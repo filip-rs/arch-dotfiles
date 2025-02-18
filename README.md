@@ -29,7 +29,7 @@ I've made a simple script that automates the process of setting up the config fi
 3. Run the install script:
 
    ```bash
-   sudo ./dotfiles-install.sh
+   ./dotfiles-install.sh
    ```
 
 4. Done :)
