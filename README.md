@@ -68,36 +68,70 @@ cp -r neofetch ~/.config
 etc. etc.
 ```
 
-4. Build the Docker container:
+# Backup script installation
 
-   ```bash
-   docker-compose build
-   ```
+The repository also contains a script for automatic backup of dotfiles, including systemd service and timer files to handle this automatically. There is a bash script for easy install but I will also provide a manual install guide incase the automatic one fails or you simply want more control over the installtion process.
 
-5. Create symbolic link for the timer and service file into the systemd directory:
+## Installation script
 
-   ```bash
-   sudo ln -s dotfiles-backup.timer /etc/systemd/system/dotfiles-backup.timer
-   sudo ln -s dotfiles-backup.service /etc/systemd/system/dotfiles-backup.service
-   ```
+1. Make sure you are in the correct directory:
 
-6. Enable the timer:
+```bash
+cd backup-service
+pwd
+```
+
+Should return `bash .../arch-dotfiles/backup-service`
+
+2. Run the install script (Requires sudo to copy files into /etc folder)
+
+```bash
+sudo ./install-backup-service.sh
+```
+
+3. Modify the `bash dotfiles-backup.service`:
+   This file has to contain the specific path to the repository.
+
+```bash
+nvim dotfiles-backup.service
+```
+
+Update the `bash WorkingDirectory=/home/filip/Services` so it points to where you have the repository located.
+
+## Manual install
+
+1. Make sure you are in the correct directory:
+
+```bash
+cd backup-service
+pwd
+```
+
+Should return `bash .../arch-dotfiles/backup-service`
+
+2. Symlink the timers:
+
+```bash
+sudo ln -s dotfiles-backup.timer /etc/systemd/system/dotfiles-backup.timer
+sudo ln -s dotfiles-backup.service /etc/systemd/system/dotfiles-backup.service
+```
+
+3. Modify the `bash dotfiles-backup.service`:
+   This file has to contain the specific path to the repository.
+
+```bash
+nvim dotfiles-backup.service
+```
+
+Update the `bash WorkingDirectory=/home/filip/Services` so it points to where you have the repository located.
+
+4. Enable the timer:
 
    ```bash
    sudo systemctl enable dotfiles-backup.timer
    ```
 
-7. Reload systemd daemon
+5. Reload systemd daemon
    ```bash
    sudo systemctl daemon-reload
    ```
-
-## Updating Configuration or Scripts
-
-If you make changes to the configuration or script, rebuild the Docker container to apply updates:
-
-```bash
-docker-compose build
-```
-
-The script will automatically apply changes the next time it runs, as long as the Docker image is rebuilt.
