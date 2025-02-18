@@ -1,0 +1,181 @@
+{
+    "layer": "top",
+    "position": "bottom",
+    "mod": "dock",
+    "exclusive": true,
+    "passthrough": false,
+    "gtk-layer-shell": true,
+    "height": 0,
+    "modules-left": ["clock", "custom/weather", "hyprland/workspaces", "custom/wallpaper-engine"],
+    //"modules-center": ["hyprland/window"],
+    "modules-right": ["backlight","pulseaudio","pulseaudio#microphone","tray","battery","custom/wlogout"],
+    "hyprland/window": {
+        "format": "{}"
+    },
+    
+   "hyprland/workspaces": {
+        "active-only": false,
+        "all-outputs": true,
+        "disable-scroll": false,
+        "on-scroll-up": "hyprctl dispatch workspace -1",
+        "on-scroll-down": "hyprctl dispatch workspace +1",
+		"format": "{icon}",
+		"on-click": "activate",
+		"format-icons": {
+//			"1": "一",
+//			"2": "二",
+//			"3": "三",
+//			"4": "四",
+//			"5": "五",
+			"urgent": "",
+			"active": "󱓻󰝤󱓻",
+			"default": "󱓻"
+		},
+
+    	"sort-by-number": true,
+	"persistent_workspaces": {
+	         "1": [],
+	         "2": [],
+	         "3": []
+    } 
+   },
+
+
+    "wlr/workspaces": {
+        "disable-scroll": true,
+        "all-outputs": true,
+        "on-click": "activate",
+        "persistent_workspaces": {
+            "1": [],
+            "2": [],
+            "3": [],
+            "4": [],
+            "5": [],
+            "6": [],
+            "7": [],
+            "8": [],
+            "9": [],
+            "10": []
+        }
+    },
+    
+    "custom/power_profile":{
+        //shows the current power profile and switches to next on click
+        "exec": "asusctl profile -p | sed s:'Active profile is'::",
+        "interval": 30,
+        "format": "󰈐{}", 
+        "on-click": "asusctl profile -n; pkill -SIGRTMIN+8 waybar",
+        "signal": 8
+    },
+
+   "custom/weather" : {
+        //shows the current weather and forecast
+        "tooltip" : true,
+        "format" : "{}",
+        "interval" : 30,
+        "exec" : "python ~/.config/waybar/scripts/waybar-wttr.py",
+        "return-type" : "json"
+    },
+
+    "custom/wlogout": {
+	"format" : "{icon}",
+	"on-click" : "exec wlogout",
+	"tooltip" : false,
+	"format-icons": [""]
+    },
+
+
+    "custom/wallpaper-engine": {
+        "exec": "/usr/bin/dwall -s mountains >/dev/null 2>&1",
+        "interval": 60
+    },
+
+
+    "tray": {
+        "icon-size": 18,
+        "spacing": 10
+    },
+
+    "clock": {
+        "format": "{:%H:%M %b %e}",
+        "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>"
+    },
+
+    "backlight": {
+        "device": "intel_backlight",
+        "format": "{icon}   {percent}%",
+        "format-icons": ["󰃞", "󰃟", "󰃠"],
+        "on-scroll-up": "brightnessctl set 1%-",
+        "on-scroll-down": "brightnessctl set 1%+",
+        "min-length": 6
+    },
+
+    "battery": {
+        "states": {
+            "good": 95,
+            "warning": 30,
+            "critical": 20
+        },
+        "tooltip": false,
+        "format": "{icon} {capacity}%",
+        "format-charging": " {capacity}%",
+        "format-plugged": " {capacity}%",
+        "format-alt": "{time} {icon}",
+        "format-icons": ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"]
+    },
+
+    "pulseaudio": {
+        "format": "{icon}  {volume}%",
+        "tooltip": false,
+        "format-muted": "  Muted",
+        "on-click": "pamixer -t",
+        "on-scroll-up": "pamixer -d 1",
+        "on-scroll-down": "pamixer -i 1",
+        "scroll-step": 5,
+        "format-icons": {
+            "headphone": "",
+            "hands-free": "",
+            "headset": "",
+            "phone": "",
+            "portable": "",
+            "car": "",
+            "default": ["", "", ""]
+        }
+    },
+
+    "pulseaudio#microphone": {
+        "format": "{format_source}",
+        "format-source": "  {volume}%",
+        "format-source-muted": "    Muted",
+        "on-click": "pamixer --default-source -t",
+        "on-scroll-up": "pamixer --default-source -d 1",
+        "on-scroll-down": "pamixer --default-source -i 1",
+        "scroll-step": 5
+    },
+    
+    "temperature": {
+        "thermal-zone": 1,
+        "format": "{temperatureC}°C ",
+        "critical-threshold": 80,
+        "format-critical": "{temperatureC}°C "
+    },
+
+    "network": {
+        // "interface": "wlp2*", // (Optional) To force the use of this interface
+        "format-wifi": "  {signalStrength}%",
+        "format-ethernet": "{ipaddr}/{cidr}",
+        "tooltip-format": "{essid} - {ifname} via {gwaddr}",
+        "format-linked": "{ifname} (No IP)",
+        "format-disconnected": "Disconnected ⚠",
+        "format-alt": "{ifname}:{essid} {ipaddr}/{cidr}"
+    },
+
+    "bluetooth": {
+	    "format": " {status}",
+	    "format-disabled": "", // an empty format will hide the module
+	    "format-connected": " {num_connections}",
+	    "tooltip-format": "{device_alias}",
+	    "tooltip-format-connected": " {device_enumerate}",
+	    "tooltip-format-enumerate-connected": "{device_alias}"
+    }
+}
