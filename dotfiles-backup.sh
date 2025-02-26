@@ -1,4 +1,5 @@
 # Dotfiles backup script
+set -x
 
 # Copying the important hyprland files:
 mkdir -p $(pwd)/dotfiles/hypr
