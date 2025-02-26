@@ -12,14 +12,12 @@
     "hyprland/window": {
         "format": "{}"
     },
-    
+
    "hyprland/workspaces": {
-        "active-only": false,
-        "all-outputs": true,
-        "disable-scroll": false,
+        "disable-scroll": true,
         "on-scroll-up": "hyprctl dispatch workspace -1",
         "on-scroll-down": "hyprctl dispatch workspace +1",
-		"format": "{icon}",
+		"format": "{name}: {windows}",
 		"on-click": "activate",
 		"format-icons": {
 //			"1": "一",
@@ -28,19 +26,34 @@
 //			"4": "四",
 //			"5": "五",
 			"urgent": "",
-			"active": "󱓻󰝤󱓻",
-			"default": "󱓻"
+			//"active": "󱓻󰝤󱓻",
+			"active": "",
+			//"default": "󱓻"
+			"default": ""
 		},
 
-    	"sort-by-number": true,
-	"persistent_workspaces": {
-	         "1": [],
-	         "2": [],
-	         "3": []
-    } 
-   },
+/*    	"sort-by-number": true,*/
+    	"persistent-workspaces": {
+    	         "*": 5
+        },
 
+        "window-rewrite-default": "󱓻",
+	    "window-rewrite": {
+		    "title<.*youtube.*>": "", // Windows whose titles contain "youtube"
+		    "class<firefox>": "", // Windows whose classes are "firefox"
+		    "class<none>": "r", // Windows whose classes are "firefox"
+		    "class<librewolf>": "󰈹", // Windows whose classes are "firefox"
+		    "class<librewolf> title<.*github.*>": "", // Windows whose class is "firefox" and title contains "github". Note that "class" always comes first.
+		    "alacritty": "", // Windows that contain "foot" in either class or title. For optimization reasons, it will only match against a title if at least one other window explicitly matches against a title.
+		    "thunar": "󱧶", // Windows that contain "foot" in either class or title. For optimization reasons, it will only match against a title if at least one other window explicitly matches against a title.
+		    "code": "󰨞",
+		    "slack": "",
+		    "youtube-music": "󰎆",
+		    "title<.* - (.*) - VSCodium>": "codium $1"  // captures part of the window title and formats it into output
+	    }
+    },
 
+/*
     "wlr/workspaces": {
         "disable-scroll": true,
         "all-outputs": true,
@@ -58,7 +71,7 @@
             "10": []
         }
     },
-    
+ */   
     "custom/power_profile":{
         //shows the current power profile and switches to next on click
         "exec": "asusctl profile -p | sed s:'Active profile is'::",
@@ -79,7 +92,7 @@
 
     "custom/wlogout": {
 	"format" : "{icon}",
-	"on-click" : "exec wlogout",
+	"on-click" : "exec wlogout -b 5",
 	"tooltip" : false,
 	"format-icons": [""]
     },

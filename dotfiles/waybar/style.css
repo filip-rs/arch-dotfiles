@@ -13,46 +13,11 @@ window#waybar {
 }
 
 tooltip {
-  background: #1e1e2e;
-  border-radius: 20px;
+  background: #181818;
+  border-radius: 0px;
   border-width: 1px;
   border-style: solid;
   border-color: #11111b;
-}
-
-#workspaces {
-  background: #282828;
-  border-radius: 10px;
-  border: solid 0px #f4d9e1;
-  font-weight: normal;
-  font-style: normal;
-  margin-left: 15px;
-}
-
-#workspaces button {
-  color: #868da8;
-  border-radius: 10px;
-  background: rgba(30, 30, 30, 0.95);
-  padding: 0px;
-}
-
-#workspaces button.active {
-  color: #868da8;
-  background: rgba(30, 30, 30, 0.95);
-  border-radius: 10px;
-  padding-left: 2px;
-  padding-right: 3px;
-}
-
-#workspaces button.urgent {
-  color: #11111b;
-  background: #a6e3a1;
-  border-radius: 10px;
-}
-
-#workspaces button:hover {
-  color: #cdd6f4;
-  border-radius: 10px;
 }
 
 #custom-power_profile,
@@ -68,7 +33,7 @@ tooltip {
 #tray,
 #custom-wlogout,
 #backlight {
-  background: rgba(30, 30, 30, 0.95);
+  background: #181818;
   opacity: 1;
   padding: 0px 20px;
   margin: 11px 0px;
@@ -76,6 +41,46 @@ tooltip {
   border-width: 1px;
   border-style: solid;
   border-color: rgba(50, 50, 50, 0.9);
+}
+
+#workspaces {
+  background: #181818;
+  border-radius: 10px;
+  font-weight: normal;
+  font-style: normal;
+  margin-left: 0px;
+}
+
+#workspaces button {
+  color: #868da8;
+  /*background-color: #212124;*/
+  border-radius: 8px;
+  padding: 0px;
+  margin-left: 10px;
+  margin-right: 10px;
+  padding-left: 3px;
+  padding-right: 3px;
+  min-width: 20px;
+  margin-top: 0px;
+  margin-bottom: 0px;
+}
+
+#workspaces button.active {
+  color: #cdd6f4;
+  border-radius: 10px;
+  padding-left: 3px;
+  padding-right: 3px;
+}
+
+#workspaces button.urgent {
+  color: #11111b;
+  background: #a6e3a1;
+  border-radius: 10px;
+}
+
+#workspaces button:hover {
+  color: #787878;
+  border-radius: 10px;
 }
 
 #temperature {
@@ -97,7 +102,9 @@ tooltip {
 
 #custom-power_profile {
   color: #a6e3a1;
-  border-left: 0px;
+  border-color: rgba(50, 50, 50, 0.9);
+  border-width: 1px;
+  border-left: 1px;
   border-right: 0px;
 }
 
@@ -138,13 +145,13 @@ tooltip {
 #pulseaudio {
   color: #89b4fa;
   border-left: 0px;
-  border-right: 0px;
+  border-right: 1px;
 }
 
 #pulseaudio.microphone {
   color: #cba6f7;
   border-left: 0px;
-  border-right: 0px;
+  border-right: 1px;
   border-radius: 0px 10px 10px 0px;
   margin-right: 7px;
 }
@@ -168,3 +175,8 @@ tooltip {
   margin-right: 7px;
   border-left: 0px;
 }
+/*
+#tray > .passive {
+  -gtk-icon-effect: dim;
+}
+*/

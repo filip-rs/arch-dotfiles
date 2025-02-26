@@ -1,6 +1,6 @@
 SERVICE_NAME="dotfiles-backup"
 
-echo "\n██████╗  ██████╗ ████████╗███████╗██╗██╗     ███████╗███████╗
+echo -e "\e[36m\n██████╗  ██████╗ ████████╗███████╗██╗██╗     ███████╗███████╗
 ██╔══██╗██╔═══██╗╚══██╔══╝██╔════╝██║██║     ██╔════╝██╔════╝
 ██║  ██║██║   ██║   ██║   █████╗  ██║██║     █████╗  ███████╗
 ██║  ██║██║   ██║   ██║   ██╔══╝  ██║██║     ██╔══╝  ╚════██║
@@ -16,7 +16,7 @@ cat <<'EOF'
           github.com/filip-rs        |_|        
 EOF
 
-echo "\n\n\n"
+echo -e "\n\n\n"
 
 sleep 1
 
@@ -31,6 +31,6 @@ sudo systemctl enable $SERVICE_NAME.timer
 sudo systemctl start $SERVICE_NAME.timer
 sudo systemctl daemon-reload
 
-echo "\n\n\n"
-echo "Here is the status of the timer:"
+echo -e "\n\n\n"
+echo -e "\e[1;34mHere is the status of the timer:"
 sudo systemctl list-timers $SERVICE_NAME.timer
