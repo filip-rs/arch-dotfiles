@@ -6,7 +6,7 @@ echo "\n██████╗  ██████╗ ████████╗
 ██║  ██║██║   ██║   ██║   ██╔══╝  ██║██║     ██╔══╝  ╚════██║
 ██████╔╝╚██████╔╝   ██║   ██║     ██║███████╗███████╗███████║
 ╚═════╝  ╚═════╝    ╚═╝   ╚═╝     ╚═╝╚══════╝╚══════╝╚══════╝
-                                                             "
+                      backup-install script                  "
 
 cat <<'EOF'
   _         _        _ _              _      _   
@@ -19,10 +19,6 @@ EOF
 echo "\n\n\n"
 
 sleep 1
-
-
-echo "Building the docker container..."
-docker-compose build
 
 echo "Installing the systemd service files..."
 mkdir $HOME/Services

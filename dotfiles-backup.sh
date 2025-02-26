@@ -38,4 +38,15 @@ cp -r $HOME/.config/waybar/scripts $(pwd)/dotfiles/waybar
 mkdir -p $(pwd)/dotfiles/wofi
 cp -r $HOME/.config/wofi $(pwd)/dotfiles
 
+# wlogout
+mkdir -p $(pwd)/dotfiles/wlogout
+cp -r $HOME/.config/wlogout $(pwd)/dotfiles
+
 echo "$(date): Finished copying scripts for this week" >> latest.log
+
+
+git add .
+git commit -m "Weekly dotfiles backup"
+git push
+
+echo "$(date): Finished pushing dotfiles to github" >> latest.log
