@@ -1,6 +1,6 @@
 # Arch dotfiles
 
-Repository containing my (most important) arch linux dotfies. Full of configs and settings I use on a daily basis. The dotfiles are located in the dotfiles folder, wheras the root of the repository contains systemd service and timer files for automatically copying the dotfiles and backing them up on a set schedule. If you simply want to download and install the files I would recommend cloning the repo and running the `bash ./dotfiles-installer.sh` which will copy the correct files to the correct locations automatically.
+Repository containing my (most important) arch linux dotfies. Full of configs and settings I use on a daily basis. The dotfiles are located in the dotfiles folder, wheras the root of the repository contains systemd service and timer files for automatically copying the dotfiles and backing them up on a set schedule. If you simply want to download and install the files I would recommend cloning the repo and running the `./dotfiles-install.sh` which will copy the correct files to the correct locations automatically.
 
 # Script Installation Guide
 
@@ -81,7 +81,7 @@ cd backup-service
 pwd
 ```
 
-Should return `bash .../arch-dotfiles/backup-service`
+Should return `.../arch-dotfiles/backup-service`
 
 2. Run the install script (Requires sudo to copy files into /etc folder)
 
@@ -96,7 +96,7 @@ sudo ./install-backup-service.sh
 nvim dotfiles-backup.service
 ```
 
-Update the `bash WorkingDirectory=/home/filip/Services` so it points to where you have the repository located.
+Update the `WorkingDirectory=/home/filip/Services` so it points to where you have the repository located.
 
 ## Manual install
 
@@ -107,7 +107,7 @@ cd backup-service
 pwd
 ```
 
-Should return `bash .../arch-dotfiles/backup-service`
+Should return `.../arch-dotfiles/backup-service`
 
 2. Symlink the timers:
 
@@ -123,7 +123,7 @@ sudo ln -s dotfiles-backup.service /etc/systemd/system/dotfiles-backup.service
 nvim dotfiles-backup.service
 ```
 
-Update the `bash WorkingDirectory=/home/filip/Services` so it points to where you have the repository located.
+Update the `WorkingDirectory=/home/filip/Services` so it points to where you have the repository located.
 
 4. Enable the timer:
 
