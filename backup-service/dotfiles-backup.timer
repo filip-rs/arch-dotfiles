@@ -3,7 +3,7 @@ Description=Run backup script every Monday at 12:00
 
 [Timer]
 OnCalendar=Mon 12:00
-Persistent=false
+Persistent=true
 RemainAfterElapse=true
 
 [Install]
