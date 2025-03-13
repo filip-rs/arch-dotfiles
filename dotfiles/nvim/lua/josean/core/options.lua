@@ -5,6 +5,10 @@ local opt = vim.opt
 opt.relativenumber = true
 opt.number = true
 
+vim.opt.scrolloff = 0
+vim.opt.scroll = 1
+vim.opt.mousescroll = "ver:1,hor:1"
+
 -- tabs & indentation
 opt.tabstop = 4 -- 2 spaces for tabs (prettier default)
 opt.shiftwidth = 4 -- 2 spaces for indent width

@@ -49,6 +49,7 @@
 		    "code": "󰨞",
 		    "slack": "",
 		    "youtube-music": "󰎆",
+            "notion": "",
 		    "title<.* - (.*) - VSCodium>": "codium $1"  // captures part of the window title and formats it into output
 	    }
     },
