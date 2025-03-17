@@ -100,7 +100,7 @@
 
 
     "custom/wallpaper-engine": {
-        "exec": "/usr/bin/dwall -s mountains >/dev/null 2>&1",
+        "exec": "/usr/bin/dwall -s cliffs >/dev/null 2>&1",
         "interval": 60
     },
 
