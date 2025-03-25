@@ -42,6 +42,9 @@ cp -r $HOME/.config/wofi $(pwd)/dotfiles
 mkdir -p $(pwd)/dotfiles/wlogout
 cp -r $HOME/.config/wlogout $(pwd)/dotfiles
 
+# .zshrc
+cp $HOME/.zshrc $(pwd)/dotfiles/.zshrc
+
 echo "$(date): Finished copying scripts for this week" >> latest.log
 
 
