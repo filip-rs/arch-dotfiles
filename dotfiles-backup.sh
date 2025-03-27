@@ -45,6 +45,9 @@ cp -r $HOME/.config/wlogout $(pwd)/dotfiles
 # .zshrc
 cp $HOME/.zshrc $(pwd)/dotfiles/.zshrc
 
+# arch packages
+$(pacman -Q) > $(pwd)/dotfiles/pacman-list.txt
+
 echo "$(date): Finished copying scripts for this week" >> latest.log
 
 
