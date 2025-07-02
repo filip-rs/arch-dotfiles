@@ -6,7 +6,7 @@
 }
 {
     "label" : "logout",
-    "action" : "loginctl terminate-user $USER",
+    "action" : "loginctl kill-session $XDG_SESSION_ID",
     "text" : "        ",
     "keybind" : "e"
 }

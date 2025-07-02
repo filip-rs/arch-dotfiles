@@ -17,7 +17,9 @@ export ZSH="~/.config/zsh/ohmyzsh"
 
 # path to cargo programs
 export PATH="$PATH:/home/filip/.cargo/bin"
-export BROWSER=librewolf
+export BROWSER=brave-beta
+export TERM="xterm-256color"
+
 
 export GH_CONFIG_DIR="$HOME/.config/gh"
 # Set name of the theme to load --- if set to "random", it will
@@ -192,6 +194,14 @@ alias heicconvert="for file in *.heic; do heif-convert $file ${file/%.heic/.png}
 alias gpt="chatgpt.sh -cc"
 alias qrc="qrencode -t UTF8"
 alias mccmd="mcrcon -H 129.241.208.10 -P 25575 -p "
+alias fnd="la | grep -i"
+alias gs="git status"
+alias pkgfnd="pacman -Q | grep"
+
+alias tls="tmux list-sessions"
+alias tmn="tmux new -s"
+alias tma="tmux attach -t"
+alias rename="tmux rename-session"
 
 #alias powersave="sudo echo "2000000" > /sys/devices/system/cpu/cpu*/cpufreq/scaling_max_freq"
 #alias performance="sudo echo "3201000" > /sys/devices/system/cpu/cpu*/cpufreq/scaling_max_freq"
@@ -205,10 +215,8 @@ export EDITOR="nvim"
 eval "$(zoxide init zsh)"
 alias cd="z"
 
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-source ~/.fzf-git.sh
-
+# [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+# source ~/.fzf-git.sh
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 #zprof
-
