@@ -1,16 +1,14 @@
 {
     "layer": "top",
-    "output": "DP-1",
     "position": "bottom",
     "mod": "dock",
     "exclusive": true,
     "passthrough": false,
     "gtk-layer-shell": true,
     "height": 0,
-    "modules-left": ["clock", "custom/weather", "hyprland/workspaces"],
-    //"modules-left": ["clock", "custom/weather", "hyprland/workspaces", "custom/wallpaper-engine"],
+    "modules-left": ["clock", "custom/weather", "hyprland/workspaces", "custom/wallpaper-engine"],
     //"modules-center": ["hyprland/window"],
-    "modules-right": ["pulseaudio","pulseaudio#microphone","tray","custom/wlogout"],
+    "modules-right": ["backlight","pulseaudio","pulseaudio#microphone","tray","battery","custom/wlogout"],
     "hyprland/window": {
         "format": "{}"
     },
@@ -19,8 +17,7 @@
         "disable-scroll": true,
         "on-scroll-up": "hyprctl dispatch workspace -1",
         "on-scroll-down": "hyprctl dispatch workspace +1",
-		//"format": "{name}: {windows}",
-		"format": "{icon}",
+		"format": "{name}: {windows}",
 		"on-click": "activate",
 		"format-icons": {
 //			"1": "一",
@@ -29,32 +26,32 @@
 //			"4": "四",
 //			"5": "五",
 			"urgent": "",
-			"active": "󱓻󰝤󱓻",
-			//"active": "",
-			"default": "󱓻"
-			//"default": ""
+			//"active": "󱓻󰝤󱓻",
+			"active": "",
+			//"default": "󱓻"
+			"default": ""
 		},
 
 /*    	"sort-by-number": true,*/
-    	// "persistent-workspaces": {
-    	//          "*": 5
-        // },
+    	"persistent-workspaces": {
+    	         "*": 5
+        },
 
-        // "window-rewrite-default": "󱓻",
-	    // "window-rewrite": {
-		//     "title<.*youtube.*>": "", // Windows whose titles contain "youtube"
-		//     "class<firefox>": "", // Windows whose classes are "firefox"
-		//     "class<none>": "r", // Windows whose classes are "firefox"
-		//     "class<librewolf>": "󰈹", // Windows whose classes are "firefox"
-		//     "class<librewolf> title<.*github.*>": "", // Windows whose class is "firefox" and title contains "github". Note that "class" always comes first.
-		//     "alacritty": "", // Windows that contain "foot" in either class or title. For optimization reasons, it will only match against a title if at least one other window explicitly matches against a title.
-		//     "thunar": "󱧶", // Windows that contain "foot" in either class or title. For optimization reasons, it will only match against a title if at least one other window explicitly matches against a title.
-		//     "code": "󰨞",
-		//     "slack": "",
-		//     "youtube-music": "󰎆",
-        //     "notion": "",
-		//     "title<.* - (.*) - VSCodium>": "codium $1"  // captures part of the window title and formats it into output
-	    // }
+        "window-rewrite-default": "󱓻",
+	    "window-rewrite": {
+		    "title<.*youtube.*>": "", // Windows whose titles contain "youtube"
+		    "class<firefox>": "", // Windows whose classes are "firefox"
+		    "class<none>": "r", // Windows whose classes are "firefox"
+		    "class<librewolf>": "󰈹", // Windows whose classes are "firefox"
+		    "class<librewolf> title<.*github.*>": "", // Windows whose class is "firefox" and title contains "github". Note that "class" always comes first.
+		    "alacritty": "", // Windows that contain "foot" in either class or title. For optimization reasons, it will only match against a title if at least one other window explicitly matches against a title.
+		    "thunar": "󱧶", // Windows that contain "foot" in either class or title. For optimization reasons, it will only match against a title if at least one other window explicitly matches against a title.
+		    "code": "󰨞",
+		    "slack": "",
+		    "youtube-music": "󰎆",
+            "notion": "",
+		    "title<.* - (.*) - VSCodium>": "codium $1"  // captures part of the window title and formats it into output
+	    }
     },
 
 /*
@@ -76,6 +73,14 @@
         }
     },
  */   
+    "custom/power_profile":{
+        //shows the current power profile and switches to next on click
+        "exec": "asusctl profile -p | sed s:'Active profile is'::",
+        "interval": 30,
+        "format": "󰈐{}", 
+        "on-click": "asusctl profile -n; pkill -SIGRTMIN+8 waybar",
+        "signal": 8
+    },
 
    "custom/weather" : {
         //shows the current weather and forecast
@@ -137,9 +142,9 @@
         "format": "{icon}  {volume}%",
         "tooltip": false,
         "format-muted": "  Muted",
-        "on-click": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
-        "on-scroll-up": "wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 1%+",
-        "on-scroll-down": "wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 1%-",
+        "on-click": "pamixer -t",
+        "on-scroll-up": "pamixer -d 1",
+        "on-scroll-down": "pamixer -i 1",
         "scroll-step": 5,
         "format-icons": {
             "headphone": "",
@@ -156,9 +161,9 @@
         "format": "{format_source}",
         "format-source": "  {volume}%",
         "format-source-muted": "    Muted",
-        "on-click": "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle",
-        "on-scroll-up": "wpctl set-volume @DEFAULT_AUDIO_SOURCE@ 1%+",
-        "on-scroll-down": "wpctl set-volume @DEFAULT_AUDIO_SOURCE@ 1%-",
+        "on-click": "pamixer --default-source -t",
+        "on-scroll-up": "pamixer --default-source -d 1",
+        "on-scroll-down": "pamixer --default-source -i 1",
         "scroll-step": 5
     },
     

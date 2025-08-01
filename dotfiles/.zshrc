@@ -17,9 +17,7 @@ export ZSH="~/.config/zsh/ohmyzsh"
 
 # path to cargo programs
 export PATH="$PATH:/home/filip/.cargo/bin"
-export BROWSER=brave-beta
-export TERM="xterm-256color"
-
+export BROWSER=librewolf
 
 export GH_CONFIG_DIR="$HOME/.config/gh"
 # Set name of the theme to load --- if set to "random", it will
@@ -77,6 +75,8 @@ source /usr/share/zsh/plugins/zsh-history-substring-search/zsh-history-substring
 bindkey '^[[A' history-substring-search-up   # Up arrow
 bindkey '^[[B' history-substring-search-down # Down arrow
 
+bindkey '^K' history-substring-search-up     # ctrl k
+bindkey '^J' history-substring-search-down   # ctrl j
 
 [ -f /usr/share/fzf/key-bindings.zsh ] && source /usr/share/fzf/key-bindings.zsh
 [ -f /usr/share/fzf/completion.zsh ] && source /usr/share/fzf/completion.zsh
@@ -155,7 +155,7 @@ plugins=(git)
 #cd ~
 #
 # Example aliases
-alias zshconf="nvim ~/.zshrc"
+alias zshconf="nvim ~/.zshrc +6 && source ~/.zshrc"
 # alias ohmyzsh="nvim ~/.config/.oh-my-zsh"
 
 bindkey '^A' beginning-of-line   # Ctrl-A: Move to beginning
@@ -168,7 +168,7 @@ source /usr/share/zsh-theme-powerlevel10k/powerlevel10k.zsh-theme
 alias please="sudo"
 alias fking="sudo"
 alias wifilist="nmcli device wifi list"
-alias wificonnect="nmcli device wifi connect"
+alias wificonnect="nmcli device wifi connect --ask"
 #alias performance="sudo cpupower frequency-set -g performance"
 #alias powersave="sudo cpupower frequency-set -g powersave"
 alias c="clear"
@@ -194,18 +194,15 @@ alias heicconvert="for file in *.heic; do heif-convert $file ${file/%.heic/.png}
 alias gpt="chatgpt.sh -cc"
 alias qrc="qrencode -t UTF8"
 alias mccmd="mcrcon -H 129.241.208.10 -P 25575 -p "
-alias fnd="la | grep -i"
-alias gs="git status"
+alias systat="sudo systemctl status"
+alias systart="sudo systemctl restart"
 alias pkgfnd="pacman -Q | grep"
-
-alias tls="tmux list-sessions"
-alias tmn="tmux new -s"
-alias tma="tmux attach -t"
-alias rename="tmux rename-session"
 
 #alias powersave="sudo echo "2000000" > /sys/devices/system/cpu/cpu*/cpufreq/scaling_max_freq"
 #alias performance="sudo echo "3201000" > /sys/devices/system/cpu/cpu*/cpufreq/scaling_max_freq"
 
+eval $(thefuck --alias)
+alias fk="fuck"
 
 
 export PATH="$HOME/.local/bin:$PATH"
@@ -215,8 +212,17 @@ export EDITOR="nvim"
 eval "$(zoxide init zsh)"
 alias cd="z"
 
-# [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-# source ~/.fzf-git.sh
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+source ~/.fzf-git.sh
+
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 #zprof
+
+if command -v tmux &> /dev/null && [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [ -z "$TMUX" ]; then
+  if tmux ls 2>/dev/null | grep -vq 'no server running'; then
+    exec tmux a
+  else
+    exec tmux
+  fi
+fi

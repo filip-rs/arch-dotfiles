@@ -36,7 +36,6 @@ return {
         "emmet_ls",
         "prismals",
         "pyright",
-        "gopls",
       },
       automatic_installation = true,
     })
@@ -49,7 +48,6 @@ return {
         "black", -- python formatter
         "pylint",
         "eslint_d",
-        "gopls",
       },
     })
   end,
