@@ -1,13 +1,14 @@
 # Dotfiles backup script
 
 # Copying the important hyprland files:
-mkdir -p $(pwd)/dotfiles/hypr
+mkdir -p $(pwd)/dotfiles/hypr/scripts
 rsync $HOME/.config/hypr/hyprland.conf $(pwd)/dotfiles/hypr
 rsync $HOME/.config/hypr/keybindings.conf $(pwd)/dotfiles/hypr
 rsync $HOME/.config/hypr/windowrules.conf $(pwd)/dotfiles/hypr
 rsync $HOME/.config/hypr/animations.conf $(pwd)/dotfiles/hypr
 rsync $HOME/.config/hypr/hyprlock.conf $(pwd)/dotfiles/hypr
 rsync $HOME/.config/hypr/hypridle.conf $(pwd)/dotfiles/hypr
+rsync -a $HOME/.config/hypr/scripts $(pwd)/dotfiles/hypr
 
 # Alacritty
 mkdir -p $(pwd)/dotfiles/alacritty/themes

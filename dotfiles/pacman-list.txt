@@ -21,6 +21,7 @@ appstream 1.0.5-2
 appstream-glib 0.8.3-2
 aquamarine 0.8.0-5
 archlinux-keyring 20250430.1-1
+argon2 20190702-6
 aribb24 1.0.3-4
 asar 3.4.1-1
 asus-stylus-driver 1.2.0-1
@@ -75,6 +76,7 @@ chatgpt.sh 0.100.1-1
 chromium 138.0.7204.49-1
 clang 20.1.6-1
 clojure 1.12.1.1550-1
+clucene 2.3.3.4-16
 cmake 4.0.3-1
 cmark 0.31.1-1
 cmatrix 2.0-3
@@ -236,13 +238,16 @@ gupnp-igd 1.6.0-2
 gvfs 1.57.2-4
 gzip 1.14-2
 harfbuzz 11.2.1-1
+harfbuzz-icu 11.2.1-1
 hicolor-icon-theme 0.18-1
 hidapi 0.15.0-1
 highway 1.2.0-1
 hollywood 1.21-7
 htop 3.4.1-1
 http-parser 2.9.4-2
+hunspell 1.7.2-2
 hwdata 0.396-1
+hyphen 2.8.8-6
 hyprcursor 0.1.12-4
 hyprgraphics 0.1.4-2
 hypridle 0.1.6-5
@@ -370,6 +375,7 @@ lib32-wayland 1.23.1-1
 lib32-xz 5.8.1-1
 lib32-zlib 1.3.1-2
 lib32-zstd 1.5.7-2
+libabw 0.1.3-5
 libadwaita 1:1.7.4-1
 libaio 0.3.113-3
 libappindicator-gtk3 12.10.0.r298-4
@@ -378,6 +384,7 @@ libass 0.17.3-1
 libassuan 3.0.0-1
 libasyncns 1:0.8+r3+g68cd5af-3
 libatasmart 0.19-6
+libatomic_ops 7.8.2-1
 libavc1394 0.5.4-6
 libavif 1.3.0-1
 libayatana-appindicator 0.5.94-1
@@ -401,8 +408,10 @@ libcap 2.76-1
 libcap-ng 0.8.5-3
 libcdio 2.2.0-1
 libcdio-paranoia 10.2+2.0.2-1
+libcdr 0.1.8-2
 libcgif 0.5.0-1
 libcloudproviders 0.3.6-2
+libcmis 0.6.2-5
 libcolord 1.4.7-2
 libcue 2.3.0-1
 libcups 2:2.4.12-2
@@ -422,16 +431,21 @@ libdrm 2.4.125-1
 libdvbpsi 1:1.3.3-3
 libdvdnav 6.1.1-2
 libdvdread 6.1.3-2
+libe-book 0.1.3-18
 libebml 1.4.5-1
 libedit 20250104_3.1-1
 libei 1.4.1-1
 libelf 0.193-2
 libepoxy 1.5.10-3
+libepubgen 0.1.1-5
+libetonyek 0.1.12-3
 libevdev 1.13.4-1
 libevent 2.1.12-4
 libexif 0.6.25-1
+libexttextcat 3.4.7-1
 libffi 3.5.0-1
 libfontenc 1.1.8-1
+libfreehand 0.1.2-5
 libgcrypt 1.11.1-1
 libgee 0.20.8-1
 libgexiv2 0.14.5-1
@@ -456,10 +470,12 @@ libinih 58-1
 libinput 1.28.1-1
 libiptcdata 1.0.5-4
 libisl 0.27-1
+libixion 0.20.0-2
 libjpeg-turbo 3.1.1-1
 libjuice 1.6.0-1
 libjxl 0.11.1-3
 libksba 1.6.7-2
+liblangtag 0.6.7-2
 libldap 2.6.10-1
 libliftoff 0.5.0-1
 liblqr 0.4.3-1
@@ -476,6 +492,8 @@ libmpc 1.3.1-2
 libmpcdec 1:0.1+r475-6
 libmpdclient 2.23-1
 libmpeg2 0.5.1-10
+libmspub 0.1.4-17
+libmwaw 0.3.22-3
 libmypaint 1.6.1-2
 libnautilus-extension 48.2-1
 libndp 1.9-1
@@ -494,11 +512,15 @@ libnma 1.10.6-3
 libnma-common 1.10.6-3
 libnotify 0.8.6-1
 libnsl 2.0.1-1
+libnumbertext 1.0.11-2
 libnvme 1.13-1
+libodfgen 0.1.8-4
 libogg 1.3.5-2
 libopenmpt 0.8.1-1
+liborcus 0.20.1-1
 libosinfo 1.12.0-2
 libp11-kit 0.25.5-1
+libpagemaker 0.0.4-4
 libpaper 2.2.6-1
 libpcap 1.10.5-3
 libpciaccess 0.18.1-2
@@ -514,9 +536,12 @@ libproxy 0.5.9-1
 libpsl 0.21.5-2
 libpulse 17.0+r43+g3e2bb8a1e-1
 libqalculate 5.5.2-2
+libqxp 0.0.2-13
 libraqm 0.10.2-1
 libraw 0.21.4-1
 libraw1394 2.1.2-4
+libreoffice-fresh 25.2.4-2
+librevenge 0.0.5-3
 librewolf-bin 1:139.0.4_1-1
 librsvg 2:2.60.0-2
 libsamplerate 0.2.2-3
@@ -537,6 +562,7 @@ libspng 0.7.4-2
 libsrtp 1:2.7.0-1
 libssh 0.11.2-1
 libssh2 1.11.1-1
+libstaroffice 0.0.7-4
 libstemmer 3.0.1-1
 libsynctex 2025.2-1
 libsysprof-capture 48.0-5
@@ -547,6 +573,7 @@ libthai 0.1.29-3
 libtheora 1.2.0-1
 libtiff 4.7.0-1
 libtirpc 1.3.6-2
+libtommath 1.3.0-1
 libtool 2.5.4+r23+g5b582aed-1
 libtorrent-rasterbar 1:2.0.11-4
 libunibreak 6.1-1
@@ -563,6 +590,7 @@ libva 2.22.0-1
 libvdpau 1.5-3
 libverto 0.3.2-5
 libvips 8.16.1-2
+libvisio 0.1.8-3
 libvlc 3.0.21-24
 libvorbis 1.3.7-4
 libvpl 2.15.0-1
@@ -572,6 +600,8 @@ libwacom 2.16.1-1
 libwebp 1.5.0-1
 libwireplumber 0.5.10-1
 libwmf 0.2.13-4
+libwpd 0.10.3-5
+libwps 0.4.14-3
 libx11 1.8.12-1
 libxau 1.0.12-1
 libxaw 1.0.16-1
@@ -611,6 +641,7 @@ libxxf86vm 1.1.6-1
 libyaml 0.2.5-3
 libyuv r2426+464c51a03-1
 libzip 1.11.4-1
+libzmf 0.0.2-17
 licenses 20240728-1
 linux 6.15.4.arch2-1
 linux-api-headers 6.15-1
@@ -634,6 +665,7 @@ lm_sensors 1:3.6.2-1
 lmdb 0.9.33-1
 localsearch 3.9.0-3
 logseq-desktop 0.10.12-1
+lpsolve 5.5.2.11-3
 lsb-release 2.0.r55.a25a4fc-1
 lsof 4.99.4-1
 lua 5.4.8-2
@@ -670,6 +702,7 @@ mypaint-brushes1 1.3.1-2
 nautilus 48.2-1
 ncurses 6.5-4
 neofetch 7.1.0-2
+neon 0.34.2-1
 neovim 0.11.2-3
 netpbm 10.86.46-3
 nettle 3.10.1-1
@@ -882,10 +915,13 @@ qt6-translations 6.9.1-1
 qt6-wayland 6.9.1-1
 quazip-qt6 1.5-1
 ranger 1.9.4-4
+raptor 2.0.16-7
+rasqal 1:0.9.33-7
 rate-mirrors 0.20.0-2
 rav1e 0.7.1-1
 re2 1:20240702-5
 readline 8.2.013-2
+redland 1:1.0.17-9
 rhash 1.4.4-1
 rnnoise 1:0.2-1
 rog-control-center 6.1.12.r0.g685345d6-1
@@ -1041,6 +1077,7 @@ xorg-xrandr 1.5.3-1
 xorg-xset 1.2.5-2
 xorg-xwayland 24.1.8-1
 xorgproto 2024.1-2
+xournalpp 1.2.7-1
 xvidcore 1.3.7-3
 xxhash 0.8.3-1
 xz 5.8.1-1
@@ -1067,4 +1104,5 @@ zsh-theme-powerlevel10k 1.20.15-1
 zsh-vi-mode 0.11.0-1
 zsh-you-should-use 1.10.0-1
 zstd 1.5.7-2
+zxing-cpp 2.3.0-5
 zziplib 0.13.80-1
