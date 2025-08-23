@@ -64,19 +64,6 @@ ENABLE_CORRECTION="true"
 autoload -Uz compinit && compinit -d ~/.config/zsh/.zcompdump
 
 
-source /usr/share/zsh/plugins/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
-source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
-# source /usr/share/zsh/plugins/zsh-vi-mode/zsh-vi-mode.plugin.zsh
-source /usr/share/zsh/plugins/zsh-autopair/autopair.zsh
-source /usr/share/zsh/plugins/zsh-you-should-use/you-should-use.plugin.zsh
-
-
-source /usr/share/zsh/plugins/zsh-history-substring-search/zsh-history-substring-search.zsh
-bindkey '^[[A' history-substring-search-up   # Up arrow
-bindkey '^[[B' history-substring-search-down # Down arrow
-
-bindkey '^K' history-substring-search-up     # ctrl k
-bindkey '^J' history-substring-search-down   # ctrl j
 
 [ -f /usr/share/fzf/key-bindings.zsh ] && source /usr/share/fzf/key-bindings.zsh
 [ -f /usr/share/fzf/completion.zsh ] && source /usr/share/fzf/completion.zsh
@@ -142,18 +129,50 @@ plugins=(git)
 # Compilation flags
 # export ARCHFLAGS="-arch x86_64"
 
-# Set personal aliases, overriding those provided by oh-my-zsh libs,
-# plugins, and themes. Aliases can be placed here, though oh-my-zsh
-# users are encouraged to define aliases within the ZSH_CUSTOM folder.
-# For a full list of active aliases, run `alias`.
-#
-#
-#
-#
-#
-###### source $ZSH/oh-my-zsh.sh
-#cd ~
-#
+
+# Machine specific .,m
+case "$HOST" in
+    arch*)
+        alias update="sudo pacman -Syyu && paru && hyprpm update"
+        alias refreshmirrors="rate-mirrors arch | sudo tee /etc/pacman.d/mirrorlist"
+        alias pkgfnd="pacman -Q | grep"
+        alias hyprconf="nvim ~/.config/hypr/hyprland.conf"
+
+        source /usr/share/zsh/plugins/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
+        source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+        # source /usr/share/zsh/plugins/zsh-vi-mode/zsh-vi-mode.plugin.zsh
+        source /usr/share/zsh/plugins/zsh-autopair/autopair.zsh
+        source /usr/share/zsh/plugins/zsh-you-should-use/you-should-use.plugin.zsh
+
+
+        source /usr/share/zsh/plugins/zsh-history-substring-search/zsh-history-substring-search.zsh
+        bindkey '^[[A' history-substring-search-up   # Up arrow
+        bindkey '^[[B' history-substring-search-down # Down arrow
+
+        bindkey '^K' history-substring-search-up     # ctrl k
+        bindkey '^J' history-substring-search-down   # ctrl j
+
+        # HOST SPECIFIC
+        case "$HOST" in
+            archbased)
+                ;;
+
+            archflipper)
+                ;;
+        esac
+        ;;
+
+
+    debian*|i5server)
+        alias inst="sudo apt install"
+        alias update="sudo apt update && sudo apt upgrade"
+        ;;
+
+    *)
+        alias update="echo 'no system-specific update command defined'"
+        ;;
+esac
+
 # Example aliases
 alias zshconf="nvim ~/.zshrc +6 && source ~/.zshrc"
 # alias ohmyzsh="nvim ~/.config/.oh-my-zsh"
@@ -169,26 +188,27 @@ alias please="sudo"
 alias fking="sudo"
 alias wifilist="nmcli device wifi list"
 alias wificonnect="nmcli device wifi connect --ask"
-#alias performance="sudo cpupower frequency-set -g performance"
-#alias powersave="sudo cpupower frequency-set -g powersave"
+# alias performance="sudo cpupower frequency-set -g performance"
+# alias powersave="sudo cpupower frequency-set -g powersave"
+# alias wifix="rfkill unblock wlan"
 alias c="clear"
 alias nfch="neofetch"
 alias lss="eza --tree --icons --level=2"
+alias lsss="eza --tree --icons --level=3"
+alias lssss="eza --tree --icons --level=4"
 alias ls="eza --icons"
 alias la="eza --long --header --icons --git --all"
 alias py="python"
-alias wifix="rfkill unblock wlan"
 alias serialfix="sudo chmod +766 /dev/ttyACM0"
 alias cpufetch="cpufetch --style fancy --color 230,50,45:240,230,230:0,0,0:250,70,65:170,170,170"
 alias fetch="fastfetch"
-alias update="sudo pacman -Syyu && paru"
 alias desktopentry="/usr/share/applications/"
 alias nvide='nohup neovide & disown'
 alias pyvenv="chmod +x .venv/bin/activate && source .venv/bin/activate"
+alias mkvenv="py -m venv .venv && chmod +x .venv/bin/activate && source .venv/bin/activate"
 alias desktopentry="cd /usr/share/applications/"
 alias bt="sudo systemctl start bluetooth"
 alias btui="bluetuith"
-alias refreshmirrors="rate-mirrors arch | sudo tee /etc/pacman.d/mirrorlist"
 alias webpconvert="for file in *.webp; dwebp $file -o ${file/%.webp/.png} && rm $file"
 alias heicconvert="for file in *.heic; do heif-convert $file ${file/%.heic/.png}; done"
 alias gpt="chatgpt.sh -cc"
@@ -196,7 +216,6 @@ alias qrc="qrencode -t UTF8"
 alias mccmd="mcrcon -H 129.241.208.10 -P 25575 -p "
 alias systat="sudo systemctl status"
 alias systart="sudo systemctl restart"
-alias pkgfnd="pacman -Q | grep"
 
 #alias powersave="sudo echo "2000000" > /sys/devices/system/cpu/cpu*/cpufreq/scaling_max_freq"
 #alias performance="sudo echo "3201000" > /sys/devices/system/cpu/cpu*/cpufreq/scaling_max_freq"
@@ -215,10 +234,11 @@ alias cd="z"
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 source ~/.fzf-git.sh
 
-# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
-[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-#zprof
 
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
+
+
+# TMUX session system
 if command -v tmux &> /dev/null && [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [ -z "$TMUX" ]; then
   if tmux ls 2>/dev/null | grep -vq 'no server running'; then
     exec tmux a

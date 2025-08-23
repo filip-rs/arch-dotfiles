@@ -18,3 +18,4 @@ elif grep -q "kb_layout = no" "$file"; then
     echo "Changed layout to us in $file"
 fi
 
+hyprctl reload
