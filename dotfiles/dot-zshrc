@@ -136,7 +136,7 @@ case "$HOST" in
         alias update="sudo pacman -Syyu && paru && hyprpm update"
         alias refreshmirrors="rate-mirrors arch | sudo tee /etc/pacman.d/mirrorlist"
         alias pkgfnd="pacman -Q | grep"
-        alias hyprconf="nvim ~/.config/hypr/hyprland.conf"
+        alias hyprconf="cd ~/.config/hypr && nvim ~/.config/hypr/hyprland.conf"
 
         source /usr/share/zsh/plugins/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
         source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
