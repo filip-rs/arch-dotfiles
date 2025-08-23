@@ -216,6 +216,7 @@ alias qrc="qrencode -t UTF8"
 alias mccmd="mcrcon -H 129.241.208.10 -P 25575 -p "
 alias systat="sudo systemctl status"
 alias systart="sudo systemctl restart"
+alias stow="stow . --dotfiles -t $HOME"
 
 #alias powersave="sudo echo "2000000" > /sys/devices/system/cpu/cpu*/cpufreq/scaling_max_freq"
 #alias performance="sudo echo "3201000" > /sys/devices/system/cpu/cpu*/cpufreq/scaling_max_freq"
