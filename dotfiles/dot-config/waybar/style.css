@@ -146,6 +146,7 @@ tooltip {
   color: #89b4fa;
   border-left: 0px;
   border-right: 1px;
+  border-radius: 10px 0px 0px 10px;
 }
 
 #pulseaudio.microphone {
@@ -171,7 +172,7 @@ tooltip {
 
 #custom-wlogout {
   color: #d65351;
-  border-radius: 0px 10px 10px 0px;
+  border-radius: 10px;
   margin-right: 7px;
   border-left: 0px;
 }
