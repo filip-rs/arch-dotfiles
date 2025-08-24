@@ -13,7 +13,7 @@ typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
 # Path to your oh-my-zsh installation.
-export ZSH="~/.config/zsh/ohmyzsh"
+export ZSH="$HOME/.config/zsh/ohmyzsh"
 
 # path to cargo programs
 export PATH="$PATH:/home/filip/.cargo/bin"
@@ -158,6 +158,8 @@ case "$HOST" in
                 ;;
 
             archflipper)
+                [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+                source ~/.fzf-git.sh
                 ;;
         esac
         ;;
@@ -232,8 +234,6 @@ export EDITOR="nvim"
 eval "$(zoxide init zsh)"
 alias cd="z"
 
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-source ~/.fzf-git.sh
 
 
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
