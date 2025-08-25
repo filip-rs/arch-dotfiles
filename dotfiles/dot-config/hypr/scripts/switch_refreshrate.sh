@@ -7,13 +7,13 @@ if [[ ! -f "$file" ]]; then
 fi
 
 
-if grep -q "monitor=,1920x1200@60, 0x0, 1.25" "$file"; then
-    sed -i 's|monitor=,1920x1200@60, 0x0, 1.25|monitor=,1920x1200@120, 0x0, 1.25|' "$file"
+if grep -q "monitor=eDP-1,1920x1200@60, 0x0, 1.25" "$file"; then
+    sed -i 's|monitor=eDP-1,1920x1200@60, 0x0, 1.25|monitor=eDP-1,1920x1200@120, 0x0, 1.25|' "$file"
     notify-send "Set refreshrate to 120hz"
     echo "Changed refreshrate to 120hz in $file"
 
-elif grep -q "monitor=,1920x1200@120, 0x0, 1.25" "$file"; then
-    sed -i 's|monitor=,1920x1200@120, 0x0, 1.25|monitor=,1920x1200@60, 0x0, 1.25|' "$file"
+elif grep -q "monitor=eDP-1,1920x1200@120, 0x0, 1.25" "$file"; then
+    sed -i 's|monitor=eDP-1,1920x1200@120, 0x0, 1.25|monitor=eDP-1,1920x1200@60, 0x0, 1.25|' "$file"
     notify-send "Set refreshrate to 60hz"
     echo "Changed refreshrate to 60hz in $file"
 fi
