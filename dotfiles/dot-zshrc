@@ -228,6 +228,7 @@ alias fk="fuck"
 
 
 export PATH="$HOME/.local/bin:$PATH"
+export XDG_DATA_DIRS="/var/lib/flatpak/exports/share:/usr/local/share:/usr/share"
 export EDITOR="nvim"
 
 # configure and init zoxide
