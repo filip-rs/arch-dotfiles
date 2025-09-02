@@ -173,7 +173,7 @@
     // WORKSTATION CONFIG
 
     "layer": "top",
-    "output": "DP-1",
+    "output": "DP-2",
     "position": "bottom",
     "mod": "dock",
     "exclusive": true,
@@ -364,7 +364,7 @@
     // EXTRA MONITOR CONFIGS
 
     "layer": "top",
-    "output": ["HDMI-A-1", "DP-3"],
+    "output": ["HDMI-A-1", "DP-1", "DP-3"],
     "position": "bottom",
     "mod": "dock",
     "exclusive": true,
