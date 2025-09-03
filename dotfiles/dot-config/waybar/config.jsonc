@@ -120,6 +120,7 @@
         "tooltip": false,
         "format-muted": "  Muted",
         "on-click": "pamixer -t",
+        "on-click-right": "./usr/bin/pavucontrol",
         "on-scroll-up": "pamixer -d 1",
         "on-scroll-down": "pamixer -i 1",
         "scroll-step": 5,

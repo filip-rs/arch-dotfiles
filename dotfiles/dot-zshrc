@@ -239,6 +239,24 @@ alias cd="z"
 
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 
+# Davinci converter
+conv() {
+    if [ -z "$1" ]; then
+        echo "Usage: conv inputfile [outputfile]"
+        return 1
+    fi
+
+    input="$1"
+    if [ -n "$2" ]; then
+        output="$2"
+    else
+        base="${input%.*}"
+        output="${base}.mov"
+    fi
+
+    ffmpeg -i "$input" -c:v prores_ks -profile:v 3 -c:a pcm_s16le "$output"
+}
+
 
 # TMUX session system
 if command -v tmux &> /dev/null && [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [ -z "$TMUX" ]; then
