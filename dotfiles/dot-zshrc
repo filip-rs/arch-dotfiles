@@ -235,8 +235,6 @@ export EDITOR="nvim"
 eval "$(zoxide init zsh)"
 alias cd="z"
 
-
-
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 
 # Davinci converter
