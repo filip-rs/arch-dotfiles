@@ -173,7 +173,7 @@
 }, {
     // WORKSTATION CONFIG
 
-    "layer": "top",
+    "layer": "bottom",
     "output": "DP-1",
     "position": "bottom",
     "mod": "dock",
@@ -182,8 +182,7 @@
     "gtk-layer-shell": true,
     "height": 0,
     "modules-left": ["clock", "custom/weather", "hyprland/workspaces"],
-    //"modules-left": ["clock", "custom/weather", "hyprland/workspaces", "custom/wallpaper-engine"],
-    //"modules-center": ["hyprland/window"],
+    "modules-center": ["custom/os_button", "wlr/taskbar"],
     "modules-right": ["pulseaudio","pulseaudio#microphone","tray","custom/wlogout"],
     "hyprland/window": {
         "format": "{}"
@@ -197,61 +196,28 @@
 		"format": "{icon}",
 		"on-click": "activate",
 		"format-icons": {
-//			"1": "一",
-//			"2": "二",
-//			"3": "三",
-//			"4": "四",
-//			"5": "五",
 			"urgent": "",
 			"active": "󱓻󰝤󱓻",
-			//"active": "",
 			"default": "󱓻"
-			//"default": ""
-		},
-
-/*    	"sort-by-number": true,*/
-    	// "persistent-workspaces": {
-    	//          "*": 5
-        // },
-
-        // "window-rewrite-default": "󱓻",
-	    // "window-rewrite": {
-		//     "title<.*youtube.*>": "", // Windows whose titles contain "youtube"
-		//     "class<firefox>": "", // Windows whose classes are "firefox"
-		//     "class<none>": "r", // Windows whose classes are "firefox"
-		//     "class<librewolf>": "󰈹", // Windows whose classes are "firefox"
-		//     "class<librewolf> title<.*github.*>": "", // Windows whose class is "firefox" and title contains "github". Note that "class" always comes first.
-		//     "alacritty": "", // Windows that contain "foot" in either class or title. For optimization reasons, it will only match against a title if at least one other window explicitly matches against a title.
-		//     "thunar": "󱧶", // Windows that contain "foot" in either class or title. For optimization reasons, it will only match against a title if at least one other window explicitly matches against a title.
-		//     "code": "󰨞",
-		//     "slack": "",
-		//     "youtube-music": "󰎆",
-        //     "notion": "",
-		//     "title<.* - (.*) - VSCodium>": "codium $1"  // captures part of the window title and formats it into output
-	    // }
+		}
     },
 
-/*
-    "wlr/workspaces": {
-        "disable-scroll": true,
-        "all-outputs": true,
-        "on-click": "activate",
-        "persistent_workspaces": {
-            "1": [],
-            "2": [],
-            "3": [],
-            "4": [],
-            "5": [],
-            "6": [],
-            "7": [],
-            "8": [],
-            "9": [],
-            "10": []
-        }
+    "custom/os_button": {
+        "format": "🔍",
+        "on-click": "wofi --show drun",
+        "tooltip": false
     },
- */   
+    "wlr/taskbar": {
+        "format": "{icon}",
+        "icon-size": 36,
+        "spacing": 3,
+        "on-click-middle": "close",
+        "tooltip-format": "{title}",
+        "ignore-list": [],
+        "on-click": "activate"
+    },
 
-   "custom/weather" : {
+    "custom/weather" : {
         //shows the current weather and forecast
         "tooltip" : true,
         "format" : "{}",
@@ -311,7 +277,8 @@
         "format": "{icon}  {volume}%",
         "tooltip": false,
         "format-muted": "  Muted",
-        "on-click": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
+        "on-click-right": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
+        "on-click": "if pgrep -x pavucontrol > /dev/null; then \nkillall pavucontrol \nelse \npavucontrol \nfi",
         "on-scroll-up": "wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 1%+",
         "on-scroll-down": "wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 1%-",
         "scroll-step": 5,
@@ -550,6 +517,3 @@
 	    "tooltip-format-enumerate-connected": "{device_alias}"
     }
 }]
-
-
-

@@ -33,6 +33,8 @@ tooltip {
 #tray,
 #custom-wlogout,
 #custom-laptopwlogout,
+#custom-os_button,
+#taskbar,
 #backlight {
   background: #011423;
   opacity: 1;
@@ -189,3 +191,26 @@ tooltip {
   -gtk-icon-effect: dim;
 }
 */
+
+#custom-os_button {
+  color: #d65351;
+  border-radius: 15px 0px 0px 15px;
+  margin-left: 0px;
+  border-right: 0px;
+  margin-top: 0px;
+  margin-bottom: 3px;
+  padding-right: 10px;
+}
+#taskbar {
+  color: #d65351;
+  border-radius: 0px 15px 15px 0px;
+  border-left: 0px;
+  padding-right: 1px;
+  padding-left: 0px;
+  margin-right: 0px;
+  margin-top: 0px;
+  margin-bottom: 3px;
+}
+#taskbar hover {
+  border-radius: 0px 15px 15px 0px;
+}
