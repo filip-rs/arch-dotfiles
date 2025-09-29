@@ -221,6 +221,7 @@ alias systart="sudo systemctl restart"
 alias stow="stow . --dotfiles -t $HOME"
 alias fnd="ls -a | grep -i"
 alias lsblk="lsblk | bat -p --style=full --theme=\"Sublime Snazzy\" -l=makefile"
+alias templestart="qemu-system-x86_64 -m 512M -enable-kvm -drive file=$HOME/Temple/temple.qcow2"
 
 dnsfix() {
     sudo tee /etc/resolv.conf > /dev/null <<'EOF'
