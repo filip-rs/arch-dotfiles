@@ -183,7 +183,7 @@
     "height": 0,
     "modules-left": ["clock", "custom/weather", "hyprland/workspaces"],
     "modules-center": ["custom/os_button", "wlr/taskbar"],
-    "modules-right": ["pulseaudio","pulseaudio#microphone","tray","custom/wlogout"],
+    "modules-right": ["mpris","pulseaudio","pulseaudio#microphone","tray","custom/wlogout"],
     "hyprland/window": {
         "format": "{}"
     },
@@ -231,6 +231,18 @@
 	"on-click" : "exec wlogout -b 5",
 	"tooltip" : false,
 	"format-icons": [""]
+    },
+
+    "mpris": {
+	    "format": "Playing: {player_icon} {title}",
+	    "format-paused": "Playing: {status_icon} <i>{title}</i>",
+	    "player-icons": {
+	    	"default": "▶",
+	    	"mpv": "🎵"
+	    },
+	    "status-icons": {
+	    	"paused": "⏸"
+	        }
     },
 
 

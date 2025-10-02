@@ -35,6 +35,7 @@ tooltip {
 #custom-laptopwlogout,
 #custom-os_button,
 #taskbar,
+#mpris,
 #backlight {
   background: #011423;
   opacity: 1;
@@ -147,7 +148,7 @@ tooltip {
 
 #pulseaudio {
   color: #89b4fa;
-  border-left: 0px;
+  border-left: 1px;
   border-right: 1px;
   border-radius: 10px 0px 0px 10px;
 }
@@ -213,4 +214,9 @@ tooltip {
 }
 #taskbar hover {
   border-radius: 0px 15px 15px 0px;
+}
+
+#mpris {
+  border-radius: 10px 10px 10px 10px;
+  margin-right: 6px;
 }
