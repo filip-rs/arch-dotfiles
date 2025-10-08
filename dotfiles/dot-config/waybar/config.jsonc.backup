@@ -21,35 +21,34 @@
         "disable-scroll": true,
         "on-scroll-up": "hyprctl dispatch workspace -1",
         "on-scroll-down": "hyprctl dispatch workspace +1",
-		//"format": "{name}: {windows}",
-		"format": "{icon}",
+		"format": "{name}: {windows}",
 		"on-click": "activate",
-        "active-only": true,
 		"format-icons": {
-			"1":    "⠁⠀",
-			"2":    "⠈⠀",
-			"3":    "⠀⠁",
-			"257":  "⠂⠀",
-			"258":  "⠐⠀",
-			"259":  "⠀⠂",
-			"513":  "⠄⠀",
-			"514":  "⠠⠀",
-			"515":  "⠀⠄",
-			// "1": "󱓻 o o\no o o\no o o",
-			// "2": "o 󱓻 o\no o o\no o o",
-			// "3": "o o 󱓻\no o o\no o o",
-			// "257": "o o o\n󱓻 o o\no o o",
-			// "258": "o o o\no 󱓻 o\no o o",
-			// "259": "o o o\no o 󱓻\no o o",
-			// "513": "o o o\no o o\n󱓻 o o",
-			// "514": "o o o\no o o\no 󱓻 o",
-			// "515": "o o o\no o o\no o 󱓻",
 			"urgent": "",
-			//"active": "",
-			"default": "󱓻"
-			//"default": ""
-            }
-	},
+			"active": "",
+			"default": ""
+		},
+
+    	"persistent-workspaces": {
+    	         "*": 5
+        },
+
+        "window-rewrite-default": "󱓻",
+	    "window-rewrite": {
+		    "title<.*youtube.*>": "", // Windows whose titles contain "youtube"
+		    "class<firefox>": "", // Windows whose classes are "firefox"
+		    "class<none>": "r", // Windows whose classes are "firefox"
+		    "class<librewolf>": "󰈹", // Windows whose classes are "firefox"
+		    "class<librewolf> title<.*github.*>": "", // Windows whose class is "firefox" and title contains "github". Note that "class" always comes first.
+		    "alacritty": "", // Windows that contain "foot" in either class or title. For optimization reasons, it will only match against a title if at least one other window explicitly matches against a title.
+		    "thunar": "󱧶", // Windows that contain "foot" in either class or title. For optimization reasons, it will only match against a title if at least one other window explicitly matches against a title.
+		    "code": "󰨞",
+		    "slack": "",
+		    "youtube-music": "󰎆",
+            "notion": "",
+		    "title<.* - (.*) - VSCodium>": "codium $1"  // captures part of the window title and formats it into output
+	    }
+    },
 
     "custom/power_profile":{
         //shows the current power profile and switches to next on click
@@ -365,12 +364,11 @@
 		"format": "{icon}",
 		"on-click": "activate",
 		"format-icons": {
-			"1": "󱓻oo\nooo\nooo",
-			"1": "o󱓻o\nooo\nooo",
-			"2": "二",
-			"3": "三",
-			"4": "四",
-			"5": "五",
+//			"1": "一",
+//			"2": "二",
+//			"3": "三",
+//			"4": "四",
+//			"5": "五",
 			"urgent": "",
 			"active": "󱓻󰝤󱓻",
 			//"active": "",
