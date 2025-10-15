@@ -67,6 +67,8 @@ palette = 13=c991e1
 palette = 14=aaffe4
 palette = 15=e8fafc
 
+confirm-close-surface = false
+
 # Cursor colors
 #cursor-color = 479cbb
 #cursor-text = 011423
