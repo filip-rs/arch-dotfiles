@@ -223,6 +223,9 @@ alias fnd="ls -a | grep -i"
 alias lsblk="lsblk | bat -p --style=full --theme=\"Sublime Snazzy\" -l=makefile"
 alias templestart="qemu-system-x86_64 -m 512M -enable-kvm -drive file=$HOME/Temple/temple.qcow2"
 alias templestart="qemu-system-x86_64 -m 512M -enable-kvm -drive file=$HOME/Temple/zeal.qcow2"
+alias yt-480="yt-dlp -f \"bestvideo[height=480][fps=30]+bestaudio/best[height=480][fps=30]\""
+alias yt-720="yt-dlp -f \"bestvideo[height=720][fps=60]+bestaudio/best[height=720][fps=60]\""
+alias yt-1080="yt-dlp -f \"bestvideo[height=1080][fps=60]+bestaudio/best[height=1080][fps=60]\""
 
 dnsfix() {
     sudo tee /etc/resolv.conf > /dev/null <<'EOF'
