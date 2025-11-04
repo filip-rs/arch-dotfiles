@@ -227,6 +227,7 @@ alias yt-480="yt-dlp -f \"bestvideo[height=480][fps=30]+bestaudio/best[height=48
 alias yt-720="yt-dlp -f \"bestvideo[height=720][fps=60]+bestaudio/best[height=720][fps=60]\""
 alias yt-1080="yt-dlp -f \"bestvideo[height=1080][fps=60]+bestaudio/best[height=1080][fps=60]\""
 alias yt-mp3="yt-dlp -x --audio-format mp3 --audio-quality 0"
+alias vm-passwd="echo XCFVK23N"
 
 dnsfix() {
     sudo tee /etc/resolv.conf > /dev/null <<'EOF'
