@@ -273,6 +273,14 @@ conv() {
     ffmpeg -i "$input" -c:v prores_ks -profile:v 3 -c:a pcm_s16le "$output"
 }
 
+cpy() {
+    if [[ -f $1 ]]; then
+        cat $1 | wl-copy
+    else
+        echo $1 | wl-copy
+    fi
+}
+
 
 # TMUX session system
 # if command -v tmux &> /dev/null && [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [ -z "$TMUX" ]; then
