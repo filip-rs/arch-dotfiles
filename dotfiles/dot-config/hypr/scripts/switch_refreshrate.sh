@@ -1,21 +1,27 @@
+#!/bin/bash
 
-file="$HOME/.config/hypr/hyprland.conf"
+STATE_FILE="$HOME/.config/hypr/scripts/toggle_state"
 
-if [[ ! -f "$file" ]]; then
-    echo "File not found: $file"
-    exit 1
+# Initialize state file if it doesn't exist
+if [ ! -f "$STATE_FILE" ]; then
+    echo "60" > "$STATE_FILE"
 fi
 
+STATE=$(cat "$STATE_FILE")
 
-if grep -q "monitor=eDP-1,1920x1200@60, 0x0, 1.0" "$file"; then
-    sed -i 's|monitor=eDP-1,1920x1200@60, 0x0, 1.0|monitor=eDP-1,1920x1200@120, 0x0, 1.0|' "$file"
+if [ "$STATE" = "60" ]; then
+    hyprctl keyword monitor "eDP-1, 1920x1200@120, 0x0"
     notify-send "Set refreshrate to 120hz"
-    echo "Changed refreshrate to 120hz in $file"
 
-elif grep -q "monitor=eDP-1,1920x1200@120, 0x0, 1.0" "$file"; then
-    sed -i 's|monitor=eDP-1,1920x1200@120, 0x0, 1.0|monitor=eDP-1,1920x1200@60, 0x0, 1.0|' "$file"
+    echo "120" > "$STATE_FILE"
+
+else
+    hyprctl keyword monitor "eDP-1, 1920x1200@60, 0x0"
     notify-send "Set refreshrate to 60hz"
-    echo "Changed refreshrate to 60hz in $file"
+
+    echo "60" > "$STATE_FILE"
 fi
 
-hyprctl reload
+
+
+
