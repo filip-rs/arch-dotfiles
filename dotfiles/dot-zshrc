@@ -14,6 +14,7 @@ typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
 
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.config/zsh/ohmyzsh"
+export TERMINAL_EMULATOR="ghostty"
 
 # path to cargo programs
 export PATH="$PATH:/home/filip/.cargo/bin"
@@ -282,7 +283,7 @@ cpy() {
 }
 
 pdf() {
-    zathura $1 & disown && exit
+    zathura $1 & disown && pkill $TERMINAL_EMULATOR
 }
 
 th() {
