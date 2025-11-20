@@ -287,7 +287,7 @@ pdf() {
 }
 
 th() {
-    thunar . & disown && exit
+    thunar . & disown && pkill $TERMINAL_EMULATOR
 }
 
 
