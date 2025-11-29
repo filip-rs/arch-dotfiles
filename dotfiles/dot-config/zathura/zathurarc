@@ -1,2 +1,4 @@
 map k feedkeys "<C-Up>"
 map j feedkeys "<C-Down>"
+
+set selection-clipboard clipboard
