@@ -290,6 +290,11 @@ th() {
     thunar . & disown && pkill $TERMINAL_EMULATOR
 }
 
+sunshine_start() {
+    export DISPLAY:=1
+    sunshine
+}
+
 
 # TMUX session system
 # if command -v tmux &> /dev/null && [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [ -z "$TMUX" ]; then
