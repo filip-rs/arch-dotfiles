@@ -235,14 +235,14 @@
     },
 
     "mpris": {
-	    "format": "Playing: {player_icon} {title}",
-	    "format-paused": "Playing: {status_icon} <i>{title}</i>",
+	    "format": "Playing: {player_icon} <i>{title}</i>",
+	    "format-paused": "Paused: {status_icon} {title}",
 	    "player-icons": {
-	    	"default": "▶",
+	    	"default": "⏸",
 	    	"mpv": "🎵"
 	    },
 	    "status-icons": {
-	    	"paused": "⏸"
+	    	"paused": "▶"
 	        }
     },
 
@@ -255,7 +255,10 @@
 
     "tray": {
         "icon-size": 18,
-        "spacing": 10
+        "spacing": 10,
+        "icons": {
+            "steam": "$HOME/.local/share/icons/hicolor/16x16/apps/steam-waybar.png"
+        }
     },
 
     "clock": {
