@@ -7,7 +7,7 @@ return {
   config = function()
     -- Load Arduino plugin for .ino files
     vim.api.nvim_create_autocmd("FileType", {
-      pattern = "arduino",
+      pattern = { "arduino", "cpp" },
       callback = function()
         require("Arduino-Nvim")
       end,
