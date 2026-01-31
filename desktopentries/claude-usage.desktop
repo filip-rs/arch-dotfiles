@@ -1,7 +1,7 @@
 [Desktop Entry]
 Name=Check Claude Usage
 Comment=claude usage bash script
-Exec=sh -lc "$HOME/.config/hypr/scripts/claude_usage_notif.sh"
+Exec=sh -lc "$HOME/Programming/Bash/claude_usage_notif.sh"
 Icon=applications-system
 Terminal=false
 Type=Application
