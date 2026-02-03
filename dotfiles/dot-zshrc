@@ -230,6 +230,7 @@ alias yt-1080="yt-dlp -f \"bestvideo[height=1080][fps=60]+bestaudio/best[height=
 alias yt-mp3="yt-dlp -x --audio-format mp3 --audio-quality 0 --cookies-from-browser firefox"
 alias hypr-fix='export HYPRLAND_INSTANCE_SIGNATURE=$(\ls -t /run/user/1000/hypr | head -n1)'
 alias vm-passwd="echo XCFVK23N"
+alias powerdraw="upower -i $(upower -e | grep BAT) | grep -i energy-rate"
 
 dnsfix() {
     sudo tee /etc/resolv.conf > /dev/null <<'EOF'
