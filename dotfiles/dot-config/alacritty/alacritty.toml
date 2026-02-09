@@ -10,10 +10,11 @@ padding.y = 10
 decorations = "Buttonless"
 
 [font]
-normal.family = "MesloLGS NF"
-bold.family = "MesloLGS NF"
-italic.family = "MesloLGS NF"
-bold_italic.family = "MesloLGS NF"
+#normal.family = "MesloLGS NF"
+normal.family = "Monocraft"
+bold.family = "Monocraft"
+italic.family = "Monocraft"
+bold_italic.family = "Monocraft"
 
 # normal.family = "JetBrainsMono Nerd Font"
 # bold.family = "JetBrainsMono Nerd Font"
