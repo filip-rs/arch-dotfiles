@@ -36,6 +36,7 @@
 # key = value
 # Font configuration from Alacritty
 font-family = MesloLGS NF
+#font-family = Monocraft
 font-size = 10
 
 # Window configuration from Alacritty
