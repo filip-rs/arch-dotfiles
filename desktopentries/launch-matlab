@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+export LD_LIBRARY_PATH="/opt/MATLAB/R2024a/gnutls/usr/lib/:$LD_LIBRARY_PATH"
+#exec /opt/MATLAB/R2024a/bin/matlab &&
+exec ghostty -e /opt/MATLAB/R2024a/bin/matlab

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Terminal=false
+Exec=/usr/share/applications/launch-matlab
+Name=Matlab
+Icon=matlab
+Categories=Development;Math;Science;
+Comment=Scientific computing environment
+StartupNotify=true
