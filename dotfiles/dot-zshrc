@@ -323,7 +323,7 @@ sunshine_start() {
 # TMUX session system
 [[ $- == *i* ]] || return
 
-sessions=(work home school devops)
+sessions=(work home school devops reset-tmux)
 for s in "${sessions[@]}"; do
   tmux has-session -t "$s" 2>/dev/null || tmux new-session -d -s "$s"
 done
@@ -337,7 +337,16 @@ if command -v tmux &>/dev/null \
 
   if tmux ls &>/dev/null; then
     session=$(tmux list-sessions 2>/dev/null | fzf --height=80% --layout=reverse --border=rounded --margin=40%,30% | awk -F: '{print $1}')
-    if [[ -n "$session" ]]; then
+    if [[ "$session" == "reset-tmux" ]]; then
+      tmux kill-server
+
+      for s in "${sessions[@]}"; do
+        tmux has-session -t "$s" 2>/dev/null || tmux new-session -d -s "$s"
+      done
+
+      exec tmux attach -t home
+
+    elif [[ -n "$session" ]]; then
       exec tmux attach -t "$session"
     else
       exec tmux attach -t home
