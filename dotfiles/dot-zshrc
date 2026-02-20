@@ -310,48 +310,43 @@ sunshine_start() {
 }
 
 
-# TMUX session system
-# if command -v tmux &> /dev/null && [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [ -z "$TMUX" ]; then
-#   if tmux ls 2>/dev/null | grep -vq 'no server running'; then
-#     exec tmux a
-#   else
-#     exec tmux
-#   fi
-# fi
-
-
-# TMUX session system
+# TMUX session handler
 [[ $- == *i* ]] || return
 
-sessions=(work home school devops reset-tmux)
+# Define default sessions
+sessions=(work home school devops)
+
+# check for sessions
 for s in "${sessions[@]}"; do
   tmux has-session -t "$s" 2>/dev/null || tmux new-session -d -s "$s"
 done
 
 if command -v tmux &>/dev/null \
   && [[ -t 1 ]] \
-  && [[ -n "$PS1" ]] \
-  && [[ ! "$TERM" =~ screen ]] \
-  && [[ ! "$TERM" =~ tmux ]] \
   && [[ -z "$TMUX" ]]; then
 
-  if tmux ls &>/dev/null; then
-    session=$(tmux list-sessions 2>/dev/null | fzf --height=80% --layout=reverse --border=rounded --margin=40%,30% | awk -F: '{print $1}')
-    if [[ "$session" == "reset-tmux" ]]; then
-      tmux kill-server
+  # create picker list and add reset option
+  selection=$(
+    {
+      tmux list-sessions -F '#S'
+      echo "RESET"
+    } | fzf --height=80% --layout=reverse --border=rounded --margin=40%,30%
+  )
 
-      for s in "${sessions[@]}"; do
-        tmux has-session -t "$s" 2>/dev/null || tmux new-session -d -s "$s"
-      done
+  if [[ "$selection" == "RESET" ]]; then
+    tmux kill-server
+    rm -f ~/.tmux/resurrect/*
 
-      exec tmux attach -t home
+    for s in "${sessions[@]}"; do
+      tmux new-session -d -s "$s"
+    done
 
-    elif [[ -n "$session" ]]; then
-      exec tmux attach -t "$session"
-    else
-      exec tmux attach -t home
-    fi
+    exec tmux attach -t home
+
+  elif [[ -n "$selection" ]]; then
+    exec tmux attach -t "$selection"
+
   else
-    exec tmux new -s home
+    exec tmux attach -t home
   fi
 fi
