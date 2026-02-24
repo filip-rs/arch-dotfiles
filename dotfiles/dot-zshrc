@@ -234,7 +234,14 @@ alias yt-mp3="yt-dlp -x --audio-format mp3 --audio-quality 0 --cookies-from-brow
 alias hypr-fix='export HYPRLAND_INSTANCE_SIGNATURE=$(\ls -t /run/user/1000/hypr | head -n1)'
 alias vm-passwd="echo XCFVK23N"
 alias powerdraw="upower -i $(upower -e | grep BAT) | grep -i energy-rate"
-alias gacp="git add . && git commit -m \"update\" && git push"
+
+
+# quick commit and push
+gacp() {
+    git add .
+    git commit -m "$*"
+    git push
+}
 
 dnsfix() {
     sudo tee /etc/resolv.conf > /dev/null <<'EOF'
