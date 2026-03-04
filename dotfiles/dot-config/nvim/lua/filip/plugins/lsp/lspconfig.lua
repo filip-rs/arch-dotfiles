@@ -17,7 +17,6 @@ return {
   },
   config = function()
     local lspconfig = require("lspconfig")
-    local mason_lspconfig = require("mason-lspconfig")
     local cmp_nvim_lsp = require("cmp_nvim_lsp")
 
     local capabilities = cmp_nvim_lsp.default_capabilities()
@@ -44,32 +43,30 @@ return {
       end,
     })
 
-    -- Mouse hover for LSP info
-    vim.o.mousemoveevent = true
+    -- Diagnostic float on cursor hold
     vim.api.nvim_create_autocmd("CursorHold", {
       callback = function()
         vim.diagnostic.open_float(nil, { focus = false, scope = "cursor" })
       end,
     })
 
-    -- Setup servers via mason-lspconfig
-    mason_lspconfig.setup_handlers({
-      function(server_name)
-        lspconfig[server_name].setup({
-          capabilities = capabilities,
-        })
-      end,
-      ["lua_ls"] = function()
-        lspconfig.lua_ls.setup({
-          capabilities = capabilities,
-          settings = {
-            Lua = {
-              diagnostics = { globals = { "vim" } },
-              workspace = { checkThirdParty = false },
-            },
-          },
-        })
-      end,
+    -- Setup servers directly
+    local servers = { "pyright", "gopls", "ts_ls", "html", "cssls", "jsonls", "bashls" }
+    for _, server in ipairs(servers) do
+      lspconfig[server].setup({
+        capabilities = capabilities,
+      })
+    end
+
+    -- Lua with special settings
+    lspconfig.lua_ls.setup({
+      capabilities = capabilities,
+      settings = {
+        Lua = {
+          diagnostics = { globals = { "vim" } },
+          workspace = { checkThirdParty = false },
+        },
+      },
     })
   end,
 }
