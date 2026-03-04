@@ -6,63 +6,49 @@ return {
     "nvim-treesitter/nvim-treesitter-textobjects",
     "windwp/nvim-ts-autotag",
   },
-  main = "nvim-treesitter.configs",
-  opts = {
-    highlight = { enable = true },
-    indent = { enable = true },
-    autotag = { enable = true },
-    ensure_installed = {
-      "lua",
-      "vim",
-      "vimdoc",
-      "python",
-      "go",
-      "gomod",
-      "javascript",
-      "typescript",
-      "tsx",
-      "json",
-      "yaml",
-      "html",
-      "css",
-      "bash",
-      "markdown",
-      "markdown_inline",
-    },
-    incremental_selection = {
-      enable = true,
-      keymaps = {
-        init_selection = "<C-space>",
-        node_incremental = "<C-space>",
-        scope_incremental = false,
-        node_decremental = "<bs>",
+  config = function()
+    ---@diagnostic disable-next-line: missing-fields
+    require("nvim-treesitter").setup({
+      ensure_installed = {
+        "lua",
+        "vim",
+        "vimdoc",
+        "python",
+        "go",
+        "gomod",
+        "javascript",
+        "typescript",
+        "tsx",
+        "json",
+        "yaml",
+        "html",
+        "css",
+        "bash",
+        "markdown",
+        "markdown_inline",
       },
-    },
-    textobjects = {
-      select = {
-        enable = true,
-        lookahead = true,
-        keymaps = {
-          ["af"] = "@function.outer",
-          ["if"] = "@function.inner",
-          ["ac"] = "@class.outer",
-          ["ic"] = "@class.inner",
-          ["aa"] = "@parameter.outer",
-          ["ia"] = "@parameter.inner",
-        },
-      },
-      move = {
-        enable = true,
-        set_jumps = true,
-        goto_next_start = {
-          ["]f"] = "@function.outer",
-          ["]c"] = "@class.outer",
-        },
-        goto_previous_start = {
-          ["[f"] = "@function.outer",
-          ["[c"] = "@class.outer",
-        },
-      },
-    },
-  },
+    })
+
+    -- Enable treesitter features
+    vim.treesitter.language.register("bash", "sh")
+
+    -- Incremental selection keymaps
+    vim.keymap.set("n", "<C-space>", function()
+      require("nvim-treesitter.incremental_selection").init_selection()
+    end, { desc = "Init selection" })
+    vim.keymap.set("x", "<C-space>", function()
+      require("nvim-treesitter.incremental_selection").node_incremental()
+    end, { desc = "Increment selection" })
+    vim.keymap.set("x", "<bs>", function()
+      require("nvim-treesitter.incremental_selection").node_decremental()
+    end, { desc = "Decrement selection" })
+
+    -- Textobjects
+    local ts_repeat_move = require("nvim-treesitter.textobjects.repeatable_move")
+    vim.keymap.set({ "n", "x", "o" }, ";", ts_repeat_move.repeat_last_move_next)
+    vim.keymap.set({ "n", "x", "o" }, ",", ts_repeat_move.repeat_last_move_previous)
+
+    -- Setup autotag
+    require("nvim-ts-autotag").setup()
+  end,
 }

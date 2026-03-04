@@ -16,9 +16,7 @@ return {
     },
   },
   config = function()
-    local lspconfig = require("lspconfig")
     local cmp_nvim_lsp = require("cmp_nvim_lsp")
-
     local capabilities = cmp_nvim_lsp.default_capabilities()
 
     -- LSP keymaps on attach
@@ -50,16 +48,16 @@ return {
       end,
     })
 
-    -- Setup servers directly
+    -- Configure servers using new vim.lsp.config API (Neovim 0.11+)
     local servers = { "pyright", "gopls", "ts_ls", "html", "cssls", "jsonls", "bashls" }
     for _, server in ipairs(servers) do
-      lspconfig[server].setup({
+      vim.lsp.config[server] = {
         capabilities = capabilities,
-      })
+      }
     end
 
     -- Lua with special settings
-    lspconfig.lua_ls.setup({
+    vim.lsp.config.lua_ls = {
       capabilities = capabilities,
       settings = {
         Lua = {
@@ -67,6 +65,10 @@ return {
           workspace = { checkThirdParty = false },
         },
       },
-    })
+    }
+
+    -- Enable all configured servers
+    vim.lsp.enable(servers)
+    vim.lsp.enable("lua_ls")
   end,
 }
