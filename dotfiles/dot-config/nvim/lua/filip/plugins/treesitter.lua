@@ -1,51 +1,33 @@
 return {
   "nvim-treesitter/nvim-treesitter",
-  event = { "BufReadPre", "BufNewFile" },
+  event = "BufReadPost",
   build = ":TSUpdate",
   dependencies = {
+    "nvim-treesitter/nvim-treesitter-textobjects",
     "windwp/nvim-ts-autotag",
   },
   config = function()
-    -- import nvim-treesitter plugin
-    local treesitter = require("nvim-treesitter.configs")
-
-    -- configure treesitter
-    treesitter.setup({ -- enable syntax highlighting
-      highlight = {
-        enable = true,
-      },
-      -- enable indentation
+    require("nvim-treesitter.configs").setup({
+      highlight = { enable = true },
       indent = { enable = true },
-      -- enable autotagging (w/ nvim-ts-autotag plugin)
-      autotag = {
-        enable = true,
-      },
-      -- ensure these language parsers are installed
+      autotag = { enable = true },
       ensure_installed = {
-        "json",
+        "lua",
+        "vim",
+        "vimdoc",
+        "python",
+        "go",
+        "gomod",
         "javascript",
         "typescript",
         "tsx",
+        "json",
         "yaml",
         "html",
         "css",
-        "prisma",
+        "bash",
         "markdown",
         "markdown_inline",
-        "svelte",
-        "graphql",
-        "bash",
-        "lua",
-        "vim",
-        "dockerfile",
-        "gitignore",
-        "query",
-        "vimdoc",
-        "c",
-        "go",
-        "gomod",
-        "gowork",
-        "gosum",
       },
       incremental_selection = {
         enable = true,
@@ -54,6 +36,32 @@ return {
           node_incremental = "<C-space>",
           scope_incremental = false,
           node_decremental = "<bs>",
+        },
+      },
+      textobjects = {
+        select = {
+          enable = true,
+          lookahead = true,
+          keymaps = {
+            ["af"] = "@function.outer",
+            ["if"] = "@function.inner",
+            ["ac"] = "@class.outer",
+            ["ic"] = "@class.inner",
+            ["aa"] = "@parameter.outer",
+            ["ia"] = "@parameter.inner",
+          },
+        },
+        move = {
+          enable = true,
+          set_jumps = true,
+          goto_next_start = {
+            ["]f"] = "@function.outer",
+            ["]c"] = "@class.outer",
+          },
+          goto_previous_start = {
+            ["[f"] = "@function.outer",
+            ["[c"] = "@class.outer",
+          },
         },
       },
     })

@@ -24,3 +24,15 @@ keymap.set("n", "<leader>tx", "<cmd>tabclose<CR>", { desc = "Close current tab" 
 keymap.set("n", "<leader>tn", "<cmd>tabn<CR>", { desc = "Go to next tab" }) --  go to next tab
 keymap.set("n", "<leader>tp", "<cmd>tabp<CR>", { desc = "Go to previous tab" }) --  go to previous tab
 keymap.set("n", "<leader>tf", "<cmd>tabnew %<CR>", { desc = "Open current buffer in new tab" }) --  move current buffer to new tab
+
+-- Terminal toggle
+keymap.set("n", "<C-t>", function()
+  local term_buf = vim.fn.bufnr("term://")
+  if term_buf ~= -1 and vim.fn.bufwinnr(term_buf) ~= -1 then
+    vim.cmd("bdelete! " .. term_buf)
+  else
+    vim.cmd("botright 15split | terminal")
+    vim.cmd("startinsert")
+  end
+end, { desc = "Toggle terminal" })
+keymap.set("t", "<C-t>", "<C-\\><C-n><cmd>bdelete!<CR>", { desc = "Close terminal" })
