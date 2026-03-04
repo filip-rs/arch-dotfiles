@@ -49,14 +49,20 @@ return {
     })
 
     -- Configure servers using new vim.lsp.config API (Neovim 0.11+)
-    local servers = { "pyright", "gopls", "ts_ls", "html", "cssls", "jsonls", "bashls" }
-    for _, server in ipairs(servers) do
-      vim.lsp.config[server] = {
-        capabilities = capabilities,
-      }
-    end
+    vim.lsp.config.pyright = { capabilities = capabilities }
+    vim.lsp.config.ts_ls = { capabilities = capabilities }
+    vim.lsp.config.html = { capabilities = capabilities }
+    vim.lsp.config.cssls = { capabilities = capabilities }
+    vim.lsp.config.jsonls = { capabilities = capabilities }
+    vim.lsp.config.bashls = { capabilities = capabilities }
 
-    -- Lua with special settings
+    vim.lsp.config.gopls = {
+      capabilities = capabilities,
+      cmd = { "gopls" },
+      filetypes = { "go", "gomod", "gowork", "gotmpl" },
+      root_markers = { "go.work", "go.mod", ".git" },
+    }
+
     vim.lsp.config.lua_ls = {
       capabilities = capabilities,
       settings = {
@@ -68,7 +74,13 @@ return {
     }
 
     -- Enable all configured servers
-    vim.lsp.enable(servers)
+    vim.lsp.enable("pyright")
+    vim.lsp.enable("gopls")
+    vim.lsp.enable("ts_ls")
+    vim.lsp.enable("html")
+    vim.lsp.enable("cssls")
+    vim.lsp.enable("jsonls")
+    vim.lsp.enable("bashls")
     vim.lsp.enable("lua_ls")
   end,
 }
