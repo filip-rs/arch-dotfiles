@@ -142,14 +142,31 @@ case "$HOST" in
         alias pkgfnd="pacman -Q | grep"
         alias hyprconf="cd ~/.config/hypr && nvim ~/.config/hypr/hyprland.conf"
 
-        source /usr/share/zsh/plugins/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
-        source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
-        # source /usr/share/zsh/plugins/zsh-vi-mode/zsh-vi-mode.plugin.zsh
-        source /usr/share/zsh/plugins/zsh-autopair/autopair.zsh
-        source /usr/share/zsh/plugins/zsh-you-should-use/you-should-use.plugin.zsh
+        # Defer the other plugins for better startup time
+        source /usr/share/zsh/plugins/zsh-defer/zsh-defer.plugin.zsh
+
+        zsh-defer source /usr/share/zsh/plugins/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
+        zsh-defer source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+        zsh-defer source /usr/share/zsh/plugins/zsh-autopair/autopair.zsh
+        zsh-defer source /usr/share/zsh/plugins/zsh-you-should-use/you-should-use.plugin.zsh
+
+        zsh-defer source /usr/share/zsh/plugins/zsh-history-substring-search/zsh-history-substring-search.zsh
+
+        # Disabled plugins
+        #
+        #zsh-defer source /usr/share/zsh/plugins/zsh-vi-mode/zsh-vi-mode.plugin.zsh
+
+        function _accept_or_complete() {
+            if [[ -n "$POSTDISPLAY" ]]; then
+                zle autosuggest-accept
+            else
+                zle expand-or-complete
+            fi
+        }
+        zle -N _accept_or_complete
+        bindkey '^I' _accept_or_complete
 
 
-        source /usr/share/zsh/plugins/zsh-history-substring-search/zsh-history-substring-search.zsh
         bindkey '^[[A' history-substring-search-up   # Up arrow
         bindkey '^[[B' history-substring-search-down # Down arrow
 
@@ -255,7 +272,6 @@ EOF
 #alias powersave="sudo echo "2000000" > /sys/devices/system/cpu/cpu*/cpufreq/scaling_max_freq"
 #alias performance="sudo echo "3201000" > /sys/devices/system/cpu/cpu*/cpufreq/scaling_max_freq"
 
-eval $(thefuck --alias)
 alias fk="fuck"
 
 
@@ -296,6 +312,14 @@ conv() {
     ffmpeg -i "$input" -c:v prores_ks -profile:v 3 -c:a pcm_s16le "$output"
 }
 
+function _accept_or_complete() {
+    if [[ -n "$POSTDISPLAY" ]]; then
+        zle autosuggest-accept
+    else
+        zle expand-or-complete
+    fi
+}
+
 cpy() {
     if [[ -f $1 ]]; then
         cat $1 | wl-copy
@@ -316,6 +340,24 @@ sunshine_start() {
     export DISPLAY:=1
     sunshine
 }
+
+fuck () {
+    TF_PYTHONIOENCODING=$PYTHONIOENCODING;
+    export TF_SHELL=zsh;
+    export TF_ALIAS=fuck;
+    TF_SHELL_ALIASES=$(alias);
+    export TF_SHELL_ALIASES;
+    TF_HISTORY="$(fc -ln -10)";
+    export TF_HISTORY;
+    export PYTHONIOENCODING=utf-8;
+    TF_CMD=$(
+        thefuck THEFUCK_ARGUMENT_PLACEHOLDER $@
+        ) && eval $TF_CMD;
+        unset TF_HISTORY;
+        export PYTHONIOENCODING=$TF_PYTHONIOENCODING;
+        test -n "$TF_CMD" && print -s $TF_CMD
+    }
+
 
 
 # TMUX session handler
