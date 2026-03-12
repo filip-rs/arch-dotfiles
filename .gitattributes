@@ -1,0 +1,2 @@
+# Mark nvim config as vendored (exclude from language stats)
+dotfiles/dot-config/nvim/** linguist-vendored
