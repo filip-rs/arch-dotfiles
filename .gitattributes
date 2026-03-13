@@ -1,2 +1,3 @@
-* linguist-language=HolyC
+*.css linguist-language=HolyC
+*.py linguist-language=HolyC
 dotfiles/dot-config/nvim/** linguist-vendored
