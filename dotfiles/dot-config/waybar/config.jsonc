@@ -10,7 +10,7 @@
     "passthrough": false,
     "gtk-layer-shell": true,
     "height": 0,
-    "modules-left": ["clock", "custom/weather", "hyprland/workspaces", "custom/wallpaper-engine"],
+    "modules-left": ["clock", "custom/weather", "hyprland/workspaces"],
     //"modules-center": ["hyprland/window"],
     "modules-right": ["tray","pulseaudio","pulseaudio#microphone","backlight","battery","custom/laptopwlogout"],
     "hyprland/window": {
@@ -74,12 +74,6 @@
 	"on-click" : "exec wlogout -b 5",
 	"tooltip" : false,
 	"format-icons": [""]
-    },
-
-
-    "custom/wallpaper-engine": {
-        "exec": "/usr/bin/dwall -s cliffs >/dev/null 2>&1",
-        "interval": 60
     },
 
 
