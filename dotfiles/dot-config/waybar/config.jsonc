@@ -184,32 +184,38 @@
     },
 
    "hyprland/workspaces": {
+
         "disable-scroll": true,
         "on-scroll-up": "hyprctl dispatch workspace -1",
         "on-scroll-down": "hyprctl dispatch workspace +1",
-		//"format": "{name}: {windows}",
-		"format": "{icon}",
+		"format": "[{name}: {windows}]",
 		"on-click": "activate",
 		"format-icons": {
 			"urgent": "",
-			"active": "󱓻󰝤󱓻",
-			"default": "󱓻"
-		}
-    },
+			"active": "",
+			"default": ""
+		},
 
-    "custom/os_button": {
-        "format": "🔍",
-        "on-click": "wofi --show drun",
-        "tooltip": false
-    },
-    "wlr/taskbar": {
-        "format": "{icon}",
-        "icon-size": 36,
-        "spacing": 3,
-        "on-click-middle": "close",
-        "tooltip-format": "{title}",
-        "ignore-list": [],
-        "on-click": "activate"
+    	"persistent-workspaces": {
+    	         "*": 5
+        },
+
+        "window-rewrite-default": "󱓻",
+	    "window-rewrite": {
+		    "title<.*youtube.*>": "", // Windows whose titles contain "youtube"
+		    "class<firefox>": "", // Windows whose classes are "firefox"
+		    "class<none>": "r", // Windows whose classes are "firefox"
+		    "class<librewolf>": "󰈹", 
+		    "class<librewolf> title<.*github.*>": "", // Windows whose class is "librewolf" and title contains "github". Note that "class" always comes first.
+		    "alacritty": "",
+		    "ghostty": "", 
+            "thunar": "󱧶", 
+		    "code": "󰨞",
+		    "slack": "",
+		    "youtube-music": "󰎆",
+            "notion": "",
+		    "title<.* - (.*) - VSCodium>": "codium $1"  // captures part of the window title and formats it into output
+	    }
     },
 
     "custom/weather" : {
@@ -355,45 +361,38 @@
     },
 
    "hyprland/workspaces": {
+
         "disable-scroll": true,
         "on-scroll-up": "hyprctl dispatch workspace -1",
         "on-scroll-down": "hyprctl dispatch workspace +1",
-		//"format": "{name}: {windows}",
-		"format": "{icon}",
+		"format": "[{name}: {windows}]",
 		"on-click": "activate",
 		"format-icons": {
-//			"1": "一",
-//			"2": "二",
-//			"3": "三",
-//			"4": "四",
-//			"5": "五",
 			"urgent": "",
-			"active": "󱓻󰝤󱓻",
-			//"active": "",
-			"default": "󱓻"
-			//"default": ""
+			"active": "",
+			"default": ""
 		},
 
-/*    	"sort-by-number": true,*/
     	"persistent-workspaces": {
     	         "*": 5
-        }
+        },
 
-        // "window-rewrite-default": "󱓻",
-	    // "window-rewrite": {
-		//     "title<.*youtube.*>": "", // Windows whose titles contain "youtube"
-		//     "class<firefox>": "", // Windows whose classes are "firefox"
-		//     "class<none>": "r", // Windows whose classes are "firefox"
-		//     "class<librewolf>": "󰈹", // Windows whose classes are "firefox"
-		//     "class<librewolf> title<.*github.*>": "", // Windows whose class is "firefox" and title contains "github". Note that "class" always comes first.
-		//     "alacritty": "", // Windows that contain "foot" in either class or title. For optimization reasons, it will only match against a title if at least one other window explicitly matches against a title.
-		//     "thunar": "󱧶", // Windows that contain "foot" in either class or title. For optimization reasons, it will only match against a title if at least one other window explicitly matches against a title.
-		//     "code": "󰨞",
-		//     "slack": "",
-		//     "youtube-music": "󰎆",
-        //     "notion": "",
-		//     "title<.* - (.*) - VSCodium>": "codium $1"  // captures part of the window title and formats it into output
-	    // }
+        "window-rewrite-default": "󱓻",
+	    "window-rewrite": {
+		    "title<.*youtube.*>": "", // Windows whose titles contain "youtube"
+		    "class<firefox>": "", // Windows whose classes are "firefox"
+		    "class<none>": "r", // Windows whose classes are "firefox"
+		    "class<librewolf>": "󰈹", 
+		    "class<librewolf> title<.*github.*>": "", // Windows whose class is "librewolf" and title contains "github". Note that "class" always comes first.
+		    "alacritty": "",
+		    "ghostty": "", 
+            "thunar": "󱧶", 
+		    "code": "󰨞",
+		    "slack": "",
+		    "youtube-music": "󰎆",
+            "notion": "",
+		    "title<.* - (.*) - VSCodium>": "codium $1"  // captures part of the window title and formats it into output
+	    }
     },
 
 /*
