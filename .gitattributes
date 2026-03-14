@@ -1,2 +1,3 @@
-# Mark nvim config as vendored (exclude from language stats)
+*.css linguist-language=HolyC
+*.py linguist-language=HolyC
 dotfiles/dot-config/nvim/** linguist-vendored
