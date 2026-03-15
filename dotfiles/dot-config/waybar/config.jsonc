@@ -183,6 +183,21 @@
         "format": "{}"
     },
 
+        "custom/os_button": {
+        "format": "🔍",
+        "on-click": "wofi --show drun",
+        "tooltip": false
+    },
+    "wlr/taskbar": {
+        "format": "{icon}",
+        "icon-size": 36,
+        "spacing": 3,
+        "on-click-middle": "close",
+        "tooltip-format": "{title}",
+        "ignore-list": [],
+        "on-click": "activate"
+    },
+
    "hyprland/workspaces": {
 
         "disable-scroll": true,
