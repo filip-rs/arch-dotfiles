@@ -23,16 +23,13 @@ I've made a simple script that automates the process of setting up the config fi
 2. Navigate into the project directory:
 
    ```bash
-   cd arch-dotfiles
+   cd arch-dotfiles/dotfiles
    ```
 
-3. Run the install script:
-
+3. Install the dotfiles with stow
    ```bash
-   ./dotfiles-install.sh
+   stow . --dotfiles -t $HOME
    ```
-
-4. Done :)
 
 ## Manual install guide:
 
@@ -67,71 +64,3 @@ cp -r wofi ~/.config
 cp -r neofetch ~/.config
 etc. etc.
 ```
-
-# Backup script installation
-
-The repository also contains a script for automatic backup of dotfiles, including systemd service and timer files to handle this automatically. There is a bash script for easy install but I will also provide a manual install guide incase the automatic one fails or you simply want more control over the installtion process.
-
-## Installation script
-
-1. Make sure you are in the correct directory:
-
-```bash
-cd backup-service
-pwd
-```
-
-Should return `.../arch-dotfiles/backup-service`
-
-2. Run the install script (Requires sudo to copy files into /etc folder)
-
-```bash
-sudo ./install-backup-service.sh
-```
-
-3. Modify the `bash dotfiles-backup.service`:
-   This file has to contain the specific path to the repository.
-
-```bash
-nvim dotfiles-backup.service
-```
-
-Update the `WorkingDirectory=/home/filip/Services` so it points to where you have the repository located.
-
-## Manual install
-
-1. Make sure you are in the correct directory:
-
-```bash
-cd backup-service
-pwd
-```
-
-Should return `.../arch-dotfiles/backup-service`
-
-2. Symlink the timers:
-
-```bash
-sudo ln -s dotfiles-backup.timer /etc/systemd/system/dotfiles-backup.timer
-sudo ln -s dotfiles-backup.service /etc/systemd/system/dotfiles-backup.service
-```
-
-3. Modify the `bash dotfiles-backup.service`:
-   This file has to contain the specific path to the repository.
-
-```bash
-nvim dotfiles-backup.service
-```
-
-Update the `WorkingDirectory=/home/filip/Services` so it points to where you have the repository located.
-
-4. Enable the timer:
-
-   ```bash
-   sudo systemctl enable dotfiles-backup.timer
-   ```
-
-5. Reload systemd daemon
-   ```bash
-   sudo systemctl daemon-reload
-   ```
