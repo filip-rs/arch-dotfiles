@@ -1,2 +1,3 @@
 latest.log
 dotfiles/dot-config/nvim/lazy-lock.json
+dotfiles/dot-config/hypr/local.conf
