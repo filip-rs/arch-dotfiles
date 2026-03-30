@@ -382,3 +382,4 @@ if command -v tmux &>/dev/null \
     exec tmux attach -t home
   fi
 fi
+export GPG_TTY=$(tty)
