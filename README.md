@@ -14,12 +14,6 @@ I've made a simple script that automates the process of setting up the config fi
    git clone https://github.com/filip-rs/arch-dotfiles.git
    ```
 
-   Alternatively clone using the ssh feature:
-
-   ```bash
-   git clone git@github.com:filip-rs/arch-dotfiles.git
-   ```
-
 2. Navigate into the project directory:
 
    ```bash
