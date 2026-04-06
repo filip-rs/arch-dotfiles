@@ -21,8 +21,15 @@ I've made a simple script that automates the process of setting up the config fi
    ```
 
 3. Install the dotfiles with stow
+
    ```bash
    stow . --dotfiles -t $HOME
+   ```
+
+4. \[Optional\] Install desktopentries
+   ```bash
+   cd desktopentries \
+   sudo stow . -t /usr/share/applications
    ```
 
 ## Manual install guide:
