@@ -1,3 +1,10 @@
+/* @theme-colors-start */
+@define-color bg_base #1a1b26;
+@define-color selection #283457;
+@define-color text_primary #c0caf5;
+@define-color border_color #3d59a1;
+/* @theme-colors-end */
+
 * {
   background-image: none;
   box-shadow: none;
@@ -10,10 +17,10 @@ window {
 button {
   border-radius: 30px;
   margin: 172px 25px;
-  border-color: black;
-  text-decoration-color: #ffffff;
-  color: #ffffff;
-  background-color: #011423;
+  border-color: @border_color;
+  text-decoration-color: @text_primary;
+  color: @text_primary;
+  background-color: @bg_base;
   border-style: solid;
   border-width: 1px;
   background-repeat: no-repeat;
@@ -23,9 +30,9 @@ button {
 }
 
 button:hover {
-  background-color: #0f3f63;
-  box-shadow: 0 0 10px 3px #0f3f63;
-  border-color: #0f3f63;
+  background-color: @selection;
+  box-shadow: 0 0 10px 3px @selection;
+  border-color: @selection;
   outline: none;
 }
 

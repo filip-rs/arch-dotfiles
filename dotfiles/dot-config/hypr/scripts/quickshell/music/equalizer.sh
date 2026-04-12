@@ -1,49 +1,131 @@
 #!/usr/bin/env bash
+# 10-band EQ using PipeWire filter-chain (replaces easyeffects)
 
 STATE_FILE="/tmp/eq_state.json"
-PRESET_DIR="$HOME/.config/easyeffects/output"
-PRESET_NAME="live_eq"
-PRESET_FILE="$PRESET_DIR/${PRESET_NAME}.json"
+CONFIG_DIR="$HOME/.config/pipewire/filter-chain.conf.d"
+CONFIG_FILE="$CONFIG_DIR/eq-live.conf"
+PID_FILE="/tmp/pw_eq_pid"
+EQ_SINK="effect_input.live_eq"
 
-mkdir -p "$PRESET_DIR"
+# Standard ISO 10-band frequencies
+FREQS=(32 63 125 250 500 1000 2000 4000 8000 16000)
+TYPES=("bq_lowshelf" "bq_peaking" "bq_peaking" "bq_peaking" "bq_peaking" "bq_peaking" "bq_peaking" "bq_peaking" "bq_peaking" "bq_highshelf")
 
-# Default state (Now includes "pending": false)
+mkdir -p "$CONFIG_DIR"
+
 if [ ! -f "$STATE_FILE" ]; then
-    echo '{"b1": 0, "b2": 0, "b3": 0, "b4": 0, "b5": 0, "b6": 0, "b7": 0, "b8": 0, "b9": 0, "b10": 0, "preset": "Flat", "pending": false}' > "$STATE_FILE"
+    echo '{"b1":0,"b2":0,"b3":0,"b4":0,"b5":0,"b6":0,"b7":0,"b8":0,"b9":0,"b10":0,"preset":"Flat","pending":false}' > "$STATE_FILE"
 fi
 
-apply_eq() {
-    vals=$(cat "$STATE_FILE")
-    python3 -c "
-import sys, json
-try:
-    data = json.loads(sys.argv[1])
-    slider_map = { 0:0, 1:3, 2:6, 3:9, 4:12, 5:15, 6:18, 7:21, 8:24, 9:27 }
-    freqs = [32, 40, 50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000, 6300, 8000, 10000, 12500, 16000, 20000, 22000, 24000, 24000]
-    gains = [float(data['b1']), float(data['b2']), float(data['b3']), float(data['b4']), float(data['b5']), float(data['b6']), float(data['b7']), float(data['b8']), float(data['b9']), float(data['b10'])]
-    bands = {}
-    for i in range(32):
-        freq = freqs[i] if i < len(freqs) else 20000.0
-        gain = 0.0
-        for s_idx, b_idx in slider_map.items():
-            if i == b_idx:
-                gain = gains[s_idx]
-                break
-        bands[f\"band{i}\"] = { \"frequency\": freq, \"gain\": gain, \"mode\": \"Bell\", \"mute\": False, \"q\": 1.0, \"solo\": False, \"width\": 1.0, \"slope\": \"x1\" }
-    preset = { \"output\": { \"blocklist\": [], \"plugins_order\": [ \"equalizer\" ], \"equalizer\": { \"bypass\": False, \"input-gain\": 0.0, \"output-gain\": 0.0, \"left\": bands, \"right\": bands, \"mode\": \"IIR\", \"num-bands\": 32, \"split-channels\": False } } }
-    print(json.dumps(preset, indent=4))
-except:
-    sys.exit(1)
-" "$vals" > "$PRESET_FILE"
-
-    easyeffects -l "$PRESET_NAME" >/dev/null 2>&1 &
+read_gains() {
+    local vals=$(cat "$STATE_FILE")
+    GAINS=()
+    for i in $(seq 1 10); do
+        local g=$(echo "$vals" | jq -r ".b${i}")
+        [[ "$g" != *.* ]] && g="${g}.0"
+        GAINS+=("$g")
+    done
 }
 
-# Save state helper (Always sets pending to false because Presets apply instantly)
+generate_config() {
+    read_gains
+
+    local nodes="" links=""
+    for i in $(seq 0 9); do
+        local band=$((i + 1))
+        nodes+="
+                    {
+                        type  = builtin
+                        name  = eq_band_${band}
+                        label = ${TYPES[$i]}
+                        control = { \"Freq\" = ${FREQS[$i]}.0 \"Q\" = 1.0 \"Gain\" = ${GAINS[$i]} }
+                    }"
+    done
+    for i in $(seq 1 9); do
+        links+="
+                    { output = \"eq_band_${i}:Out\" input = \"eq_band_$((i + 1)):In\" }"
+    done
+
+    cat > "$CONFIG_FILE" << EOF
+context.modules = [
+    { name = libpipewire-module-filter-chain
+        args = {
+            node.description = "Live EQ"
+            media.name       = "Live EQ"
+            filter.graph = {
+                nodes = [${nodes}
+                ]
+                links = [${links}
+                ]
+            }
+            audio.channels = 2
+            audio.position = [ FL FR ]
+            capture.props = {
+                node.name   = "${EQ_SINK}"
+                media.class = Audio/Sink
+            }
+            playback.props = {
+                node.name   = "effect_output.live_eq"
+                node.passive = true
+            }
+        }
+    }
+]
+EOF
+}
+
+start_eq() {
+    # Kill existing filter-chain EQ
+    if [ -f "$PID_FILE" ]; then
+        kill "$(cat "$PID_FILE")" 2>/dev/null
+        rm -f "$PID_FILE"
+    fi
+    sleep 0.2
+
+    pipewire -c filter-chain.conf >/dev/null 2>&1 &
+    echo $! > "$PID_FILE"
+    disown
+
+    # Wait for sink to appear, set as default, move existing streams
+    for _ in $(seq 1 20); do
+        if pactl list sinks short 2>/dev/null | grep -q "$EQ_SINK"; then
+            pactl set-default-sink "$EQ_SINK" 2>/dev/null
+            for input in $(pactl list sink-inputs short 2>/dev/null | awk '{print $1}'); do
+                pactl move-sink-input "$input" "$EQ_SINK" 2>/dev/null
+            done
+            return 0
+        fi
+        sleep 0.1
+    done
+}
+
+try_live_update() {
+    read_gains
+    local node_id
+    node_id=$(pw-dump 2>/dev/null | jq -r \
+        ".[] | select(.type == \"PipeWire:Interface:Node\" and .info.props.\"node.name\"? == \"${EQ_SINK}\") | .id" \
+        | head -1)
+
+    [ -z "$node_id" ] || [ "$node_id" = "null" ] && return 1
+
+    local params=""
+    for i in $(seq 1 10); do
+        params+="\"eq_band_${i}:Gain\" ${GAINS[$((i - 1))]} "
+    done
+
+    pw-cli set-param "$node_id" Props "{ params = [ ${params}] }" 2>/dev/null
+}
+
+apply_eq() {
+    generate_config
+    # Try live update (instant, no audio blip), fall back to restart
+    try_live_update || start_eq
+}
+
 save_preset() {
     jq -n -c --arg b1 "$1" --arg b2 "$2" --arg b3 "$3" --arg b4 "$4" --arg b5 "$5" \
           --arg b6 "$6" --arg b7 "$7" --arg b8 "$8" --arg b9 "$9" --arg b10 "${10}" --arg p "${11}" \
-       '{"b1": $b1, "b2": $b2, "b3": $b3, "b4": $b4, "b5": $b5, "b6": $b6, "b7": $b7, "b8": $b8, "b9": $b9, "b10": $b10, "preset": $p, "pending": false}' > "$STATE_FILE"
+       '{"b1":$b1,"b2":$b2,"b3":$b3,"b4":$b4,"b5":$b5,"b6":$b6,"b7":$b7,"b8":$b8,"b9":$b9,"b10":$b10,"preset":$p,"pending":false}' > "$STATE_FILE"
 }
 
 cmd=$1
@@ -53,20 +135,17 @@ arg2=$3
 case $cmd in
     "get") cat "$STATE_FILE" ;;
     "set_band")
-        # SLIDER MOVE: Set pending = true, Preset = Custom. DO NOT APPLY.
         tmp=$(cat "$STATE_FILE")
         updated=$(echo "$tmp" | jq -c --arg val "$arg2" ".b$arg1 = \$val | .preset = \"Custom\" | .pending = true")
         echo "$updated" > "$STATE_FILE"
         ;;
     "apply")
-        # APPLY BUTTON: Set pending = false, then Apply.
         tmp=$(cat "$STATE_FILE")
         updated=$(echo "$tmp" | jq -c ".pending = false")
         echo "$updated" > "$STATE_FILE"
         apply_eq
         ;;
     "preset")
-        # PRESET CLICK: Save values (pending=false) and Apply Instantly.
         case $arg1 in
             "Flat")    save_preset 0 0 0 0 0 0 0 0 0 0 "Flat" ;;
             "Bass")    save_preset 5 7 5 2 1 0 0 0 1 2 "Bass" ;;
@@ -80,4 +159,3 @@ case $cmd in
         apply_eq
         ;;
 esac
-

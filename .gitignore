@@ -4,3 +4,7 @@ dotfiles/dot-config/hypr/local.conf
 dotfiles/dot-config/hypr/scripts/quickshell/guide/previews/
 
 .env
+
+# Generated theme files (written by theme_apply.sh at runtime)
+dotfiles/dot-config/hypr/scripts/quickshell/qs_colors.json
+dotfiles/dot-config/nvim/lua/filip/theme_colors.lua

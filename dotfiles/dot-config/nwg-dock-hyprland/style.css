@@ -1,9 +1,19 @@
+/* @theme-colors-start */
+@define-color bg_base #1a1b26;
+@define-color border_subtle rgba(61, 89, 161, 0.6);
+@define-color text_primary #c0caf5;
+@define-color text_dim #a9b1d6;
+@define-color text_muted #787c99;
+@define-color hover_bg rgba(36, 40, 59, 0.8);
+@define-color active_border rgba(61, 89, 161, 0.5);
+/* @theme-colors-end */
+
 window {
-  background: #011423;
-  border-radius: 15px;
+  background: @bg_base;
+  border-radius: 16px;
   border-style: solid;
   border-width: 1px;
-  border-color: rgba(50, 50, 50, 0.9);
+  border-color: @border_subtle;
 }
 
 #box {
@@ -14,8 +24,8 @@ window {
 #active {
   /* This is to underline the button representing the currently active window */
   border-bottom: solid 0px;
-  border-color: rgba(255, 255, 255, 0.3);
-  color: #ccc;
+  border-color: @active_border;
+  color: @text_dim;
 }
 
 button,
@@ -23,19 +33,19 @@ image {
   background: none;
   border-style: none;
   box-shadow: none;
-  color: #aaa;
+  color: @text_muted;
 }
 
 button {
   padding: 4px;
   margin-left: 4px;
   margin-right: 4px;
-  color: #f5f5f5;
+  color: @text_primary;
   font-size: 10px;
 }
 
 button:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: @hover_bg;
   border-radius: 10px;
 }
 

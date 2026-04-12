@@ -1,3 +1,33 @@
+/* @theme-colors-start */
+@define-color bg_base #1a1b26;
+@define-color bg_mantle #16161e;
+@define-color bg_crust #13131a;
+@define-color bg_surface0 #24283b;
+@define-color bg_surface1 #2f3549;
+@define-color bg_surface2 #3b4261;
+@define-color text_primary #c0caf5;
+@define-color text_secondary #a9b1d6;
+@define-color text_muted #787c99;
+@define-color overlay0 #545c7e;
+@define-color overlay1 #6b7089;
+@define-color overlay2 #737aa2;
+@define-color accent #7aa2f7;
+@define-color accent_dim #3d59a1;
+@define-color accent_bright #b4f9f8;
+@define-color blue #7aa2f7;
+@define-color sapphire #7dcfff;
+@define-color green #9ece6a;
+@define-color red #f7768e;
+@define-color yellow #e0af68;
+@define-color peach #ff9e64;
+@define-color mauve #bb9af7;
+@define-color pink #ff007c;
+@define-color maroon #db4b4b;
+@define-color teal #1abc9c;
+@define-color selection #283457;
+@define-color border_subtle rgba(61, 89, 161, 0.6);
+/* @theme-colors-end */
+
 * {
   border: 0;
   border-radius: 0;
@@ -9,15 +39,15 @@
 
 window#waybar {
   background: rgba(21, 18, 27, 0);
-  color: #cdd6f4;
+  color: @text_primary;
 }
 
 tooltip {
-  background: #011423;
+  background: @bg_base;
   border-radius: 0px;
   border-width: 1px;
   border-style: solid;
-  border-color: #11111b;
+  border-color: @bg_crust;
 }
 
 #custom-power_profile,
@@ -37,18 +67,15 @@ tooltip {
 #taskbar,
 #mpris,
 #backlight {
-  background: #011423;
+  background: @bg_base;
   opacity: 1;
   padding: 0px 20px;
   margin: 11px 0px;
   margin-top: 6px;
-  border-width: 1px;
-  border-style: solid;
-  border-color: rgba(50, 50, 50, 0.9);
 }
 
 #workspaces {
-  background: #011423;
+  background: @bg_base;
   border-radius: 10px;
   font-weight: normal;
   font-style: normal;
@@ -56,7 +83,7 @@ tooltip {
 }
 
 #workspaces button {
-  color: #868da8;
+  color: @text_muted;
   /*background-color: #212124;*/
   border-radius: 8px;
   padding: 0px;
@@ -70,20 +97,20 @@ tooltip {
 }
 
 #workspaces button.active {
-  color: #cdd6f4;
+  color: @text_primary;
   border-radius: 10px;
   padding-left: 3px;
   padding-right: 3px;
 }
 
 #workspaces button.urgent {
-  color: #11111b;
-  background: #a6e3a1;
+  color: @bg_crust;
+  background: @green;
   border-radius: 10px;
 }
 
 #workspaces button:hover {
-  color: #787878;
+  color: @text_muted;
   border-radius: 10px;
 }
 
@@ -92,7 +119,7 @@ tooltip {
 }
 
 #temperature.critical {
-  color: #eba0ac;
+  color: @maroon;
 }
 
 #backlight {
@@ -105,11 +132,7 @@ tooltip {
 }
 
 #custom-power_profile {
-  color: #a6e3a1;
-  border-color: rgba(50, 50, 50, 0.9);
-  border-width: 1px;
-  border-left: 1px;
-  border-right: 0px;
+  color: @green;
 }
 
 #window {
@@ -126,66 +149,55 @@ tooltip {
 }
 
 #clock {
-  color: #cdd6f4;
+  color: @text_primary;
   border-radius: 10px 10px 10px 10px;
   margin-left: 7px;
-  border-right: 0px;
   margin-right: 7px;
 }
 
 #network {
-  color: #f9e2af;
+  color: @yellow;
   border-radius: 10px 0px 0px 10px;
-  border-left: 0px;
-  border-right: 0px;
 }
 
 #bluetooth {
-  color: #89b4fa;
+  color: @accent;
   border-radius: 0px 10px 10px 0px;
   margin-right: 0px;
 }
 
 #pulseaudio {
-  color: #89b4fa;
-  border-left: 1px;
-  border-right: 1px;
+  color: @accent;
   border-radius: 10px 0px 0px 10px;
 }
 
 #pulseaudio.microphone {
-  color: #cba6f7;
-  border-left: 0px;
-  border-right: 1px;
+  color: @mauve;
   border-radius: 0px 10px 10px 0px;
   margin-right: 7px;
 }
 
 #battery {
-  color: #a6e3a1;
+  color: @green;
   border-radius: 0px;
   margin-right: 0px;
-  border-left: 0px;
 }
 
 #custom-weather {
   border-radius: 10px 10px 10px 10px;
-  border-right: 0px;
   margin-right: 7px;
 }
 
 #custom-wlogout {
-  color: #d65351;
+  color: @red;
   border-radius: 10px;
   margin-right: 7px;
-  border-left: 0px;
 }
 
 #custom-laptopwlogout {
-  color: #d65351;
+  color: @red;
   border-radius: 0px 10px 10px 0px;
   margin-right: 7px;
-  border-left: 0px;
 }
 /*
 #tray > .passive {
@@ -194,18 +206,16 @@ tooltip {
 */
 
 #custom-os_button {
-  color: #d65351;
-  border-radius: 15px 0px 0px 15px;
+  color: @red;
+  border-radius: 16px 0px 0px 16px;
   margin-left: 0px;
-  border-right: 0px;
   margin-top: 0px;
   margin-bottom: 3px;
   padding-right: 10px;
 }
 #taskbar {
-  color: #d65351;
-  border-radius: 0px 15px 15px 0px;
-  border-left: 0px;
+  color: @red;
+  border-radius: 0px 16px 16px 0px;
   padding-right: 1px;
   padding-left: 0px;
   margin-right: 0px;
@@ -213,7 +223,7 @@ tooltip {
   margin-bottom: 3px;
 }
 #taskbar hover {
-  border-radius: 0px 15px 15px 0px;
+  border-radius: 0px 16px 16px 0px;
 }
 
 #mpris {

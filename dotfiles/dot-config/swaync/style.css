@@ -1,23 +1,25 @@
-@define-color cc-bg #16161d;
-@define-color noti-border-color #dcd7ba;
-@define-color noti-bg #11111b;
-@define-color noti-bg-darker #2b2b39;
-@define-color noti-bg-hover #1b1b2b;
-@define-color noti-bg-focus #1b1b1b;
-@define-color noti-close-bg #dcd7ba;
-@define-color noti-close-bg-hover #dcd7ba;
-@define-color text-color #dcd7ba;
-@define-color text-color-disabled #828282;
-@define-color bg-selected #7e9cd8;
-@define-color border-blue #030240;
-@define-color red-base #c34043;
-@define-color red-hover #e46876;
-@define-color green-base #98bb6c;
-@define-color blue-base #7e9cd8;
+/* @theme-colors-start */
+@define-color cc-bg #1a1b26;
+@define-color noti-border-color #3d59a1;
+@define-color noti-bg #16161e;
+@define-color noti-bg-darker #24283b;
+@define-color noti-bg-hover #2f3549;
+@define-color noti-bg-focus #24283b;
+@define-color noti-close-bg #f7768e;
+@define-color noti-close-bg-hover #ff007c;
+@define-color text-color #c0caf5;
+@define-color text-color-disabled #787c99;
+@define-color bg-selected #7aa2f7;
+@define-color border-blue #3d59a1;
+@define-color red-base #f7768e;
+@define-color red-hover #ff007c;
+@define-color green-base #9ece6a;
+@define-color blue-base #7aa2f7;
+/* @theme-colors-end */
 
 * {
   font-family: "JetBrainsMono NFM SemiBold", monospace;
-  border-radius: 5;
+  border-radius: 10;
 }
 
 .control-center .notification-row:focus,

@@ -27,7 +27,7 @@ size = 10
 
 [general]
 import = [
-    "~/.config/alacritty/themes/blackout.toml"
+    "~/.config/alacritty/themes/current.toml"
 ]
 #for video
 # size = 35.0

@@ -1,0 +1,13 @@
+[config]
+# Wallpaper-based color generation
+# Matugen extracts Material You colors from the wallpaper image
+# and writes them to qs_colors.json via the template below.
+# theme_apply.sh then reads qs_colors.json and generates all app configs.
+
+[config.custom_colors]
+# Override specific Material You color roles if desired
+# primary = "#65b2ff"
+
+[templates.quickshell]
+input_path = "~/.config/hypr/scripts/quickshell/colors.json.template"
+output_path = "~/.config/hypr/scripts/quickshell/qs_colors.json"

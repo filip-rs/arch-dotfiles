@@ -1,50 +1,59 @@
+/* @theme-colors-start */
+@define-color bg_base #1a1b26;
+@define-color bg_crust #13131a;
+@define-color text_primary #c0caf5;
+@define-color text_bright #b4f9f8;
+@define-color selection #283457;
+@define-color border_color #13131a;
+/* @theme-colors-end */
+
 window {
   margin: 0px;
   border: 5px solid;
-  border-color: #11111b;
-  border-radius: 15px;
-  background-color: #011423;
+  border-color: @border_color;
+  border-radius: 16px;
+  background-color: @bg_base;
 }
 
 #input {
   padding: 4px;
   margin: 4px;
   padding-left: 20px;
-  border: 0px solid #0f3f63;
-  color: #cdd6f4;
+  border: 0px solid @selection;
+  color: @text_primary;
   font-weight: bold;
-  background-color: #011423;
+  background-color: @bg_base;
   outline: none;
-  border-radius: 15px;
+  border-radius: 16px;
   margin: 10px;
   margin-bottom: 2px;
 }
 
 #input:focus {
-  border: 0px solid #0f3f63;
+  border: 0px solid @selection;
   margin-bottom: 0px;
 }
 
 #inner-box {
   margin: 4px;
-  border: 10px solid #011423;
-  color: #cdd6f4;
+  border: 10px solid @bg_base;
+  color: @text_primary;
   font-weight: bold;
-  background-color: #011423;
-  border-radius: 15px;
+  background-color: @bg_base;
+  border-radius: 16px;
 }
 
 #outer-box {
   margin: 0px;
   border: none;
-  border-radius: 15px;
-  background-color: #011423;
+  border-radius: 16px;
+  background-color: @bg_base;
 }
 
 #scroll {
   margin-top: 5px;
   border: none;
-  border-radius: 15px;
+  border-radius: 16px;
   margin-bottom: 5px;
   /* background: rgb(255,255,255); */
 }
@@ -53,8 +62,8 @@ window {
   padding-left: 3px;
 }
 #img:selected {
-  background-color: #0f3f63;
-  border-radius: 15px;
+  background-color: @selection;
+  border-radius: 16px;
 }
 
 #text {
@@ -62,22 +71,22 @@ window {
 }
 
 #text:selected {
-  color: #cbe0f0;
+  color: @text_primary;
   border: none;
-  border-radius: 15px;
-  background-color: #0f3f63;
+  border-radius: 16px;
+  background-color: @selection;
 }
 
 #entry {
   margin: 0px 0px;
   border: none;
-  border-radius: 15px;
+  border-radius: 16px;
   background-color: transparent;
 }
 
 #entry:selected {
   margin: 0px 0px;
   border: none;
-  border-radius: 15px;
-  background-color: #0f3f63;
+  border-radius: 16px;
+  background-color: @selection;
 }
