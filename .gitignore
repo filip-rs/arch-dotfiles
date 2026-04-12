@@ -1,3 +1,6 @@
 latest.log
 dotfiles/dot-config/nvim/lazy-lock.json
 dotfiles/dot-config/hypr/local.conf
+dotfiles/dot-config/hypr/scripts/quickshell/guide/previews/
+
+.env
