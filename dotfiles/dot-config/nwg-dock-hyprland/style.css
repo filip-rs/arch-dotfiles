@@ -1,11 +1,11 @@
 /* @theme-colors-start */
-@define-color bg_base #0b0f12;
-@define-color border_subtle rgba(65, 71, 77, 0.6);
-@define-color text_primary #e0e3e8;
-@define-color text_dim #c1c7ce;
-@define-color text_muted #8b9198;
-@define-color hover_bg rgba(28, 32, 36, 0.8);
-@define-color active_border rgba(65, 71, 77, 0.5);
+@define-color bg_base #070f15;
+@define-color border_subtle rgba(63, 72, 79, 0.6);
+@define-color text_primary #dbe3ed;
+@define-color text_dim #bfc7d1;
+@define-color text_muted #89929a;
+@define-color hover_bg rgba(24, 33, 39, 0.8);
+@define-color active_border rgba(63, 72, 79, 0.5);
 /* @theme-colors-end */
 
 window {

@@ -80,7 +80,10 @@ if [ "$target" = "_theme" ]; then
 
     if [ "$theme_choice" = "Wallpaper (auto)" ]; then
         # Re-run matugen on current wallpaper, then apply
-        [ -f /tmp/lock_bg.png ] && matugen image /tmp/lock_bg.png --source-color-index 0
+        if [ -f /tmp/lock_bg.png ]; then
+            matugen image /tmp/lock_bg.png --type scheme-vibrant --prefer saturation 2>/dev/null || \
+            matugen image /tmp/lock_bg.png --type scheme-vibrant --source-color-index 0 2>/dev/null || true
+        fi
         exec bash "$THEME_APPLY" wallpaper
     else
         # Find matching theme slug

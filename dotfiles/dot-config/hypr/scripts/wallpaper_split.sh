@@ -4,10 +4,6 @@
 
 set -euo pipefail
 
-LOG="/tmp/wallpaper_split.log"
-exec 3>>"$LOG"
-echo "[$(date +%H:%M:%S.%3N)] invoked with: $*" >&3
-
 SPLIT_DIR="$HOME/.config/hypr/scripts/WallpaperSplitter"
 SPLITTER="$SPLIT_DIR/split_wallpaper.py"
 CACHE_DIR="$HOME/.cache/wallpaper_splits"
@@ -62,8 +58,8 @@ awww img --outputs DP-3 --resize crop "${TRANSITION_ARGS[@]}" "$SPLIT_DIR/right.
 cp "$cache_path/center.png" /tmp/lock_bg.png
 
 # ── Theme: always regenerate from the new wallpaper ──
-matugen image "$src" --source-color-index 0 >/dev/null 2>&1 || true
+matugen image "$src" --type scheme-vibrant --prefer saturation >/dev/null 2>&1 || \
+matugen image "$src" --type scheme-vibrant --source-color-index 0 >/dev/null 2>&1 || true
 bash "$THEME_APPLY" wallpaper 2>/dev/null || true
 
-echo "[$(date +%H:%M:%S.%3N)] done: $basename_raw" >&3
 echo "Done: $basename_raw applied"

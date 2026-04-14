@@ -1,20 +1,20 @@
 /* @theme-colors-start */
-@define-color cc-bg #0b0f12;
-@define-color noti-border-color #41474d;
-@define-color noti-bg #181c20;
-@define-color noti-bg-darker #1c2024;
-@define-color noti-bg-hover #262a2e;
-@define-color noti-bg-focus #1c2024;
+@define-color cc-bg #070f15;
+@define-color noti-border-color #3f484f;
+@define-color noti-bg #141d23;
+@define-color noti-bg-darker #182127;
+@define-color noti-bg-hover #232b32;
+@define-color noti-bg-focus #182127;
 @define-color noti-close-bg #ffb4ab;
-@define-color noti-close-bg-hover #4c4162;
-@define-color text-color #e0e3e8;
-@define-color text-color-disabled #8b9198;
-@define-color bg-selected #95cdf7;
+@define-color noti-close-bg-hover #3a4472;
+@define-color text-color #dbe3ed;
+@define-color text-color-disabled #89929a;
+@define-color bg-selected #8bceff;
 @define-color border-blue #004b6f;
 @define-color red-base #ffb4ab;
-@define-color red-hover #4c4162;
-@define-color green-base #b7c9d9;
-@define-color blue-base #95cdf7;
+@define-color red-hover #3a4472;
+@define-color green-base #b4c7e9;
+@define-color blue-base #8bceff;
 /* @theme-colors-end */
 
 * {
