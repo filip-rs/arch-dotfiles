@@ -1,3 +1,4 @@
 *.css linguist-language=HolyC
 *.py linguist-language=HolyC
 dotfiles/dot-config/nvim/** linguist-vendored
+dotfiles/dot-config/hypr/scripts/quickshell/** linguist-vendored
