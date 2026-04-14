@@ -1,20 +1,20 @@
 /* @theme-colors-start */
-@define-color cc-bg #010d1a;
-@define-color noti-border-color #1a3a5c;
-@define-color noti-bg #01111f;
-@define-color noti-bg-darker #091e2e;
-@define-color noti-bg-hover #122d42;
-@define-color noti-bg-focus #091e2e;
-@define-color noti-close-bg #ff5458;
-@define-color noti-close-bg-hover #ff8080;
-@define-color text-color #CBE0F0;
-@define-color text-color-disabled #7d99ab;
-@define-color bg-selected #65b2ff;
-@define-color border-blue #0a64ac;
-@define-color red-base #ff5458;
-@define-color red-hover #ff8080;
-@define-color green-base #62d196;
-@define-color blue-base #65b2ff;
+@define-color cc-bg #0b0f12;
+@define-color noti-border-color #41474d;
+@define-color noti-bg #181c20;
+@define-color noti-bg-darker #1c2024;
+@define-color noti-bg-hover #262a2e;
+@define-color noti-bg-focus #1c2024;
+@define-color noti-close-bg #ffb4ab;
+@define-color noti-close-bg-hover #4c4162;
+@define-color text-color #e0e3e8;
+@define-color text-color-disabled #8b9198;
+@define-color bg-selected #95cdf7;
+@define-color border-blue #004b6f;
+@define-color red-base #ffb4ab;
+@define-color red-hover #4c4162;
+@define-color green-base #b7c9d9;
+@define-color blue-base #95cdf7;
 /* @theme-colors-end */
 
 * {
@@ -54,12 +54,11 @@
 .widget-mpris > box > button,
 .widget-mpris-player,
 .widget-mpris-album-art {
-  border-radius: 0;
+  border-radius: 5;
 }
 
 .notification {
   background: @cc-bg;
-  border: 2px solid @border-blue;
   margin: 3px -2px 3px 0;
 }
 
@@ -72,7 +71,6 @@
   margin-right: 5px;
   opacity: 0;
   transition: opacity 0.2s ease-in-out;
-  border-radius: 0;
   border: none;
 }
 
@@ -181,7 +179,6 @@
 
 .widget-dnd > switch {
   background: @blue-base;
-  border-radius: 0;
 }
 
 .widget-dnd > switch:checked {
@@ -239,7 +236,7 @@
 .widget-mpris > box > button,
 .widget-mpris-player,
 .widget-mpris-album-art {
-  border-radius: 0;
+  border-radius: 7px;
   box-shadow: none;
   margin: 10px;
 }
@@ -250,7 +247,6 @@ picture.mpris-background {
 
 .notification-action > button {
   color: @text-color;
-  border-radius: 0px;
 }
 
 .notification-action > button:hover {

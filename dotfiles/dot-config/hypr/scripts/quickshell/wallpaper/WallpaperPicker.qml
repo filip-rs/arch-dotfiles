@@ -75,8 +75,7 @@ Item {
         { name: "Blue", hex: "#1E90FF", label: "" },
         { name: "Purple", hex: "#8A2BE2", label: "" },
         { name: "Pink", hex: "#FF69B4", label: "" },
-        { name: "Monochrome", hex: "#A9A9A9", label: "" },
-        { name: "Search", hex: "", label: "Search" } 
+        { name: "Monochrome", hex: "#A9A9A9", label: "" }
     ]
 
     // -------------------------------------------------------------------------
@@ -84,28 +83,16 @@ Item {
     // -------------------------------------------------------------------------
     function applyWallpaper(safeFileName, isVideo) {
         if (!safeFileName || window.isApplying) return;
-        
+
         // 1. STRICT LOCK: Instantly block all further mouse and keyboard input
-        window.isApplying = true; 
-        
+        window.isApplying = true;
+
         window.targetWallName = safeFileName
         let cleanName = window.getCleanName(safeFileName)
-        let reloadScript = Qt.resolvedUrl("matugen_reload.sh").toString()
-        
-        if (reloadScript.startsWith("file://")) {
-            reloadScript = decodeURIComponent(reloadScript.substring(7))
-        }
 
         const escapeBash = (str) => String(str).replace(/(["\\$`])/g, '\\$1');
-        
-        // 2. HARDWARE ADAPTATION: Force Vulkan rendering
-        // FIX: Hardcoded to bypass the Quickshell.env check since the backend is required.
-        const renderOverride = "env WGPU_BACKEND=vulkan ";
-        const randomTransition = window.transitions[Math.floor(Math.random() * window.transitions.length)];
-        
-        // 3. AUTO-REVIVE COMMAND: Ensure daemon is alive before sending IPC commands
-        const ensureDaemonCmd = `if ! pgrep -x "awww-daemon" > /dev/null; then awww-daemon >/dev/null 2>&1 & sleep 0.2; fi`;
-        
+        const splitScript = Quickshell.env("HOME") + "/.config/hypr/scripts/wallpaper_split.sh";
+
         if (window.currentFilter === "Search" && window.hasSearched) {
             let alreadyExists = window.isDownloaded(safeFileName);
             let destFile = window.srcDir + "/" + safeFileName;
@@ -116,31 +103,9 @@ Item {
             if (alreadyExists) {
                 const applyScript = `
                     (
-                        # Command UI to close immediately
                         echo 'close' > /tmp/qs_widget_state
-                        
-                        export DEST_FILE="${escapeBash(destFile)}"
-                        export FINAL_THUMB="${escapeBash(finalThumb)}"
-                        export RELOAD_SCRIPT="${escapeBash(reloadScript)}"
-                        
-                        cp "$DEST_FILE" /tmp/lock_bg.png || true
                         pkill mpvpaper || true
-                        
-                        ${ensureDaemonCmd}
-                        
-                        # Run matugen completely detached so it doesn't block swww execution
-                        ( matugen image "$FINAL_THUMB" || true; bash "$RELOAD_SCRIPT" || true ) &
-                        MATUGEN_PID=$!
-                        
-                        # DETERMINISTIC LOOP
-                        for i in {1..20}; do
-                            if ${renderOverride}swww img "$DEST_FILE" --transition-type ${randomTransition} --transition-pos 0.5,0.5 --transition-fps 144 --transition-duration 1 >/dev/null 2>&1; then
-                                break
-                            fi
-                            sleep 0.05
-                        done
-                        
-                        wait $MATUGEN_PID
+                        bash "${escapeBash(splitScript)}" "${escapeBash(destFile)}"
                     ) </dev/null >/dev/null 2>&1 & disown
                 `;
                 Quickshell.execDetached(["bash", "-c", applyScript]);
@@ -153,43 +118,26 @@ Item {
                     export DEST_FILE="${escapeBash(destFile)}"
                     export FINAL_THUMB="${escapeBash(finalThumb)}"
                     export TEMP_THUMB="${escapeBash(tempThumb)}"
-                    export RELOAD_SCRIPT="${escapeBash(reloadScript)}"
                     export MAP_FILE="${escapeBash(mapFile)}"
-                    
+
                     (
                         URL=$(awk -F'|' -v fname="$SAFE_NAME" '$1 == fname {print $2; exit}' "$MAP_FILE")
                         if [ -n "$URL" ]; then
                             curl -s -L -A "Mozilla/5.0" "$URL" -o "$DEST_FILE.tmp"
-                            
+
                             if file "$DEST_FILE.tmp" | grep -iq "webp"; then
                                 magick "$DEST_FILE.tmp" "$DEST_FILE"
                                 rm -f "$DEST_FILE.tmp"
                             else
                                 mv "$DEST_FILE.tmp" "$DEST_FILE"
                             fi
-                            
+
                             cp "$TEMP_THUMB" "$FINAL_THUMB"
                             magick "$DEST_FILE" -resize x420 -quality 70 "$FINAL_THUMB" || true
-                            
+
                             echo 'close' > /tmp/qs_widget_state
-                            
-                            cp "$DEST_FILE" /tmp/lock_bg.png || true
                             pkill mpvpaper || true
-                            
-                            ${ensureDaemonCmd}
-                            
-                            ( matugen image "$FINAL_THUMB" || true; bash "$RELOAD_SCRIPT" || true ) &
-                            MATUGEN_PID=$!
-                            
-                            # DETERMINISTIC LOOP
-                            for i in {1..20}; do
-                                if ${renderOverride}swww img "$DEST_FILE" --transition-type ${randomTransition} --transition-pos 0.5,0.5 --transition-fps 144 --transition-duration 1 >/dev/null 2>&1; then
-                                    break
-                                fi
-                                sleep 0.05
-                            done
-                            
-                            wait $MATUGEN_PID
+                            bash "${escapeBash(splitScript)}" "$DEST_FILE"
                         fi
                     ) </dev/null >/dev/null 2>&1 & disown
                 `;
@@ -199,51 +147,28 @@ Item {
         }
 
         const originalFile = window.srcDir + "/" + cleanName
-        const thumbFile = Quickshell.env("HOME") + "/.cache/wallpaper_picker/thumbs/" + safeFileName 
-        
-        let wallpaperCmd = ""
-        let lockBgCmd = ""
-        
-        const escOriginal = escapeBash(originalFile);
-        const escThumb = escapeBash(thumbFile);
-        const escReload = escapeBash(reloadScript);
 
         if (isVideo) {
-            wallpaperCmd = `mpvpaper -o 'loop --no-audio --hwdec=auto --profile=high-quality --video-sync=display-resample --interpolation --tscale=oversample' '*' "$WALL_FILE"`
-            lockBgCmd = `cp "$THUMB_FILE" /tmp/lock_bg.png`
+            // Videos: use mpvpaper directly (no splitting)
+            const fullScript = `
+                (
+                    echo 'close' > /tmp/qs_widget_state
+                    pkill mpvpaper || true
+                    mpvpaper -o 'loop --no-audio --hwdec=auto --profile=high-quality --video-sync=display-resample --interpolation --tscale=oversample' '*' "${escapeBash(originalFile)}"
+                ) </dev/null >/dev/null 2>&1 & disown
+            `;
+            Quickshell.execDetached(["bash", "-c", fullScript]);
         } else {
-            wallpaperCmd = `
-                ${ensureDaemonCmd}
-                for i in {1..20}; do
-                    if ${renderOverride}swww img "$WALL_FILE" --transition-type ${randomTransition} --transition-pos 0.5,0.5 --transition-fps 144 --transition-duration 1 >/dev/null 2>&1; then
-                        break
-                    fi
-                    sleep 0.05
-                done
-            `
-            lockBgCmd = `cp "$WALL_FILE" /tmp/lock_bg.png`
+            // Images: split for triple monitors and apply via hyprpaper
+            const fullScript = `
+                (
+                    echo 'close' > /tmp/qs_widget_state
+                    pkill mpvpaper || true
+                    bash "${escapeBash(splitScript)}" "${escapeBash(originalFile)}"
+                ) </dev/null >/dev/null 2>&1 & disown
+            `;
+            Quickshell.execDetached(["bash", "-c", fullScript]);
         }
-
-        const fullScript = `
-            (
-                echo 'close' > /tmp/qs_widget_state
-                
-                export WALL_FILE="${escOriginal}"
-                export THUMB_FILE="${escThumb}"
-                export RELOAD_SCRIPT="${escReload}"
-                
-                ${lockBgCmd} || true
-                pkill mpvpaper || true
-                
-                ( matugen image "$THUMB_FILE" || true; bash "$RELOAD_SCRIPT" || true ) &
-                MATUGEN_PID=$!
-                
-                ${wallpaperCmd}
-                
-                wait $MATUGEN_PID
-            ) </dev/null >/dev/null 2>&1 & disown
-        `
-        Quickshell.execDetached(["bash", "-c", fullScript])
     }    // -------------------------------------------------------------------------
     // PERSISTENT SETTINGS
     // -------------------------------------------------------------------------
@@ -498,10 +423,14 @@ Item {
     readonly property string thumbDir: homeDir + "/.cache/wallpaper_picker/thumbs"
     readonly property string searchDir: homeDir + "/.cache/wallpaper_picker/search_thumbs"
     readonly property string srcDir: {
-    	const dir = Quickshell.env("WALLPAPER_DIR")
-    	return (dir && dir !== "") 
-        ? dir 
-        : Quickshell.env("HOME") + "/Pictures/Wallpapers"
+    	let dir = Quickshell.env("WALLPAPER_DIR")
+    	const home = Quickshell.env("HOME")
+    	if (dir && dir !== "") {
+    	    if (dir.startsWith("~/")) dir = home + dir.substring(1)
+    	    else if (dir === "~") dir = home
+    	    return dir
+    	}
+    	return home + "/Pictures/Wallpapers"
     }
 
 
@@ -1466,8 +1395,9 @@ Item {
 
             Rectangle {
                 id: searchBox
+                visible: false
                 height: window.s(44)
-                width: window.currentFilter === "Search" ? window.s(360) : window.s(44) 
+                width: window.currentFilter === "Search" ? window.s(360) : window.s(44)
                 radius: window.s(10) 
                 clip: true
                 

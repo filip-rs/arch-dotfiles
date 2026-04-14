@@ -7,6 +7,8 @@ QS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BT_PID_FILE="$HOME/.cache/bt_scan_pid"
 BT_SCAN_LOG="$HOME/.cache/bt_scan.log"
 SRC_DIR="${WALLPAPER_DIR:-${srcdir:-$HOME/Pictures/Wallpapers}}"
+# Expand leading ~ (hyprland env vars don't expand tilde)
+SRC_DIR="${SRC_DIR/#\~/$HOME}"
 THUMB_DIR="$HOME/.cache/wallpaper_picker/thumbs"
 
 # User-specific cache directory matching the QML logic
@@ -38,42 +40,42 @@ fi
 # -----------------------------------------------------------------------------
 handle_wallpaper_prep() {
     mkdir -p "$THUMB_DIR"
-    (
-        for thumb in "$THUMB_DIR"/*; do
-            [ -e "$thumb" ] || continue
-            filename=$(basename "$thumb")
-            clean_name="${filename#000_}"
-            if [ ! -f "$SRC_DIR/$clean_name" ]; then rm -f "$thumb"; fi
-        done
 
-        for img in "$SRC_DIR"/*.{jpg,jpeg,png,webp,gif,mp4,mkv,mov,webm}; do
-            [ -e "$img" ] || continue
+    # Clean stale thumbnails
+    for thumb in "$THUMB_DIR"/*; do
+        [ -e "$thumb" ] || continue
+        filename=$(basename "$thumb")
+        clean_name="${filename#000_}"
+        if [ ! -f "$SRC_DIR/$clean_name" ]; then rm -f "$thumb"; fi
+    done
+
+    for img in "$SRC_DIR"/*.{jpg,jpeg,png,webp,gif,mp4,mkv,mov,webm}; do
+        [ -e "$img" ] || continue
+        filename=$(basename "$img")
+        extension="${filename##*.}"
+
+        if [[ "${extension,,}" == "webp" ]]; then
+            new_img="${img%.*}.jpg"
+            magick "$img" "$new_img"
+            rm -f "$img"
+            img="$new_img"
             filename=$(basename "$img")
-            extension="${filename##*.}"
+            extension="jpg"
+        fi
 
-            if [[ "${extension,,}" == "webp" ]]; then
-                new_img="${img%.*}.jpg"
-                magick "$img" "$new_img"
-                rm -f "$img"
-                img="$new_img"
-                filename=$(basename "$img")
-                extension="jpg"
+        if [[ "${extension,,}" =~ ^(mp4|mkv|mov|webm)$ ]]; then
+            thumb="$THUMB_DIR/000_$filename"
+            [ -f "$THUMB_DIR/$filename" ] && rm -f "$THUMB_DIR/$filename"
+            if [ ! -f "$thumb" ]; then
+                 ffmpeg -y -ss 00:00:05 -i "$img" -vframes 1 -f image2 -q:v 2 "$thumb" > /dev/null 2>&1
             fi
-
-            if [[ "${extension,,}" =~ ^(mp4|mkv|mov|webm)$ ]]; then
-                thumb="$THUMB_DIR/000_$filename"
-                [ -f "$THUMB_DIR/$filename" ] && rm -f "$THUMB_DIR/$filename"
-                if [ ! -f "$thumb" ]; then
-                     ffmpeg -y -ss 00:00:05 -i "$img" -vframes 1 -f image2 -q:v 2 "$thumb" > /dev/null 2>&1
-                fi
-            else
-                thumb="$THUMB_DIR/$filename"
-                if [ ! -f "$thumb" ]; then
-                    magick "$img" -resize x420 -quality 70 "$thumb"
-                fi
+        else
+            thumb="$THUMB_DIR/$filename"
+            if [ ! -f "$thumb" ]; then
+                magick "$img" -resize x420 -quality 70 "$thumb"
             fi
-        done
-    ) &
+        fi
+    done
 
     TARGET_THUMB=""
     CURRENT_SRC=""
@@ -83,9 +85,30 @@ handle_wallpaper_prep() {
         CURRENT_SRC=$(basename "$CURRENT_SRC")
     fi
 
-    if [ -z "$CURRENT_SRC" ] && command -v swww >/dev/null; then
-        CURRENT_SRC=$(swww query 2>/dev/null | grep -o "$SRC_DIR/[^ ]*" | head -n1)
-        CURRENT_SRC=$(basename "$CURRENT_SRC")
+    if [ -z "$CURRENT_SRC" ]; then
+        # Derive current wallpaper name from the cached split used as center.png
+        SPLIT_DIR="$HOME/.config/hypr/scripts/WallpaperSplitter"
+        CENTER="$SPLIT_DIR/center.png"
+        if [ -f "$CENTER" ]; then
+            CENTER_SUM=$(md5sum "$CENTER" 2>/dev/null | awk '{print $1}')
+            for cache in "$HOME/.cache/wallpaper_splits"/*/center.png; do
+                [ -e "$cache" ] || continue
+                if [ "$(md5sum "$cache" | awk '{print $1}')" = "$CENTER_SUM" ]; then
+                    key=$(basename "$(dirname "$cache")")
+                    for candidate in "$SRC_DIR"/*; do
+                        [ -e "$candidate" ] || continue
+                        cand_base=$(basename "$candidate")
+                        cand_key="${cand_base%.*}"
+                        cand_key=$(echo "$cand_key" | tr ' ' '_' | tr -cd 'a-zA-Z0-9_-')
+                        if [ "$cand_key" = "$key" ]; then
+                            CURRENT_SRC="$cand_base"
+                            break
+                        fi
+                    done
+                    break
+                fi
+            done
+        fi
     fi
 
     if [ -n "$CURRENT_SRC" ]; then
