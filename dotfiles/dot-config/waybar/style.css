@@ -1,31 +1,31 @@
 /* @theme-colors-start */
-@define-color bg_base #070f15;
-@define-color bg_mantle #141d23;
-@define-color bg_crust #0c141b;
-@define-color bg_surface0 #182127;
-@define-color bg_surface1 #232b32;
-@define-color bg_surface2 #2d363d;
-@define-color text_primary #dbe3ed;
-@define-color text_secondary #bfc7d1;
-@define-color text_muted #89929a;
-@define-color overlay0 #dbe3ed;
-@define-color overlay1 #dbe3ed;
-@define-color overlay2 #3f484f;
-@define-color accent #8bceff;
-@define-color accent_dim #004b6f;
-@define-color accent_bright #006492;
-@define-color blue #8bceff;
-@define-color sapphire #004b6f;
-@define-color green #b4c7e9;
+@define-color bg_base #180b08;
+@define-color bg_mantle #271814;
+@define-color bg_crust #1e100d;
+@define-color bg_surface0 #2c1c18;
+@define-color bg_surface1 #372622;
+@define-color bg_surface2 #43302d;
+@define-color text_primary #fadcd6;
+@define-color text_secondary #e4beb6;
+@define-color text_muted #ab8982;
+@define-color overlay0 #fadcd6;
+@define-color overlay1 #fadcd6;
+@define-color overlay2 #5b403b;
+@define-color accent #ffb4a5;
+@define-color accent_dim #ff5636;
+@define-color accent_bright #b82003;
+@define-color blue #ffb4a5;
+@define-color sapphire #ff5636;
+@define-color green #ffb4a5;
 @define-color red #ffb4ab;
-@define-color yellow #354763;
-@define-color peach #bac4fa;
-@define-color mauve #8bceff;
-@define-color pink #3a4472;
+@define-color yellow #802919;
+@define-color peach #f6bd4e;
+@define-color mauve #ffb4a5;
+@define-color pink #ba8819;
 @define-color maroon #93000a;
-@define-color teal #b4c7e9;
-@define-color selection #232b32;
-@define-color border_subtle rgba(63, 72, 79, 0.6);
+@define-color teal #ffb4a5;
+@define-color selection #372622;
+@define-color border_subtle rgba(91, 64, 59, 0.6);
 /* @theme-colors-end */
 
 * {
