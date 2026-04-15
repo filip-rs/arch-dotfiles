@@ -49,21 +49,21 @@ background-opacity = 1
 background = 180b08
 foreground = fadcd6
 palette = 0=1e100d
-palette = 1=ffb4ab
-palette = 2=ffb4a5
-palette = 3=f6bd4e
-palette = 4=ffb4a5
-palette = 5=ba8819
+palette = 1=93000a
+palette = 2=802919
+palette = 3=ba8819
+palette = 4=ff5636
+palette = 5=5e4200
 palette = 6=802919
-palette = 7=fadcd6
+palette = 7=e4beb6
 palette = 8=ab8982
-palette = 9=93000a
-palette = 10=802919
-palette = 11=ba8819
-palette = 12=b82003
-palette = 13=f6bd4e
-palette = 14=ffb4a5
-palette = 15=3e2c28
+palette = 9=ffb4ab
+palette = 10=ffb4a5
+palette = 11=f6bd4e
+palette = 12=ffb4a5
+palette = 13=b82003
+palette = 14=ffdea7
+palette = 15=fadcd6
 # @theme-colors-end
 
 confirm-close-surface = false

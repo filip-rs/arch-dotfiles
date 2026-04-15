@@ -120,8 +120,12 @@ done
 cp "$cache_path/center.png" /tmp/lock_bg.png
 
 # ── Theme: always regenerate from the new wallpaper ──
-matugen image "$src" --type scheme-content --prefer saturation >/dev/null 2>&1 || \
-    echo "warning: matugen failed on $src" >&2
+if [ ! -f "$HOME/.config/matugen/config.toml" ]; then
+    echo "warning: ~/.config/matugen/config.toml missing — theme will not update. Run: cd ~/Services/arch-dotfiles/dotfiles && stow . --dotfiles -t \$HOME" >&2
+else
+    matugen image "$src" --type scheme-content --prefer saturation >/dev/null 2>&1 || \
+        echo "warning: matugen failed on $src" >&2
+fi
 bash "$THEME_APPLY" wallpaper 2>/dev/null || true
 
 echo "Done: $basename_raw applied ($mode_tag)"

@@ -81,8 +81,12 @@ if [ "$target" = "_theme" ]; then
     if [ "$theme_choice" = "Wallpaper (auto)" ]; then
         # Re-run matugen on current wallpaper, then apply
         if [ -f /tmp/lock_bg.png ]; then
-            matugen image /tmp/lock_bg.png --type scheme-content --prefer saturation || \
-                echo "warning: matugen failed" >&2
+            if [ ! -f "$HOME/.config/matugen/config.toml" ]; then
+                notify-send -u critical "Theme" "~/.config/matugen is not stowed — colors can't update."
+            else
+                matugen image /tmp/lock_bg.png --type scheme-content --prefer saturation || \
+                    notify-send -u critical "Theme" "matugen failed"
+            fi
         fi
         exec bash "$THEME_APPLY" wallpaper
     else
