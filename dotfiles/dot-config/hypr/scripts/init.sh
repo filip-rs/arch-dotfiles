@@ -31,6 +31,8 @@ if [ -f "$FLAG" ]; then
 
     if [ "$current_theme" = "wallpaper" ] && [ -f "/tmp/lock_bg.png" ]; then
         matugen image "/tmp/lock_bg.png" --source-color-index 0
+    elif [ "$current_theme" = "wallpaper-light" ] && [ -f "/tmp/lock_bg.png" ]; then
+        matugen image "/tmp/lock_bg.png" --source-color-index 0 -m light --contrast -0.5
     fi
     apply_theme
     exit 0

@@ -120,12 +120,23 @@ done
 cp "$cache_path/center.png" /tmp/lock_bg.png
 
 # ── Theme: always regenerate from the new wallpaper ──
+STATE_FILE="$HOME/.cache/current_theme"
+current_theme=""
+[ -f "$STATE_FILE" ] && current_theme=$(cat "$STATE_FILE")
+
+MATUGEN_MODE_FLAG=()
+APPLY_MODE="wallpaper"
+if [ "$current_theme" = "wallpaper-light" ]; then
+    MATUGEN_MODE_FLAG=(-m light --contrast -0.5)
+    APPLY_MODE="wallpaper-light"
+fi
+
 if [ ! -f "$HOME/.config/matugen/config.toml" ]; then
     echo "warning: ~/.config/matugen/config.toml missing — theme will not update. Run: cd ~/Services/arch-dotfiles/dotfiles && stow . --dotfiles -t \$HOME" >&2
 else
-    matugen image "$src" --type scheme-content --prefer saturation >/dev/null 2>&1 || \
+    matugen image "$src" --type scheme-content --prefer saturation "${MATUGEN_MODE_FLAG[@]}" >/dev/null 2>&1 || \
         echo "warning: matugen failed on $src" >&2
 fi
-bash "$THEME_APPLY" wallpaper 2>/dev/null || true
+bash "$THEME_APPLY" "$APPLY_MODE" 2>/dev/null || true
 
 echo "Done: $basename_raw applied ($mode_tag)"

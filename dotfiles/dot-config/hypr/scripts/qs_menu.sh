@@ -58,7 +58,7 @@ done
 # Theme submenu
 if [ "$target" = "_theme" ]; then
     # Build theme list: wallpaper + all JSON files in themes dir
-    theme_entries=("Wallpaper (auto)")
+    theme_entries=("Wallpaper (auto)" "Wallpaper (light)")
     for f in "$THEME_DIR"/*.json; do
         [ -f "$f" ] || continue
         name=$(jq -r '._meta.name // empty' "$f" 2>/dev/null)
@@ -78,17 +78,25 @@ if [ "$target" = "_theme" ]; then
 
     [ -z "$theme_choice" ] && exit 0
 
-    if [ "$theme_choice" = "Wallpaper (auto)" ]; then
+    if [ "$theme_choice" = "Wallpaper (auto)" ] || [ "$theme_choice" = "Wallpaper (light)" ]; then
         # Re-run matugen on current wallpaper, then apply
+        matugen_mode="dark"
+        matugen_extra=""
+        apply_mode="wallpaper"
+        if [ "$theme_choice" = "Wallpaper (light)" ]; then
+            matugen_mode="light"
+            matugen_extra="--contrast -0.5"
+            apply_mode="wallpaper-light"
+        fi
         if [ -f /tmp/lock_bg.png ]; then
             if [ ! -f "$HOME/.config/matugen/config.toml" ]; then
                 notify-send -u critical "Theme" "~/.config/matugen is not stowed — colors can't update."
             else
-                matugen image /tmp/lock_bg.png --type scheme-content --prefer saturation || \
+                matugen image /tmp/lock_bg.png --type scheme-content --prefer saturation -m "$matugen_mode" $matugen_extra || \
                     notify-send -u critical "Theme" "matugen failed"
             fi
         fi
-        exec bash "$THEME_APPLY" wallpaper
+        exec bash "$THEME_APPLY" "$apply_mode"
     else
         # Find matching theme slug
         for f in "$THEME_DIR"/*.json; do

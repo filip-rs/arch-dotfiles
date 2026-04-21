@@ -28,7 +28,7 @@ fi
 # ═══════════════════════════════════════════════════════════════════
 # 1. Determine theme source
 # ═══════════════════════════════════════════════════════════════════
-if [ "$mode" = "wallpaper" ]; then
+if [ "$mode" = "wallpaper" ] || [ "$mode" = "wallpaper-light" ]; then
     # Flatten matugen v4.0 nested JSON if needed
     python3 - "$QS_JSON" << 'PYEOF'
 import json, sys
@@ -43,7 +43,7 @@ try:
 except Exception:
     pass
 PYEOF
-    echo "wallpaper" > "$STATE_FILE"
+    echo "$mode" > "$STATE_FILE"
 elif [ -f "$THEME_DIR/${mode}.json" ]; then
     mkdir -p "$(dirname "$QS_JSON")"
     cp "$THEME_DIR/${mode}.json" "$QS_JSON"
