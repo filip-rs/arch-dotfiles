@@ -46,24 +46,24 @@ background-opacity = 1
 
 # Theme colors from Alacritty coolnight theme
 # @theme-colors-start
-background = 120d09
-foreground = ece0d9
-palette = 0=18120e
-palette = 1=93000a
-palette = 2=5e442d
-palette = 3=a0a75b
-palette = 4=d49459
-palette = 5=454b06
-palette = 6=5b412b
-palette = 7=d6c3b5
-palette = 8=9e8e81
-palette = 9=ffb4ab
-palette = 10=e5c0a1
-palette = 11=c5cc7c
-palette = 12=feb87a
-palette = 13=86521d
-palette = 14=e1e995
-palette = 15=ece0d9
+background = 1a1b26
+foreground = c0caf5
+palette = 0=15161e
+palette = 1=f7768e
+palette = 2=9ece6a
+palette = 3=e0af68
+palette = 4=7aa2f7
+palette = 5=bb9af7
+palette = 6=7dcfff
+palette = 7=a9b1d6
+palette = 8=414868
+palette = 9=f7768e
+palette = 10=9ece6a
+palette = 11=e0af68
+palette = 12=7aa2f7
+palette = 13=bb9af7
+palette = 14=7dcfff
+palette = 15=c0caf5
 # @theme-colors-end
 
 confirm-close-surface = false

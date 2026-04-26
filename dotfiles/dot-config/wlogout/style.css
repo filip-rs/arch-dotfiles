@@ -1,8 +1,8 @@
 /* @theme-colors-start */
-@define-color bg_base #120d09;
-@define-color selection #2f2924;
-@define-color text_primary #ece0d9;
-@define-color border_color #51443a;
+@define-color bg_base #1a1b26;
+@define-color selection #283457;
+@define-color text_primary #c0caf5;
+@define-color border_color #3d59a1;
 /* @theme-colors-end */
 
 * {
