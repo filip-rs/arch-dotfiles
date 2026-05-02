@@ -799,7 +799,7 @@ Item {
     FolderListModel {
         id: localFolderModel
         folder: window.thumbDir
-        nameFilters: ["*.jpg", "*.jpeg", "*.png", "*.webp", "*.gif", "*.mp4", "*.mkv", "*.mov", "*.webm"]
+        nameFilters: ["*.jpg", "*.jpeg", "*.png", "*.webp", "*.gif", "*.mp4", "*.MP4", "*.mkv", "*.mov", "*.MOV", "*.webm"]
         showDirs: false
         sortField: FolderListModel.Name 
         
