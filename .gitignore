@@ -12,7 +12,6 @@ dotfiles/dot-config/hypr/colors.conf
 dotfiles/dot-config/hypr/hyprlock-colors.conf
 dotfiles/dot-config/alacritty/themes/current.toml
 dotfiles/dot-config/waybar/colors.css
-dotfiles/dot-config/wofi/colors.css
 dotfiles/dot-config/swaync/colors.css
 dotfiles/dot-config/wlogout/colors.css
 dotfiles/dot-config/nwg-dock-hyprland/colors.css

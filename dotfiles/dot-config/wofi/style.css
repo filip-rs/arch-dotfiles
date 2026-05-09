@@ -1,4 +1,11 @@
-@import url("colors.css");
+/* @theme-colors-start */
+@define-color bg_base #0c0e11;
+@define-color bg_crust #111416;
+@define-color text_primary #e1e2e6;
+@define-color text_bright #266489;
+@define-color selection #282a2d;
+@define-color border_color #111416;
+/* @theme-colors-end */
 
 window {
   margin: 0px;

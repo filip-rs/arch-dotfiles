@@ -107,6 +107,12 @@ hex2rgb() {
 
 # ═══════════════════════════════════════════════════════════════════
 # 3. GTK CSS color sidecars (each app's style.css imports colors.css)
+#
+# Apps that use gtk_css_provider_load_from_path resolve @import URLs
+# relative to the stylesheet's directory, so we hand them a sidecar
+# colors.css next to style.css. Wofi uses load_from_data, which has no
+# base path — for wofi we still inline colors via marker replacement
+# (see section 3b below).
 # ═══════════════════════════════════════════════════════════════════
 
 cat > "$HOME/.config/waybar/colors.css" << EOF
@@ -139,14 +145,20 @@ cat > "$HOME/.config/waybar/colors.css" << EOF
 @define-color border_subtle rgba($(hex2rgb "$BORDER"), 0.6);
 EOF
 
-cat > "$HOME/.config/wofi/colors.css" << EOF
-@define-color bg_base ${BASE};
+# 3b. Wofi: marker-based replacement (load_from_data quirk, see above)
+WOFI_STYLE="$HOME/.config/wofi/style.css"
+if [ -f "$WOFI_STYLE" ]; then
+    awk -v c="@define-color bg_base ${BASE};
 @define-color bg_crust ${CRUST};
 @define-color text_primary ${TEXT};
 @define-color text_bright ${ACCENT_BRIGHT};
 @define-color selection ${SELECTION};
-@define-color border_color ${CRUST};
-EOF
+@define-color border_color ${CRUST};" '
+    /theme-colors-start/ { print; print c; skip = 1; next }
+    /theme-colors-end/   { skip = 0 }
+    !skip { print }
+    ' "$WOFI_STYLE" > "${WOFI_STYLE}.tmp" && mv "${WOFI_STYLE}.tmp" "$WOFI_STYLE"
+fi
 
 cat > "$HOME/.config/swaync/colors.css" << EOF
 @define-color cc-bg ${BASE};
