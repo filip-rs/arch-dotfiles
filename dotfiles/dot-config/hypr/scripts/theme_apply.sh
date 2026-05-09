@@ -106,35 +106,11 @@ hex2rgb() {
 }
 
 # ═══════════════════════════════════════════════════════════════════
-# 3. Helper: replace content between theme markers in a file
-# ═══════════════════════════════════════════════════════════════════
-replace_theme_block() {
-    local file="$1"
-    local content="$2"
-    [ -f "$file" ] || return 0
-
-    awk -v content="$content" '
-    /theme-colors-start/ {
-        print
-        printf "%s\n", content
-        skip = 1
-        next
-    }
-    /theme-colors-end/ {
-        skip = 0
-        print
-        next
-    }
-    !skip { print }
-    ' "$file" > "${file}.tmp" && cp "${file}.tmp" "$file" && rm -f "${file}.tmp"
-}
-
-# ═══════════════════════════════════════════════════════════════════
-# 4. Generate GTK CSS color blocks
+# 3. GTK CSS color sidecars (each app's style.css imports colors.css)
 # ═══════════════════════════════════════════════════════════════════
 
-# --- Waybar ---
-WAYBAR_COLORS="@define-color bg_base ${BASE};
+cat > "$HOME/.config/waybar/colors.css" << EOF
+@define-color bg_base ${BASE};
 @define-color bg_mantle ${MANTLE};
 @define-color bg_crust ${CRUST};
 @define-color bg_surface0 ${SURFACE0};
@@ -160,22 +136,20 @@ WAYBAR_COLORS="@define-color bg_base ${BASE};
 @define-color maroon ${MAROON};
 @define-color teal ${TEAL};
 @define-color selection ${SELECTION};
-@define-color border_subtle rgba($(hex2rgb "$BORDER"), 0.6);"
+@define-color border_subtle rgba($(hex2rgb "$BORDER"), 0.6);
+EOF
 
-replace_theme_block "$HOME/.config/waybar/style.css" "$WAYBAR_COLORS"
-
-# --- Wofi ---
-WOFI_COLORS="@define-color bg_base ${BASE};
+cat > "$HOME/.config/wofi/colors.css" << EOF
+@define-color bg_base ${BASE};
 @define-color bg_crust ${CRUST};
 @define-color text_primary ${TEXT};
 @define-color text_bright ${ACCENT_BRIGHT};
 @define-color selection ${SELECTION};
-@define-color border_color ${CRUST};"
+@define-color border_color ${CRUST};
+EOF
 
-replace_theme_block "$HOME/.config/wofi/style.css" "$WOFI_COLORS"
-
-# --- SwayNC ---
-SWAYNC_COLORS="@define-color cc-bg ${BASE};
+cat > "$HOME/.config/swaync/colors.css" << EOF
+@define-color cc-bg ${BASE};
 @define-color noti-border-color ${BORDER};
 @define-color noti-bg ${MANTLE};
 @define-color noti-bg-darker ${SURFACE0};
@@ -190,28 +164,25 @@ SWAYNC_COLORS="@define-color cc-bg ${BASE};
 @define-color red-base ${RED};
 @define-color red-hover ${PINK};
 @define-color green-base ${GREEN};
-@define-color blue-base ${ACCENT};"
+@define-color blue-base ${ACCENT};
+EOF
 
-replace_theme_block "$HOME/.config/swaync/style.css" "$SWAYNC_COLORS"
-
-# --- Wlogout ---
-WLOGOUT_COLORS="@define-color bg_base ${BASE};
+cat > "$HOME/.config/wlogout/colors.css" << EOF
+@define-color bg_base ${BASE};
 @define-color selection ${SELECTION};
 @define-color text_primary ${TEXT};
-@define-color border_color ${BORDER};"
+@define-color border_color ${BORDER};
+EOF
 
-replace_theme_block "$HOME/.config/wlogout/style.css" "$WLOGOUT_COLORS"
-
-# --- Nwg-dock ---
-NWG_COLORS="@define-color bg_base ${BASE};
+cat > "$HOME/.config/nwg-dock-hyprland/colors.css" << EOF
+@define-color bg_base ${BASE};
 @define-color border_subtle rgba($(hex2rgb "$BORDER"), 0.6);
 @define-color text_primary ${TEXT};
 @define-color text_dim ${SUBTEXT0};
 @define-color text_muted ${SUBTEXT1};
 @define-color hover_bg rgba($(hex2rgb "$SURFACE0"), 0.8);
-@define-color active_border rgba($(hex2rgb "$BORDER"), 0.5);"
-
-replace_theme_block "$HOME/.config/nwg-dock-hyprland/style.css" "$NWG_COLORS"
+@define-color active_border rgba($(hex2rgb "$BORDER"), 0.5);
+EOF
 
 # ═══════════════════════════════════════════════════════════════════
 # 5. Hyprland colors.conf (sourced by hyprland.conf)
@@ -285,11 +256,11 @@ white = '${TBW}'
 EOF
 
 # ═══════════════════════════════════════════════════════════════════
-# 8. Ghostty colors (marker-based replacement)
+# 8. Ghostty colors (sidecar included from main config via config-file)
 # ═══════════════════════════════════════════════════════════════════
-GHOSTTY_CFG="$HOME/.config/ghostty/config"
-if [ -f "$GHOSTTY_CFG" ]; then
-    GHOSTTY_COLORS="background = $(s "$BASE")
+mkdir -p "$HOME/.config/ghostty"
+cat > "$HOME/.config/ghostty/colors" << EOF
+background = $(s "$BASE")
 foreground = $(s "$TEXT")
 palette = 0=$(s "$TB")
 palette = 1=$(s "$TR")
@@ -306,10 +277,8 @@ palette = 11=$(s "$TBY")
 palette = 12=$(s "$TBBL")
 palette = 13=$(s "$TBM")
 palette = 14=$(s "$TBC")
-palette = 15=$(s "$TBW")"
-
-    replace_theme_block "$GHOSTTY_CFG" "$GHOSTTY_COLORS"
-fi
+palette = 15=$(s "$TBW")
+EOF
 
 # ═══════════════════════════════════════════════════════════════════
 # 9. Neovim colors (lua table)

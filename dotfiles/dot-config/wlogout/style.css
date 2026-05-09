@@ -1,9 +1,4 @@
-/* @theme-colors-start */
-@define-color bg_base #1a1b26;
-@define-color selection #283457;
-@define-color text_primary #c0caf5;
-@define-color border_color #3d59a1;
-/* @theme-colors-end */
+@import url("colors.css");
 
 * {
   background-image: none;
