@@ -11,3 +11,7 @@
 [templates.quickshell]
 input_path = "~/.config/hypr/scripts/quickshell/colors.json.template"
 output_path = "~/.config/hypr/scripts/quickshell/qs_colors.json"
+
+[templates.millennium]
+input_path = "~/.steam/steam/millennium/themes/Material-Theme/matugentemplate.css"
+output_path = "~/.steam/steam/steamui/skins/Material-Theme/css/main/colors/matugen.css"
