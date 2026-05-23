@@ -1,11 +1,20 @@
 #!/usr/bin/env bash
 # 10-band EQ using PipeWire filter-chain (replaces easyeffects)
 
-STATE_FILE="/tmp/eq_state.json"
+STATE_DIR="$HOME/.local/state"
+STATE_FILE="$STATE_DIR/eq_state.json"
 CONFIG_DIR="$HOME/.config/pipewire/filter-chain.conf.d"
 CONFIG_FILE="$CONFIG_DIR/eq-live.conf"
 PID_FILE="/tmp/pw_eq_pid"
 EQ_SINK="effect_input.live_eq"
+# Per-machine hardware output target for the EQ playback. Set via `equalizer.sh save_target`.
+TARGET_FILE="$STATE_DIR/live-eq-target"
+
+mkdir -p "$STATE_DIR"
+# Migrate legacy /tmp state file from older versions of this script.
+if [ ! -f "$STATE_FILE" ] && [ -f /tmp/eq_state.json ]; then
+    mv /tmp/eq_state.json "$STATE_FILE"
+fi
 
 # Standard ISO 10-band frequencies
 FREQS=(32 63 125 250 500 1000 2000 4000 8000 16000)
@@ -29,6 +38,13 @@ read_gains() {
 
 generate_config() {
     read_gains
+
+    local target_line=""
+    if [ -r "$TARGET_FILE" ]; then
+        local hw_sink
+        hw_sink=$(tr -d '[:space:]' < "$TARGET_FILE")
+        [ -n "$hw_sink" ] && target_line=$'\n                target.object = "'"$hw_sink"'"'
+    fi
 
     local nodes="" links=""
     for i in $(seq 0 9); do
@@ -66,7 +82,7 @@ context.modules = [
             }
             playback.props = {
                 node.name   = "effect_output.live_eq"
-                node.passive = true
+                node.passive = true${target_line}
             }
         }
     }
@@ -134,6 +150,31 @@ arg2=$3
 
 case $cmd in
     "get") cat "$STATE_FILE" ;;
+    "save_target")
+        # Persist a per-machine hardware sink that the EQ playback should feed.
+        # Usage: equalizer.sh save_target [sink_name]
+        # With no arg, auto-detects whichever sink effect_output.live_eq currently feeds.
+        if [ -n "$arg1" ]; then
+            sink="$arg1"
+        else
+            sink=$(pw-link -l 2>/dev/null | awk '
+                /^effect_output\.live_eq:output_FL/ {f=1; next}
+                f && /^[[:space:]]+\|->/ {print $2; exit}
+            ' | cut -d: -f1)
+        fi
+        if [ -z "$sink" ]; then
+            echo "Could not determine EQ hardware target. Open pavucontrol, set Live EQ's output, then re-run." >&2
+            exit 1
+        fi
+        mkdir -p "$(dirname "$TARGET_FILE")"
+        echo "$sink" > "$TARGET_FILE"
+        echo "Saved EQ target: $sink"
+        apply_eq
+        ;;
+    "clear_target")
+        rm -f "$TARGET_FILE"
+        echo "Cleared EQ target. Restart EQ for changes to apply."
+        ;;
     "set_band")
         tmp=$(cat "$STATE_FILE")
         updated=$(echo "$tmp" | jq -c --arg val "$arg2" ".b$arg1 = \$val | .preset = \"Custom\" | .pending = true")
