@@ -1,0 +1,66 @@
+name: nvim config check
+
+# Validates the Neovim config on every push/PR that touches it: installs all
+# plugins, builds the treesitter parsers, and runs a headless smoke test that
+# opens a buffer of each language and fails if the config errors.
+
+on:
+  push:
+    paths:
+      - "dotfiles/dot-config/nvim/**"
+      - ".github/workflows/nvim-check.yml"
+  pull_request:
+    paths:
+      - "dotfiles/dot-config/nvim/**"
+      - ".github/workflows/nvim-check.yml"
+  workflow_dispatch: {}
+
+concurrency:
+  group: nvim-check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      NVIM_CONFIG: dotfiles/dot-config/nvim
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Neovim (stable)
+        uses: rhysd/action-setup-vim@v1
+        with:
+          neovim: true
+          version: stable # pin to e.g. v0.12.2 if you need an exact version
+
+      - name: Install build tools (C compiler + tree-sitter CLI)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential
+          npm install -g tree-sitter-cli
+          nvim --version
+          tree-sitter --version
+
+      - name: Link config to ~/.config/nvim
+        run: |
+          mkdir -p "$HOME/.config"
+          ln -sfn "$GITHUB_WORKSPACE/$NVIM_CONFIG" "$HOME/.config/nvim"
+
+      - name: Install plugins
+        run: nvim --headless "+Lazy! sync" +qa
+
+      - name: Build & verify treesitter parsers
+        run: |
+          nvim --headless \
+            -c "lua require('nvim-treesitter').install({'lua','python','rust','typescript','tsx','json','html','css','bash','go','markdown','yaml','toml'}):wait(600000)" \
+            -c "qa"
+          nvim --headless -c "lua \
+            local need = {'lua','python','rust','typescript','json','bash'}; \
+            local got = require('nvim-treesitter').get_installed(); \
+            local miss = {}; \
+            for _,l in ipairs(need) do if not vim.tbl_contains(got, l) then miss[#miss+1]=l end end; \
+            if #miss > 0 then io.stderr:write('Missing parsers: '..table.concat(miss,', ')..'\n'); vim.cmd('cquit 1') \
+            else io.stderr:write('parsers OK\n'); vim.cmd('qa') end"
+
+      - name: Smoke test (load plugins + validate treesitter/telescope)
+        run: nvim --headless -c "luafile $NVIM_CONFIG/scripts/ci-check.lua"
