@@ -2,8 +2,8 @@ return {
   "neovim/nvim-lspconfig",
   event = "BufReadPre",
   dependencies = {
-    "williamboman/mason.nvim",
-    "williamboman/mason-lspconfig.nvim",
+    "mason-org/mason.nvim",
+    "mason-org/mason-lspconfig.nvim",
     "hrsh7th/cmp-nvim-lsp",
     {
       "ray-x/lsp_signature.nvim",
@@ -34,8 +34,8 @@ return {
         vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, vim.tbl_extend("force", opts, { desc = "Smart rename" }))
         vim.keymap.set("n", "<leader>D", "<cmd>Telescope diagnostics bufnr=0<CR>", vim.tbl_extend("force", opts, { desc = "Show buffer diagnostics" }))
         vim.keymap.set("n", "<leader>d", vim.diagnostic.open_float, vim.tbl_extend("force", opts, { desc = "Show line diagnostics" }))
-        vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, vim.tbl_extend("force", opts, { desc = "Go to previous diagnostic" }))
-        vim.keymap.set("n", "]d", vim.diagnostic.goto_next, vim.tbl_extend("force", opts, { desc = "Go to next diagnostic" }))
+        vim.keymap.set("n", "[d", function() vim.diagnostic.jump({ count = -1, float = true }) end, vim.tbl_extend("force", opts, { desc = "Go to previous diagnostic" }))
+        vim.keymap.set("n", "]d", function() vim.diagnostic.jump({ count = 1, float = true }) end, vim.tbl_extend("force", opts, { desc = "Go to next diagnostic" }))
         vim.keymap.set("n", "K", vim.lsp.buf.hover, vim.tbl_extend("force", opts, { desc = "Show documentation" }))
         vim.keymap.set("n", "<leader>rs", ":LspRestart<CR>", vim.tbl_extend("force", opts, { desc = "Restart LSP" }))
       end,
@@ -48,13 +48,23 @@ return {
       end,
     })
 
-    -- Configure servers using new vim.lsp.config API (Neovim 0.11+)
+    -- Configure servers using new vim.lsp.config API (Neovim 0.11+).
+    -- These merge on top of the defaults shipped by nvim-lspconfig.
     vim.lsp.config.pyright = { capabilities = capabilities }
     vim.lsp.config.ts_ls = { capabilities = capabilities }
     vim.lsp.config.html = { capabilities = capabilities }
     vim.lsp.config.cssls = { capabilities = capabilities }
     vim.lsp.config.jsonls = { capabilities = capabilities }
     vim.lsp.config.bashls = { capabilities = capabilities }
+    vim.lsp.config.tailwindcss = { capabilities = capabilities }
+
+    -- Ruff handles Python linting / import sorting; let pyright own hover.
+    vim.lsp.config.ruff = {
+      capabilities = capabilities,
+      on_attach = function(client)
+        client.server_capabilities.hoverProvider = false
+      end,
+    }
 
     vim.lsp.config.gopls = {
       capabilities = capabilities,
@@ -73,14 +83,19 @@ return {
       },
     }
 
-    -- Enable all configured servers
-    vim.lsp.enable("pyright")
-    vim.lsp.enable("gopls")
-    vim.lsp.enable("ts_ls")
-    vim.lsp.enable("html")
-    vim.lsp.enable("cssls")
-    vim.lsp.enable("jsonls")
-    vim.lsp.enable("bashls")
-    vim.lsp.enable("lua_ls")
+    -- Enable all configured servers.
+    -- (rust-analyzer is intentionally absent here — rustaceanvim manages it.)
+    vim.lsp.enable({
+      "pyright",
+      "ruff",
+      "gopls",
+      "ts_ls",
+      "html",
+      "cssls",
+      "jsonls",
+      "bashls",
+      "tailwindcss",
+      "lua_ls",
+    })
   end,
 }

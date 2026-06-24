@@ -1,6 +1,8 @@
 return {
   "nvim-telescope/telescope.nvim",
-  branch = "0.1.x",
+  -- master is required for nvim-treesitter `main` branch compatibility
+  -- (0.1.x calls the removed nvim-treesitter.parsers.ft_to_lang in its previewer).
+  branch = "master",
   dependencies = {
     "nvim-lua/plenary.nvim",
     { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
