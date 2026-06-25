@@ -92,4 +92,23 @@ return {
     event = { "BufReadPost", "BufNewFile" },
     opts = {},
   },
+  {
+    -- Pins the enclosing scope (function/method/class header) to the top of the
+    -- window while scrolling, so you can always see what you're inside of.
+    "nvim-treesitter/nvim-treesitter-context",
+    event = { "BufReadPost", "BufNewFile" },
+    dependencies = { "nvim-treesitter/nvim-treesitter" },
+    opts = {
+      max_lines = 3,        -- cap the sticky header height
+      multiline_threshold = 1, -- collapse multi-line signatures to one line
+      mode = "topline",     -- show context for the topmost visible line
+    },
+    config = function(_, opts)
+      require("treesitter-context").setup(opts)
+      -- Jump to the top of the current context (the function header).
+      vim.keymap.set("n", "[x", function()
+        require("treesitter-context").go_to_context(vim.v.count1)
+      end, { desc = "Jump to context (function header)" })
+    end,
+  },
 }
