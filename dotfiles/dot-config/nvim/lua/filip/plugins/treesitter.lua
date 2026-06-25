@@ -123,7 +123,7 @@ return {
     opts = {
       max_lines = 3, -- cap the sticky header height
       multiline_threshold = 1, -- collapse multi-line signatures to one line
-      mode = "topline", -- show context for the topmost visible line
+      mode = "cursor", -- show context for the topmost visible line
     },
     config = function(_, opts)
       require("treesitter-context").setup(opts)
