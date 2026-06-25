@@ -37,7 +37,19 @@ return {
         vim.keymap.set("n", "[d", function() vim.diagnostic.jump({ count = -1, float = true }) end, vim.tbl_extend("force", opts, { desc = "Go to previous diagnostic" }))
         vim.keymap.set("n", "]d", function() vim.diagnostic.jump({ count = 1, float = true }) end, vim.tbl_extend("force", opts, { desc = "Go to next diagnostic" }))
         vim.keymap.set("n", "K", vim.lsp.buf.hover, vim.tbl_extend("force", opts, { desc = "Show documentation" }))
-        vim.keymap.set("n", "<leader>rs", ":LspRestart<CR>", vim.tbl_extend("force", opts, { desc = "Restart LSP" }))
+        -- Restart the LSP for this buffer. There is no native :LspRestart, and
+        -- Rust is managed by rustaceanvim, so branch on filetype.
+        vim.keymap.set("n", "<leader>rs", function()
+          if vim.bo.filetype == "rust" then
+            vim.cmd("RustAnalyzer restart")
+            return
+          end
+          local bufnr = vim.api.nvim_get_current_buf()
+          for _, client in ipairs(vim.lsp.get_clients({ bufnr = bufnr })) do
+            client:stop()
+          end
+          vim.defer_fn(function() vim.cmd("edit") end, 250)
+        end, vim.tbl_extend("force", opts, { desc = "Restart LSP" }))
       end,
     })
 
