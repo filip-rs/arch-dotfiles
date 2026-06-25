@@ -20,10 +20,10 @@ keymap.set("n", "<leader>se", "<C-w>=", { desc = "Make splits equal size" }) -- 
 keymap.set("n", "<leader>sx", "<cmd>close<CR>", { desc = "Close current split" }) -- close current split window
 
 -- resize splits, tmux-style: <leader> + Shift-HJKL
-keymap.set("n", "<leader>H", "<cmd>vertical resize -3<CR>", { desc = "Shrink split width" })
-keymap.set("n", "<leader>L", "<cmd>vertical resize +3<CR>", { desc = "Grow split width" })
-keymap.set("n", "<leader>K", "<cmd>resize +3<CR>", { desc = "Grow split height" })
-keymap.set("n", "<leader>J", "<cmd>resize -3<CR>", { desc = "Shrink split height" })
+keymap.set("n", "<leader>H", "<cmd>vertical resize +15<CR>", { desc = "Shrink split width" })
+keymap.set("n", "<leader>L", "<cmd>vertical resize -15<CR>", { desc = "Grow split width" })
+keymap.set("n", "<leader>K", "<cmd>resize +5<CR>", { desc = "Grow split height" })
+keymap.set("n", "<leader>J", "<cmd>resize -5<CR>", { desc = "Shrink split height" })
 
 -- Tabpages (workspaces/layouts). Day-to-day file switching is handled by the
 -- bufferline (S-h / S-l / C-Tab); these stay for occasional split-layout tabs.
