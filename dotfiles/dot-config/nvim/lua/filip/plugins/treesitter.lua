@@ -10,12 +10,26 @@ return {
       -- On the main branch, setup() only accepts install_dir; parser
       -- installation and feature activation are done explicitly below.
       local ensure_installed = {
-        "lua", "vim", "vimdoc", "query",
+        "lua",
+        "vim",
+        "vimdoc",
+        "query",
         "python",
-        "rust", "toml",
-        "go", "gomod", "gowork", "gosum",
-        "javascript", "typescript", "tsx", "json", "yaml",
-        "html", "css", "markdown", "markdown_inline",
+        "rust",
+        "toml",
+        "go",
+        "gomod",
+        "gowork",
+        "gosum",
+        "javascript",
+        "typescript",
+        "tsx",
+        "json",
+        "yaml",
+        "html",
+        "css",
+        "markdown",
+        "markdown_inline",
         "bash",
       }
 
@@ -81,10 +95,18 @@ return {
       end
 
       -- Movement
-      map({ "n", "x", "o" }, "]f", function() move.goto_next_start("@function.outer", "textobjects") end, { desc = "Next function start" })
-      map({ "n", "x", "o" }, "]c", function() move.goto_next_start("@class.outer", "textobjects") end, { desc = "Next class start" })
-      map({ "n", "x", "o" }, "[f", function() move.goto_previous_start("@function.outer", "textobjects") end, { desc = "Prev function start" })
-      map({ "n", "x", "o" }, "[c", function() move.goto_previous_start("@class.outer", "textobjects") end, { desc = "Prev class start" })
+      map({ "n", "x", "o" }, "]f", function()
+        move.goto_next_start("@function.outer", "textobjects")
+      end, { desc = "Next function start" })
+      map({ "n", "x", "o" }, "]c", function()
+        move.goto_next_start("@class.outer", "textobjects")
+      end, { desc = "Next class start" })
+      map({ "n", "x", "o" }, "[f", function()
+        move.goto_previous_start("@function.outer", "textobjects")
+      end, { desc = "Prev function start" })
+      map({ "n", "x", "o" }, "[c", function()
+        move.goto_previous_start("@class.outer", "textobjects")
+      end, { desc = "Prev class start" })
     end,
   },
   {
@@ -99,12 +121,27 @@ return {
     event = { "BufReadPost", "BufNewFile" },
     dependencies = { "nvim-treesitter/nvim-treesitter" },
     opts = {
-      max_lines = 3,        -- cap the sticky header height
+      max_lines = 3, -- cap the sticky header height
       multiline_threshold = 1, -- collapse multi-line signatures to one line
-      mode = "topline",     -- show context for the topmost visible line
+      mode = "topline", -- show context for the topmost visible line
     },
     config = function(_, opts)
       require("treesitter-context").setup(opts)
+
+      -- Use the theme's CursorLine as a subtle secondary surface for the sticky
+      -- header instead of the plugin's near-white default. Tracks any
+      -- colorscheme; re-applied on colorscheme changes so it sticks.
+      local function fix_hl()
+        vim.api.nvim_set_hl(0, "TreesitterContext", { link = "NormalFloat" })
+        --vim.api.nvim_set_hl(0, "TreesitterContext", { link = "ColorColumn" })
+        vim.api.nvim_set_hl(0, "TreesitterContextLineNumber", { link = "CursorLineNr" })
+      end
+      fix_hl()
+      vim.api.nvim_create_autocmd("ColorScheme", {
+        group = vim.api.nvim_create_augroup("filip_ts_context_hl", { clear = true }),
+        callback = fix_hl,
+      })
+
       -- Jump to the top of the current context (the function header).
       vim.keymap.set("n", "[x", function()
         require("treesitter-context").go_to_context(vim.v.count1)
