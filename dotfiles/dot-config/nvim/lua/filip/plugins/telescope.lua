@@ -8,6 +8,9 @@ return {
     { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
     "nvim-tree/nvim-web-devicons",
   },
+  -- Also load on the :Telescope command so LSP keymaps that call it (gd, gR,
+  -- gi, gt, <leader>D) work even before a <leader>f mapping is used.
+  cmd = "Telescope",
   keys = {
     { "<leader>ff", "<cmd>Telescope find_files<cr>", desc = "Find files" },
     { "<leader>fr", "<cmd>Telescope oldfiles<cr>", desc = "Recent files" },

@@ -23,6 +23,14 @@ return {
     vim.g.loaded_netrwPlugin = 1
 
     require("nvim-tree").setup({
+      -- Keep nvim-tree's default mappings, but drop its <C-t> ("open in new
+      -- tab") so <C-t> means "toggle terminal" everywhere — no more split
+      -- behaviour depending on whether the cursor is in the tree.
+      on_attach = function(bufnr)
+        local api = require("nvim-tree.api")
+        api.config.mappings.default_on_attach(bufnr)
+        pcall(vim.keymap.del, "n", "<C-t>", { buffer = bufnr })
+      end,
       view = {
         width = 35,
         relativenumber = true,
