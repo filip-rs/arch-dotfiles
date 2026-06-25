@@ -12,7 +12,10 @@ return {
         capabilities = capabilities,
         default_settings = {
           ["rust-analyzer"] = {
-            cargo = { allFeatures = true },
+            -- Analyze with the SAME features cargo build uses (default set).
+            -- `allFeatures = true` can surface phantom type errors when a crate
+            -- has cfg-gated or non-additive features. If you need a specific
+            -- feature analyzed, set e.g. cargo = { features = { "foo" } }.
             checkOnSave = true,
             check = { command = "clippy" },
           },
