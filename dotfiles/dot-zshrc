@@ -118,7 +118,7 @@ plugins=(git)
 
 # Machine specific .,m
 case "$HOST" in
-    arch*)
+    arch* || KSAT*)
         alias update="sudo pacman -Syyu && paru && hyprpm update"
         alias refreshmirrors="rate-mirrors arch | sudo tee /etc/pacman.d/mirrorlist"
         alias pkgfnd="pacman -Q | grep"
