@@ -5,6 +5,10 @@ opt.number = true
 
 opt.scrolloff = 8
 opt.updatetime = 250
+-- Time (ms) to wait for a mapped sequence to complete. The default (1000) is
+-- what makes which-key feel like it takes ~1s to pop up; 300 keeps it snappy
+-- while still leaving room to finish multi-key maps like `jk`.
+opt.timeoutlen = 300
 
 -- tabs & indentation
 opt.tabstop = 4
