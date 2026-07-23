@@ -163,6 +163,9 @@ case "$HOST" in
             archflipper)
                 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
                 source ~/.fzf-git.sh
+
+                alias performance="sudo cpupower frequency-set -g performance"
+                alias powersave="sudo cpupower frequency-set -g powersave"
                 ;;
         esac
         ;;
@@ -193,8 +196,6 @@ alias please="sudo"
 alias fking="sudo"
 alias wifilist="nmcli device wifi list"
 alias wificonnect="nmcli device wifi connect --ask"
-# alias performance="sudo cpupower frequency-set -g performance"
-# alias powersave="sudo cpupower frequency-set -g powersave"
 # alias wifix="rfkill unblock wlan"
 alias c="clear"
 alias nfch="neofetch"
