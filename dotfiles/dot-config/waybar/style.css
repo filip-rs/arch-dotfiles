@@ -86,6 +86,22 @@ tooltip {
   border-radius: 10px;
 }
 
+#custom-afk.recording {
+  color: #f38ba8;
+  /* the dot in the text field pulses so it is visible from the back row */
+  animation: afk-blink 2s ease-in-out infinite;
+}
+
+#custom-afk.processing {
+  color: #f9e2af;
+}
+
+@keyframes afk-blink {
+  50% {
+    opacity: 0.4;
+  }
+}
+
 #temperature {
   border-radius: 10px 10px 10px 10px;
 }
