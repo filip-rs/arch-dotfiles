@@ -1,0 +1,19 @@
+-- Template for host.lua — copy to host.lua on each machine and edit.
+-- host.lua is gitignored; this file is the tracked template.
+--
+--   cp ~/.config/hypr/host.lua.example ~/.config/hypr/host.lua
+--
+-- Find your outputs and modes with:  hyprctl monitors all
+
+hl.env("XDG_SESSION_TYPE", "wayland")
+hl.env("XDG_CURRENT_DESKTOP", "Hyprland")
+hl.env("XDG_SESSION_DESKTOP", "Hyprland")
+
+-- >>> monitors (rewritten by scripts/monitor_apply.sh — edit above this line)
+-- Laptop (archflipper):
+-- hl.monitor({ output = "eDP-1", mode = "1920x1200@120", position = "0x0", scale = 1 })
+
+-- Desktop (archbased) — DP-2 left, DP-1 centre, DP-3 right:
+-- hl.monitor({ output = "DP-1", mode = "2560x1440@360", position = "1920x0",  scale = 1 })
+-- hl.monitor({ output = "DP-2", mode = "1920x1080@60",  position = "0x0",     scale = 1 })
+-- hl.monitor({ output = "DP-3", mode = "1920x1080@60",  position = "4480x0",  scale = 1 })

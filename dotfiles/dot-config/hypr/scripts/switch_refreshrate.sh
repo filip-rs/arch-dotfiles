@@ -1,27 +1,19 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# Toggle the laptop panel between 60 Hz and 120 Hz.
+# Bound to SUPER + CTRL + SHIFT + 6.
 
-STATE_FILE="$HOME/.config/hypr/scripts/toggle_state"
+STATE_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/hypr-refreshrate"
+mkdir -p "$(dirname "$STATE_FILE")"
 
-# Initialize state file if it doesn't exist
-if [ ! -f "$STATE_FILE" ]; then
-    echo "60" > "$STATE_FILE"
-fi
-
+[ -f "$STATE_FILE" ] || echo "60" > "$STATE_FILE"
 STATE=$(cat "$STATE_FILE")
 
 if [ "$STATE" = "60" ]; then
-    hyprctl keyword monitor "eDP-1, 1920x1200@120, 0x0"
-    notify-send "Set refreshrate to 120hz"
-
-    echo "120" > "$STATE_FILE"
-
+    RATE=120
 else
-    hyprctl keyword monitor "eDP-1, 1920x1200@60, 0x0"
-    notify-send "Set refreshrate to 60hz"
-
-    echo "60" > "$STATE_FILE"
+    RATE=60
 fi
 
-
-
-
+hyprctl eval "hl.monitor({ output = 'eDP-1', mode = '1920x1200@${RATE}', position = '0x0', scale = 1 })"
+notify-send "Set refreshrate to ${RATE}hz"
+echo "$RATE" > "$STATE_FILE"

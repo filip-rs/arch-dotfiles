@@ -322,38 +322,50 @@ Item {
                 
     function buildKeybinds() {
         dynamicKeybindsModel.clear();
+        // Mirrors lua/binds.lua. Entries with an empty cmd are
+        // reference-only (they need a real key press to make sense).
         let binds = [
-            { k1: "SUPER", k2: "RETURN", action: "Open Terminal (Kitty)", cmd: "kitty" },
-            { k1: "SUPER", k2: "D", action: "App Launcher (Drun)", cmd: "bash ~/.config/hypr/scripts/rofi_show.sh drun" },
-            { k1: "ALT", k2: "TAB", action: "Window Switcher", cmd: "bash ~/.config/hypr/scripts/rofi_show.sh window" },
-            { k1: "SUPER", k2: "C", action: "Clipboard History", cmd: "bash ~/.config/hypr/scripts/rofi_clipboard.sh" },
-            { k1: "SUPER", k2: "F", action: "Open Firefox", cmd: "firefox" },
-            { k1: "SUPER", k2: "E", action: "Open Nautilus", cmd: "nautilus" },
-            { k1: "ALT", k2: "F4", action: "Close Active Window/Widget", cmd: "bash -c 'if hyprctl activewindow | grep -q \"title: qs-master\"; then ~/.config/hypr/scripts/qs_manager.sh close; else hyprctl dispatch killactive; fi'" },
-            { k1: "SUPER+SHIFT", k2: "F", action: "Toggle Floating", cmd: "hyprctl dispatch togglefloating" },
-            { k1: "SUPER", k2: "L", action: "Lock Screen", cmd: "bash ~/.config/hypr/scripts/lock.sh" },
-            { k1: "PRINT", k2: "", action: "Screenshot", cmd: "bash ~/.config/hypr/scripts/screenshot.sh" },
-            { k1: "SHIFT", k2: "PRINT", action: "Screenshot (Edit)", cmd: "bash ~/.config/hypr/scripts/screenshot.sh --edit" },
-            { k1: "ALT+SHIFT", k2: "", action: "Switch Keyboard Layout", cmd: "hyprctl switchxkblayout main next" },
-            { k1: "SUPER", k2: "W", action: "Toggle Wallpaper Picker", cmd: "bash ~/.config/hypr/scripts/qs_manager.sh toggle wallpaper" },
-            { k1: "SUPER", k2: "Q", action: "Toggle Music Widget", cmd: "bash ~/.config/hypr/scripts/qs_manager.sh toggle music" },
-            { k1: "SUPER", k2: "B", action: "Toggle Battery Widget", cmd: "bash ~/.config/hypr/scripts/qs_manager.sh toggle battery" },
-            { k1: "SUPER", k2: "S", action: "Toggle Calendar Widget", cmd: "bash ~/.config/hypr/scripts/qs_manager.sh toggle calendar" },
-            { k1: "SUPER", k2: "N", action: "Toggle Network Widget", cmd: "bash ~/.config/hypr/scripts/qs_manager.sh toggle network" },
-            { k1: "SUPER", k2: "V", action: "Toggle Volume Widget", cmd: "bash ~/.config/hypr/scripts/qs_manager.sh toggle volume" },
-            { k1: "SUPER", k2: "M", action: "Toggle Monitors Widget", cmd: "bash ~/.config/hypr/scripts/qs_manager.sh toggle monitors" },
-            { k1: "SUPER+SHIFT", k2: "T", action: "Toggle FocusTime", cmd: "bash ~/.config/hypr/scripts/qs_manager.sh toggle focustime" },
-            { k1: "SUPER", k2: "A", action: "Toggle SwayNC Panel", cmd: "swaync-client -t -sw" },
-            { k1: "SUPER", k2: "SPACE", action: "Play/Pause Media", cmd: "playerctl play-pause" },
-            { k1: "Media", k2: "Play/Pause", action: "Play/Pause Media", cmd: "playerctl play-pause" },
-            { k1: "Media", k2: "Vol Up/Down", action: "Adjust Volume", cmd: "swayosd-client --output-volume raise" },
-            { k1: "Media", k2: "Mute", action: "Mute Volume", cmd: "swayosd-client --output-volume mute-toggle" },
-            { k1: "Media", k2: "Mic Mute", action: "Mute Microphone", cmd: "swayosd-client --input-volume mute-toggle" },
-            { k1: "Media", k2: "Brightness", action: "Adjust Brightness", cmd: "swayosd-client --brightness raise" },
-            { k1: "CAPS", k2: "LOCK", action: "Caps Lock OSD", cmd: "swayosd-client --caps-lock" },
-            { k1: "SUPER", k2: "ARROWS", action: "Move Focus", cmd: "hyprctl dispatch movefocus r" },
-            { k1: "SUPER+CTRL", k2: "ARROWS", action: "Move Window", cmd: "hyprctl dispatch movewindow r" },
-            { k1: "SUPER+SHIFT", k2: "ARROWS", action: "Resize Window", cmd: "hyprctl dispatch resizeactive 50 0" }
+            { k1: "SUPER", k2: "Q", action: "Open Terminal (Alacritty)", cmd: "alacritty" },
+            { k1: "SUPER", k2: "SPACE", action: "App Launcher (wofi)", cmd: "wofi" },
+            { k1: "SUPER", k2: "W", action: "Open Browser", cmd: "brave-beta" },
+            { k1: "SUPER", k2: "E", action: "Open File Manager", cmd: "thunar" },
+            { k1: "SUPER", k2: "R", action: "Open Obsidian", cmd: "obsidian --ozone-platform-hint=auto" },
+            { k1: "SUPER", k2: "X", action: "Close Window", cmd: "hyprctl dispatch 'hl.dsp.window.close()'" },
+            { k1: "SUPER", k2: "V", action: "Toggle Floating", cmd: "hyprctl dispatch 'hl.dsp.window.float({ action = \"toggle\" })'" },
+            { k1: "SUPER", k2: "F", action: "Toggle Fullscreen", cmd: "hyprctl dispatch 'hl.dsp.window.fullscreen()'" },
+            { k1: "SUPER", k2: "F5", action: "Phone-shaped Window", cmd: "" },
+            { k1: "SUPER", k2: "H J K L", action: "Move Focus", cmd: "hyprctl dispatch 'hl.dsp.focus({ direction = \"l\" })'" },
+            { k1: "SUPER+SHIFT", k2: "H J K L", action: "Move Window", cmd: "hyprctl dispatch 'hl.dsp.window.move({ direction = \"l\" })'" },
+            { k1: "ALT", k2: "TAB", action: "Cycle Windows", cmd: "hyprctl dispatch 'hl.dsp.window.cycle_next()'" },
+            { k1: "SUPER", k2: "1 - 0", action: "Switch Workspace", cmd: "" },
+            { k1: "SUPER+SHIFT", k2: "1 - 0", action: "Move to Workspace", cmd: "" },
+            { k1: "SUPER", k2: "D / A", action: "Next / Prev Workspace", cmd: "hyprctl dispatch 'hl.dsp.focus({ workspace = \"r+1\" })'" },
+            { k1: "SUPER", k2: "S", action: "Special Workspace", cmd: "hyprctl dispatch 'hl.dsp.workspace.toggle_special(\"\")'" },
+            { k1: "SUPER+CTRL", k2: "SPACE", action: "Quickshell Module Menu", cmd: "bash ~/.config/hypr/scripts/qs_menu.sh" },
+            { k1: "SUPER+CTRL", k2: "S", action: "Calendar", cmd: "bash ~/.config/hypr/scripts/qs_manager.sh toggle calendar --anchor=center" },
+            { k1: "SUPER+CTRL", k2: "N", action: "Network (Wi-Fi / Bluetooth)", cmd: "bash ~/.config/hypr/scripts/qs_manager.sh toggle network --anchor=center" },
+            { k1: "SUPER+CTRL", k2: "V", action: "Volume", cmd: "bash ~/.config/hypr/scripts/qs_manager.sh toggle volume --anchor=center" },
+            { k1: "SUPER+CTRL", k2: "B", action: "Battery", cmd: "bash ~/.config/hypr/scripts/qs_manager.sh toggle battery --anchor=center" },
+            { k1: "SUPER+CTRL", k2: "Q", action: "Music", cmd: "bash ~/.config/hypr/scripts/qs_manager.sh toggle music --anchor=center" },
+            { k1: "SUPER+CTRL", k2: "M", action: "Monitors", cmd: "bash ~/.config/hypr/scripts/qs_manager.sh toggle monitors --anchor=center" },
+            { k1: "SUPER+CTRL", k2: "W", action: "Wallpaper Picker", cmd: "bash ~/.config/hypr/scripts/qs_manager.sh toggle wallpaper --anchor=center" },
+            { k1: "SUPER+SHIFT", k2: "T", action: "Focus Time", cmd: "bash ~/.config/hypr/scripts/qs_manager.sh toggle focustime --anchor=center" },
+            { k1: "SUPER+CTRL+SHIFT", k2: "G", action: "This Guide", cmd: "bash ~/.config/hypr/scripts/qs_manager.sh toggle guide --anchor=center" },
+            { k1: "SUPER", k2: "O", action: "Lock Screen", cmd: "hyprlock" },
+            { k1: "SUPER", k2: "U", action: "Logout Menu", cmd: "wlogout --protocol layer-shell" },
+            { k1: "SUPER+SHIFT", k2: "S", action: "Screenshot to Clipboard", cmd: "bash ~/.config/hypr/scripts/screenshot_copy.sh" },
+            { k1: "SUPER+SHIFT+CTRL", k2: "S", action: "Screenshot to File", cmd: "bash ~/.config/hypr/scripts/screenshot_save.sh" },
+            { k1: "SUPER+SHIFT", k2: "N", action: "Notification Panel", cmd: "swaync-client -t -sw" },
+            { k1: "SUPER+SHIFT", k2: "C", action: "Colour Picker", cmd: "wl-color-picker clipboard --no-notify" },
+            { k1: "SUPER+SHIFT", k2: "E", action: "Emoji Picker", cmd: "bemoji -t" },
+            { k1: "SUPER+SHIFT", k2: "B", action: "Restart Waybar", cmd: "killall waybar && waybar" },
+            { k1: "SUPER", k2: "Y / T", action: "Keyboard Mouse (wl-kbptr)", cmd: "wl-kbptr" },
+            { k1: "SUPER+CTRL+SHIFT", k2: "SPACE", action: "Switch Keyboard Layout", cmd: "bash ~/.config/hypr/scripts/switch_layout.sh" },
+            { k1: "SUPER+CTRL+SHIFT", k2: "6", action: "Toggle 60 / 120 Hz", cmd: "bash ~/.config/hypr/scripts/switch_refreshrate.sh" },
+            { k1: "SUPER+CTRL+SHIFT", k2: "7", action: "Speakers / Headphones", cmd: "bash ~/.config/hypr/scripts/speaker_toggle.sh" },
+            { k1: "SUPER+CTRL+SHIFT", k2: "0", action: "Focus Mode (blank side screens)", cmd: "bash ~/.config/hypr/scripts/screen_manager.sh" },
+            { k1: "SUPER+SHIFT", k2: "R", action: "Toggle AFK Capture", cmd: "~/.local/bin/afk toggle" },
+            { k1: "SUPER", k2: "[ ; '", action: "Type å ø æ", cmd: "" }
         ];
         for (let item of binds) { dynamicKeybindsModel.append(item); }
     }
@@ -566,9 +578,9 @@ Item {
                     ListElement { pkg: "Hyprland"; role: "Wayland Compositor"; icon: ""; clr: "blue"; link: "https://hyprland.org/" }
                     ListElement { pkg: "Quickshell"; role: "UI Framework"; icon: "󰣆"; clr: "mauve"; link: "https://git.outfoxxed.me/outfoxxed/quickshell" }
                     ListElement { pkg: "Matugen"; role: "Theme Engine"; icon: "󰏘"; clr: "peach"; link: "https://github.com/InioX/matugen" }
-                    ListElement { pkg: "Rofi Wayland"; role: "App Launcher"; icon: ""; clr: "green"; link: "https://github.com/lbonn/rofi" }
-                    ListElement { pkg: "Kitty"; role: "Terminal Emulator"; icon: "󰄛"; clr: "yellow"; link: "https://sw.kovidgoyal.net/kitty/" }
-                    ListElement { pkg: "SwayOSD / NC"; role: "Overlays & Notifs"; icon: "󰂚"; clr: "pink"; link: "https://github.com/ErikReider/SwayOSD" }
+                    ListElement { pkg: "wofi"; role: "App Launcher"; icon: ""; clr: "green"; link: "https://hg.sr.ht/~scoopta/wofi" }
+                    ListElement { pkg: "Alacritty"; role: "Terminal Emulator"; icon: "󰄛"; clr: "yellow"; link: "https://alacritty.org/" }
+                    ListElement { pkg: "SwayNC"; role: "Notifications"; icon: "󰂚"; clr: "pink"; link: "https://github.com/ErikReider/SwayNotificationCenter" }
                 }
 
                 ColumnLayout {

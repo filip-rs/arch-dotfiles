@@ -11,6 +11,52 @@ CACHE_DIR="${XDG_RUNTIME_DIR:-$HOME/.cache}/quickshell_network_cache"
 mkdir -p "$CACHE_DIR"
 PID_FILE="$CACHE_DIR/bt_scan_pid"
 
+# Last noise-control mode we asked librepods for. librepods-ctl is write-only
+# (it writes to the /tmp/app_server QLocalSocket and never reads a reply), and
+# the daemon registers no D-Bus name to query, so the current mode is tracked
+# here.
+ANC_STATE_FILE="$CACHE_DIR/anc_mode"
+
+is_airpods() {
+    local mac="$1"
+    local name="${2,,}"
+    [[ "$name" == *"airpods"* || "$name" == *"pods"* ]] && return 0
+    # Apple vendor ID 0x004C in the Modalias.
+    bluetoothctl info "$mac" 2>/dev/null | grep -qi 'Modalias: bluetooth:v004C' && return 0
+    return 1
+}
+
+anc_get() {
+    cat "$ANC_STATE_FILE" 2>/dev/null || true
+}
+
+anc_set() {
+    local mode="$1"
+    case "$mode" in
+        off|anc|transparency|adaptive) ;;
+        *) echo "unknown noise mode: $mode" >&2; return 1 ;;
+    esac
+
+    if ! command -v librepods-ctl >/dev/null 2>&1; then
+        notify-send "AirPods" "librepods-ctl is not installed" 2>/dev/null
+        return 1
+    fi
+
+    # The CLI only talks to a running daemon.
+    if ! pgrep -x librepods >/dev/null 2>&1; then
+        setsid librepods --hide >/dev/null 2>&1 &
+        disown 2>/dev/null || true
+        sleep 1.5
+    fi
+
+    if librepods-ctl "noise:$mode" >/dev/null 2>&1; then
+        echo "$mode" > "$ANC_STATE_FILE"
+    else
+        notify-send "AirPods" "Could not reach librepods" 2>/dev/null
+        return 1
+    fi
+}
+
 get_icon() {
     local type="${1,,}"
     local name="${2,,}"
@@ -90,7 +136,9 @@ get_status() {
             bat=$(bluetoothctl info "$mac" | awk -F'[(|)]' '/Battery Percentage:/ {print $2}')
             [ -z "$bat" ] && bat="0"
 
-            connected_list_objs+=("{\"id\":\"$mac\",\"name\":\"$CACHE_NAME\",\"mac\":\"$mac\",\"icon\":\"$CACHE_ICON\",\"battery\":\"$bat\",\"profile\":\"$CACHE_PROFILE\"}")
+            if is_airpods "$mac" "$name"; then pods="true"; else pods="false"; fi
+
+            connected_list_objs+=("{\"id\":\"$mac\",\"name\":\"$CACHE_NAME\",\"mac\":\"$mac\",\"icon\":\"$CACHE_ICON\",\"battery\":\"$bat\",\"profile\":\"$CACHE_PROFILE\",\"airpods\":$pods}")
         done
 
         if [ ${#connected_list_objs[@]} -gt 0 ]; then
@@ -133,7 +181,7 @@ get_status() {
         fi
     fi
 
-    echo "{\"power\":\"$power\",\"connected\":$connected_json,\"devices\":$devices_json}"
+    echo "{\"power\":\"$power\",\"anc\":\"$(anc_get)\",\"connected\":$connected_json,\"devices\":$devices_json}"
 }
 
 toggle_power() {
@@ -159,10 +207,27 @@ disconnect_dev() {
     bluetoothctl disconnect "$mac"
 }
 
+# off -> anc -> transparency -> adaptive -> off
+anc_cycle() {
+    local cur next
+    cur=$(anc_get)
+    case "$cur" in
+        off)          next="anc" ;;
+        anc)          next="transparency" ;;
+        transparency) next="adaptive" ;;
+        adaptive)     next="off" ;;
+        *)            next="anc" ;;
+    esac
+    anc_set "$next"
+}
+
 cmd="$1"
 case $cmd in
     --status) get_status ;;
     --toggle) toggle_power ;;
     --connect) connect_dev "$2" ;;
     --disconnect) disconnect_dev "$2" ;;
+    --anc) anc_set "$2" ;;
+    --anc-get) anc_get ;;
+    --anc-cycle) anc_cycle ;;
 esac

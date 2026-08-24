@@ -16,19 +16,42 @@ PanelWindow {
     exclusionMode: ExclusionMode.Ignore 
     focusable: true
 
-    width: Screen.width
-    height: Screen.height
+    // Which output the overlay lives on. qs_manager.sh resolves this from the
+    // cursor (bar clicks) or the focused monitor (keybinds) and sends it over
+    // IPC; empty means "leave it where it is".
+    property string targetMonitor: ""
+
+    screen: {
+        if (masterWindow.targetMonitor !== "") {
+            for (let i = 0; i < Quickshell.screens.length; i++) {
+                if (Quickshell.screens[i].name === masterWindow.targetMonitor)
+                    return Quickshell.screens[i];
+            }
+        }
+        return Quickshell.screens.length > 0 ? Quickshell.screens[0] : null;
+    }
+
+    readonly property int screenW: screen ? screen.width : Screen.width
+    readonly property int screenH: screen ? screen.height : Screen.height
+
+    // Cover the whole output. Anchoring all four sides lets the layer surface
+    // resize itself when the resolution changes or the overlay moves to a
+    // different monitor.
+    anchors { top: true; bottom: true; left: true; right: true }
 
     visible: isVisible
 
-    mask: Region { item: topBarHole; intersection: Intersection.Xor }
+    // Punch a click-through hole over waybar (which is at the BOTTOM) so its
+    // icons stay clickable while a panel is open — clicking a different icon
+    // then switches panels instead of just dismissing the current one.
+    mask: Region { item: barHole; intersection: Intersection.Xor }
     
     Item {
-        id: topBarHole
-        anchors.top: parent.top
+        id: barHole
+        anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
-        height: 65 // Safely covers your TopBar height + margins
+        height: Registry.BAR_HEIGHT
     }
 
     MouseArea {
@@ -45,6 +68,7 @@ PanelWindow {
     property string currentActive: "hidden" 
     property bool isVisible: false
     property string activeArg: ""
+    property string activeAnchor: ""
     property bool disableMorph: false 
     property bool isWallpaperTransition: false 
     property int morphDuration: 500
@@ -59,15 +83,16 @@ PanelWindow {
     property real targetH: 1
 
     function getLayout(name) {
-        return Registry.getLayout(name, 0, 0, Screen.width, Screen.height);
+        // Coordinates are window-local and the window covers exactly one
+        // output, so the monitor offset is always 0/0.
+        return Registry.getLayout(name, 0, 0, masterWindow.screenW, masterWindow.screenH,
+                                  masterWindow.activeAnchor);
     }
 
-    // Automatically recalculates position and scale if the OS resolution changes
-    Connections {
-        target: Screen
-        function onWidthChanged() { handleNativeScreenChange(); }
-        function onHeightChanged() { handleNativeScreenChange(); }
-    }
+    // Automatically recalculates position and scale if the resolution or the
+    // output the overlay lives on changes.
+    onScreenWChanged: handleNativeScreenChange()
+    onScreenHChanged: handleNativeScreenChange()
 
     function handleNativeScreenChange() {
         if (masterWindow.currentActive === "hidden") return;
@@ -143,6 +168,18 @@ PanelWindow {
                     }
                 }
             }
+        }
+    }
+
+    // Widgets that resize themselves at runtime (e.g. the calendar when the
+    // schedule module is absent) must go through this, so a bar-docked panel
+    // stays docked to the bar instead of floating away from it.
+    function setContentHeight(h) {
+        masterWindow.animH = h;
+        masterWindow.targetH = h;
+        if (Registry.isDocked(masterWindow.currentActive)) {
+            masterWindow.animY = Registry.dockedY(h, masterWindow.screenH,
+                                                  Registry.getScale(masterWindow.screenW));
         }
     }
 
@@ -291,14 +328,25 @@ PanelWindow {
                 let rawCmd = this.text.trim();
                 if (rawCmd === "") return;
 
-                let parts = rawCmd.split(":");
-                let cmd = parts[0];
-                let arg = parts.length > 1 ? parts[1] : "";
+                // Wire format: "<cmd>[:<arg>][|<anchor>|<monitor>]".
+                // qs_manager.sh appends the anchor (which side of the bar the
+                // invoking icon lives on) and the output to open on. Both are
+                // optional, so older/plain "close" and "network" still work.
+                let envelope = rawCmd.split("|");
+                let head = envelope[0];
+                let anchor = envelope.length > 1 ? envelope[1] : "";
+                let monitor = envelope.length > 2 ? envelope[2] : "";
+
+                let hp = head.split(":");
+                let cmd = hp[0];
+                let arg = hp.length > 1 ? hp.slice(1).join(":") : "";
 
                 if (cmd === "close") {
                     switchWidget("hidden", "");
                 } else if (getLayout(cmd)) {
                     delayedClear.stop();
+                    if (monitor !== "") masterWindow.targetMonitor = monitor;
+                    masterWindow.activeAnchor = anchor;
                     switchWidget(cmd, arg);
                 }
             }

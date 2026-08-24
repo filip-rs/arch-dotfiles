@@ -1,21 +1,17 @@
+#!/usr/bin/env bash
+# Cycle the keyboard layout between us (altgr-intl) and no.
+# Bound to SUPER + CTRL + SHIFT + SPACE.
+#
+# Both layouts are declared in lua/input.lua as `kb_layout = "us,no"`, so this
+# just asks Hyprland to switch index. It no longer sed-edits the config file
+# (which used to dirty the git worktree on every press).
 
-file="$HOME/.config/hypr/hyprland.conf"
+hyprctl switchxkblayout current next >/dev/null
 
-if [[ ! -f "$file" ]]; then
-    echo "File not found: $file"
-    exit 1
-fi
+LAYOUT=$(hyprctl devices -j | jq -r '[.keyboards[] | select(.main == true)][0].active_keymap')
 
-
-if grep -q "kb_layout = us" "$file"; then
-    sed -i 's|kb_layout = us|kb_layout = no|' "$file"
-    notify-send "Set keyboard layout to Norwegian"
-    echo "Changed layout to no in $file"
-
-elif grep -q "kb_layout = no" "$file"; then
-    sed -i 's|kb_layout = no|kb_layout = us|' "$file"
-    notify-send "Set keyboard layout to American"
-    echo "Changed layout to us in $file"
-fi
-
-hyprctl reload
+case "$LAYOUT" in
+    *Norwegian*) notify-send "Keyboard" "Norwegian" ;;
+    *English*)   notify-send "Keyboard" "American" ;;
+    *)           notify-send "Keyboard" "${LAYOUT:-unknown}" ;;
+esac

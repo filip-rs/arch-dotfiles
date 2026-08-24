@@ -1,9 +1,18 @@
 .pragma library
 
+// Waybar sits at the BOTTOM of the screen (see waybar/config.jsonc), so panels
+// that belong to a bar icon dock just above it rather than at the top, and are
+// aligned horizontally with the icon that opened them.
+//
+// BAR_HEIGHT is waybar's layer-shell height in logical pixels; it is a fixed
+// CSS size, so it is deliberately NOT run through s().
+var BAR_HEIGHT = 53;
+var BAR_GAP = 8;
+
 function getScale(mw) {
     if (mw <= 0) return 1.0;
     let r = mw / 1920.0;
-    
+
     if (r <= 1.0) {
         return Math.max(0.35, Math.pow(r, 0.85));
     } else {
@@ -17,44 +26,84 @@ function s(val, scale) {
     return Math.round(val * scale);
 }
 
+// Horizontal placement for bar-docked panels. `anchor` is passed in by
+// qs_manager.sh: waybar icons send the side they live on, keybinds send
+// "center".
+function anchorX(anchor, mw, w, scale) {
+    if (anchor === "left")  return s(12, scale);
+    if (anchor === "right") return Math.max(s(12, scale), mw - w - s(20, scale));
+    return Math.floor((mw - w) / 2);
+}
+
+function isDocked(name) {
+    return !!DOCKED[name];
+}
+
+// Y coordinate that puts a panel of height `h` just above the bar. Widgets that
+// resize themselves at runtime re-run this so they stay docked.
+function dockedY(h, mh, scale) {
+    return Math.max(s(8, scale), mh - h - BAR_HEIGHT - BAR_GAP);
+}
+
+// Panels docked to the bar. `anchor` here is the default used when the caller
+// does not specify one.
+var DOCKED = {
+    "battery":  { w: 480,  h: 760, anchor: "right",  comp: "battery/BatteryPopup.qml" },
+    "volume":   { w: 480,  h: 760, anchor: "right",  comp: "volume/VolumePopup.qml" },
+    "network":  { w: 900,  h: 700, anchor: "right",  comp: "network/NetworkPopup.qml" },
+    "calendar": { w: 1450, h: 750, anchor: "center", comp: "calendar/CalendarPopup.qml" },
+    "music":    { w: 700,  h: 620, anchor: "left",   comp: "music/MusicPopup.qml" }
+};
+
+// Modal panels: centred on the screen, anchor ignored.
+var CENTRED = {
+    "monitors":  { w: 850,  h: 580, comp: "monitors/MonitorPopup.qml" },
+    "focustime": { w: 900,  h: 720, comp: "focustime/FocusTimePopup.qml" },
+    "guide":     { w: 1200, h: 750, comp: "guide/GuidePopup.qml" }
+};
+
 // Centralized registry for all widget dimensions and positional mathematics.
-function getLayout(name, mx, my, mw, mh) {
+function getLayout(name, mx, my, mw, mh, anchor) {
     let scale = getScale(mw);
+    let t = null;
 
-    let base = {
-        // Right-aligned: pinned 20px from the right edge dynamically
-        // Note on rx: The 500 represents the 480 base width + 20 margin. 
-        "battery":   { w: s(480, scale), h: s(760, scale), rx: mw - s(500, scale), ry: s(70, scale), comp: "battery/BatteryPopup.qml" },
-        "volume":    { w: s(480, scale), h: s(760, scale), rx: mw - s(500, scale), ry: s(70, scale), comp: "volume/VolumePopup.qml" },
-        
-        // Centered horizontally dynamically based on current screen width
-        "calendar":  { w: s(1450, scale), h: s(750, scale), rx: Math.floor((mw/2)-(s(1450, scale)/2)), ry: s(70, scale), comp: "calendar/CalendarPopup.qml" },
-        
-        // Left-aligned: pinned 12px from the left edge
-        "music":     { w: s(700, scale), h: s(620, scale), rx: s(12, scale), ry: s(70, scale), comp: "music/MusicPopup.qml" },
-        
-        // Right-aligned: pinned 20px from the right edge dynamically (Width: 900 + 20 margin = 920)
-        "network":   { w: s(900, scale), h: s(700, scale), rx: mw - s(920, scale), ry: s(70, scale), comp: "network/NetworkPopup.qml" },
-        
-        // Centered both horizontally and vertically
-        "monitors":  { w: s(850, scale), h: s(580, scale), rx: Math.floor((mw/2)-(s(850, scale)/2)), ry: Math.floor((mh/2)-(s(580, scale)/2)), comp: "monitors/MonitorPopup.qml" },
-        "focustime": { w: s(900, scale), h: s(720, scale), rx: Math.floor((mw/2)-(s(900, scale)/2)), ry: Math.floor((mh/2)-(s(720, scale)/2)), comp: "focustime/FocusTimePopup.qml" },
-        
-        // Guide Popup (Centered)
-        "guide":     { w: s(1200, scale), h: s(750, scale), rx: Math.floor((mw/2)-(s(1200, scale)/2)), ry: Math.floor((mh/2)-(s(750, scale)/2)), comp: "guide/GuidePopup.qml" },
+    if (DOCKED[name]) {
+        let d = DOCKED[name];
+        let w = s(d.w, scale);
+        let h = s(d.h, scale);
+        // Sit above the bar; never push the top of the panel off-screen.
+        let y = dockedY(h, mh, scale);
+        t = {
+            w: w,
+            h: h,
+            rx: anchorX(anchor || d.anchor, mw, w, scale),
+            ry: y,
+            comp: d.comp
+        };
+    } else if (CENTRED[name]) {
+        let c = CENTRED[name];
+        let w = s(c.w, scale);
+        let h = s(c.h, scale);
+        t = {
+            w: w,
+            h: h,
+            rx: Math.floor((mw - w) / 2),
+            ry: Math.floor((mh - h) / 2),
+            comp: c.comp
+        };
+    } else if (name === "wallpaper") {
+        // Full width, centred vertically.
+        let h = s(650, scale);
+        t = { w: mw, h: h, rx: 0, ry: Math.floor((mh - h) / 2), comp: "wallpaper/WallpaperPicker.qml" };
+    } else if (name === "hidden") {
+        t = { w: 1, h: 1, rx: -5000 - mx, ry: -5000 - my, comp: "" };
+    }
 
-        // Full width, centered vertically
-        "wallpaper": { w: mw, h: s(650, scale), rx: 0, ry: Math.floor((mh/2)-(s(650, scale)/2)), comp: "wallpaper/WallpaperPicker.qml" },
-        
-        "hidden":    { w: 1, h: 1, rx: -5000 - mx, ry: -5000 - my, comp: "" } 
-    };
+    if (!t) return null;
 
-    if (!base[name]) return null;
-    
-    let t = base[name];
     // Calculate final absolute coordinates based on active monitor offset
     t.x = mx + t.rx;
     t.y = my + t.ry;
-    
+
     return t;
 }

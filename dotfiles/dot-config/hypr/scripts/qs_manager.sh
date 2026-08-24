@@ -18,9 +18,51 @@ mkdir -p "$QS_NETWORK_CACHE"
 IPC_FILE="/tmp/qs_widget_state"
 NETWORK_MODE_FILE="$QS_NETWORK_CACHE/mode"
 
-ACTION="$1"
-TARGET="$2"
-SUBTARGET="$3"
+# Flags may appear anywhere; positional args keep their meaning.
+#   --anchor=left|center|right   which side of the bar the caller sits on
+#   --monitor=NAME               which output to open the panel on
+ANCHOR=""
+MONITOR=""
+POSITIONAL=()
+for _arg in "$@"; do
+    case "$_arg" in
+        --anchor=*)  ANCHOR="${_arg#*=}" ;;
+        --monitor=*) MONITOR="${_arg#*=}" ;;
+        *)           POSITIONAL+=("$_arg") ;;
+    esac
+done
+set -- "${POSITIONAL[@]}"
+
+ACTION="${1:-}"
+TARGET="${2:-}"
+SUBTARGET="${3:-}"
+
+# The output the panel should appear on: an explicit --monitor, else the one
+# under the pointer (bar clicks are mouse-driven), else the focused one.
+resolve_monitor() {
+    if [ -n "$MONITOR" ]; then
+        printf '%s' "$MONITOR"
+        return
+    fi
+
+    local pos name
+    pos=$(hyprctl cursorpos -j 2>/dev/null)
+    if [ -n "$pos" ]; then
+        name=$(hyprctl monitors -j 2>/dev/null | jq -r --argjson c "$pos" '
+            .[] | select(
+                $c.x >= .x and $c.x < (.x + (.width / .scale)) and
+                $c.y >= .y and $c.y < (.y + (.height / .scale))
+            ) | .name' 2>/dev/null | head -1)
+        [ -n "$name" ] && { printf '%s' "$name"; return; }
+    fi
+
+    hyprctl monitors -j 2>/dev/null | jq -r '.[] | select(.focused) | .name' 2>/dev/null | head -1
+}
+
+# Wire format consumed by Main.qml: "<cmd>[:<arg>]|<anchor>|<monitor>"
+emit() {
+    printf '%s|%s|%s\n' "$1" "$ANCHOR" "$(resolve_monitor)" > "$IPC_FILE"
+}
 
 # -----------------------------------------------------------------------------
 # FAST PATH: WORKSPACE SWITCHING
@@ -29,9 +71,11 @@ if [[ "$ACTION" =~ ^[0-9]+$ ]]; then
     WORKSPACE_NUM="$ACTION"
     echo "close" > "$IPC_FILE" # Tell QML to hide the widget natively
     
-    CMD="workspace $WORKSPACE_NUM"
-    [[ "$2" == "move" ]] && CMD="movetoworkspace $WORKSPACE_NUM"
-    hyprctl --batch "dispatch $CMD" >/dev/null 2>&1
+    if [[ "$2" == "move" ]]; then
+        hyprctl dispatch "hl.dsp.window.move({ workspace = $WORKSPACE_NUM })" >/dev/null 2>&1
+    else
+        hyprctl dispatch "hl.dsp.focus({ workspace = $WORKSPACE_NUM })" >/dev/null 2>&1
+    fi
     exit 0
 fi
 
@@ -169,7 +213,7 @@ if [[ "$ACTION" == "open" || "$ACTION" == "toggle" ]]; then
                     echo "close" > "$IPC_FILE"
                 else
                     echo "$SUBTARGET" > "$NETWORK_MODE_FILE"
-                    echo "$TARGET" > "$IPC_FILE"
+                    emit "$TARGET"
                 fi
             else
                 echo "close" > "$IPC_FILE"
@@ -177,7 +221,7 @@ if [[ "$ACTION" == "open" || "$ACTION" == "toggle" ]]; then
         else
             handle_network_prep
             [[ -n "$SUBTARGET" ]] && echo "$SUBTARGET" > "$NETWORK_MODE_FILE"
-            echo "$TARGET" > "$IPC_FILE"
+            emit "$TARGET"
         fi
         exit 0
     fi
@@ -189,9 +233,9 @@ if [[ "$ACTION" == "open" || "$ACTION" == "toggle" ]]; then
 
     if [[ "$TARGET" == "wallpaper" ]]; then
         handle_wallpaper_prep
-        echo "$TARGET:$WALLPAPER_THUMB" > "$IPC_FILE"
+        emit "$TARGET:$WALLPAPER_THUMB"
     else
-        echo "$TARGET" > "$IPC_FILE"
+        emit "$TARGET"
     fi
     exit 0
 fi

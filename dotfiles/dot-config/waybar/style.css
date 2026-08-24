@@ -27,14 +27,15 @@ tooltip {
 #window,
 #clock,
 #battery,
+#custom-audio,
 #pulseaudio,
 #network,
 #bluetooth,
 #temperature,
 #workspaces,
 #tray,
+#custom-afk,
 #custom-wlogout,
-#custom-laptopwlogout,
 #custom-os_button,
 #taskbar,
 #mpris,
@@ -154,9 +155,24 @@ tooltip {
   margin-right: 0px;
 }
 
-#pulseaudio {
+#custom-audio {
   color: @accent;
   border-radius: 10px 0px 0px 10px;
+}
+
+/* Bluetooth output (AirPods) — accent shifts so the headset is obvious. */
+#custom-audio.bluetooth {
+  color: @blue;
+}
+
+/* Fell back to HFP/call mode: 16 kHz mono. Should not happen any more, but is
+   worth shouting about if it does. */
+#custom-audio.bluetooth-hfp {
+  color: @maroon;
+}
+
+#custom-audio.muted {
+  color: @text_muted;
 }
 
 #pulseaudio.microphone {
@@ -167,8 +183,8 @@ tooltip {
 
 #battery {
   color: @green;
-  border-radius: 0px;
-  margin-right: 0px;
+  border-radius: 0px 10px 10px 0px;
+  margin-right: 7px;
 }
 
 #custom-weather {
@@ -182,11 +198,6 @@ tooltip {
   margin-right: 7px;
 }
 
-#custom-laptopwlogout {
-  color: @red;
-  border-radius: 0px 10px 10px 0px;
-  margin-right: 7px;
-}
 /*
 #tray > .passive {
   -gtk-icon-effect: dim;

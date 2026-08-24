@@ -348,9 +348,7 @@ Item {
                     // Reach out to the global 'masterWindow' ID and update both
                     // the morphing wrapper (animH) and the content wrapper (targetH)
                     if (typeof masterWindow !== "undefined") {
-                        let newHeight = window.s(510);
-                        masterWindow.animH = newHeight;
-                        masterWindow.targetH = newHeight;
+                        masterWindow.setContentHeight(window.s(510));
                     }
                 }
             }

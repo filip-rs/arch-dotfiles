@@ -15,16 +15,21 @@ MON=$(printf '\xf3\xb0\x8d\xb9') # U+F0379 (nf-md-monitor)
 WLP=$(printf '\xef\x80\xbe')    # U+F03E  (FontAwesome image)
 FOC=$(printf '\xf3\xb0\x84\x89') # U+F0109 (nf-md-timer)
 THM=$(printf '\xf3\xb0\x8d\xb0') # U+F0370 (nf-md-palette)
+BT=$(printf '\xef\x8a\x93')   # U+F293  (FontAwesome bluetooth-b)
+GDE=$(printf '\xef\x80\xad')  # U+F02D  (FontAwesome book)
 
+# label<TAB>qs_manager target (target may carry sub-arguments)
 entries=(
     "${CAL}  Calendar	calendar"
-    "${NET}  Network	network"
+    "${NET}  Wi-Fi	network wifi"
+    "${BT}  Bluetooth	network bt"
     "${VOL}  Volume	volume"
     "${BAT}  Battery	battery"
     "${MUS}  Music	music"
     "${MON}  Monitors	monitors"
     "${WLP}  Wallpaper	wallpaper"
     "${FOC}  Focus Time	focustime"
+    "${GDE}  Guide	guide"
     "${THM}  Theme	_theme"
 )
 
@@ -36,7 +41,7 @@ choice=$(printf '%s\n' "$labels" | wofi \
     --cache-file /dev/null \
     --style "$HOME/.config/wofi/style.css" \
     --width 320 \
-    --height 480 \
+    --height 540 \
     --hide-scroll \
     --insensitive) || exit 0
 
@@ -111,5 +116,7 @@ if [ "$target" = "_theme" ]; then
     exit 0
 fi
 
-# Widget toggle
-exec "$QS" toggle "$target"
+# Widget toggle. $target is intentionally unquoted so entries like
+# "network wifi" split into separate arguments.
+# shellcheck disable=SC2086
+exec "$QS" toggle $target --anchor=center

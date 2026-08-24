@@ -1079,13 +1079,11 @@ Item {
                         if (monitorsModel.count === 1) {
                             let mon = monitorsModel.get(0);
                             let monitorStr = mon.name + "," + mon.resW + "x" + mon.resH + "@" + mon.rate + ",0x0," + mon.sysScale;
-                            let monitorBlock = "monitor=" + monitorStr;
-                            
-                            // AWK script: Finds the first `monitor=` block, injects the new config, and ignores old monitor lines
-                            let saveCmd = "awk -v new_mons='" + monitorBlock + "' '/^monitor[[:space:]]*=/ { if (!done) { print new_mons; done=1; } next; } {print}' ~/.config/hypr/hyprland.conf > ~/.config/hypr/hyprland.conf.tmp && mv ~/.config/hypr/hyprland.conf.tmp ~/.config/hypr/hyprland.conf";
-                            
+
+                            // monitor_apply.sh applies the layout live (hyprctl eval + hl.monitor)
+                            // and rewrites the monitor block in host.lua.
                             Quickshell.execDetached(["notify-send", "Display Update", "Applied & Saved: " + mon.resW + "x" + mon.resH + " @ " + mon.rate + "Hz"]);
-                            Quickshell.execDetached(["sh", "-c", "hyprctl keyword monitor " + monitorStr + " ; " + saveCmd]);
+                            Quickshell.execDetached(["sh", "-c", "~/.config/hypr/scripts/monitor_apply.sh '" + monitorStr + "'"]);
                         } else {
                             let rects = [];
                             for (let i = 0; i < monitorsModel.count; i++) {
@@ -1149,9 +1147,8 @@ Item {
                                 if (rects[i].y < finalMinY) finalMinY = rects[i].y;
                             }
                             
-                            let batchCmds = [];
+                            let specArgs = "";
                             let summaryString = "";
-                            let monitorBlockArray = [];
 
                             for (let i = 0; i < rects.length; i++) {
                                 let r = rects[i];
@@ -1161,19 +1158,16 @@ Item {
                                 r.y = Math.round(r.y - finalMinY);
                                 
                                 let monitorStr = r.name + "," + r.resW + "x" + r.resH + "@" + r.rate + "," + r.x + "x" + r.y + "," + r.sysScale;
-                                batchCmds.push("keyword monitor " + monitorStr);
+                                specArgs += " '" + monitorStr + "'";
                                 summaryString += r.name + " ";
-                                
-                                monitorBlockArray.push("monitor=" + monitorStr);
                             }
                             
-                            let monitorBlock = monitorBlockArray.join("\\n");
-                            let saveCmd = "awk -v new_mons='" + monitorBlock + "' '/^monitor[[:space:]]*=/ { if (!done) { print new_mons; done=1; } next; } {print}' ~/.config/hypr/hyprland.conf > ~/.config/hypr/hyprland.conf.tmp && mv ~/.config/hypr/hyprland.conf.tmp ~/.config/hypr/hyprland.conf";
-                            
-                            let fullCommand = "hyprctl --batch '" + batchCmds.join(" ; ") + "'";
+                            // monitor_apply.sh applies every layout live (hyprctl eval + hl.monitor)
+                            // and rewrites the monitor block in host.lua.
+                            let fullCommand = "~/.config/hypr/scripts/monitor_apply.sh" + specArgs;
                             let postReloadCmd = "swww kill ; sleep 0.2 ; swww-daemon &";
                             
-                            Quickshell.execDetached(["sh", "-c", fullCommand + " ; " + saveCmd + " ; " + postReloadCmd]);
+                            Quickshell.execDetached(["sh", "-c", fullCommand + " ; " + postReloadCmd]);
                             Quickshell.execDetached(["notify-send", "Display Update", "Applied & Saved layout for: " + summaryString]);
                         }
                     }

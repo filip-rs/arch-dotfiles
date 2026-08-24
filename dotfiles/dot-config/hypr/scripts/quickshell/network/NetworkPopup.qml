@@ -117,6 +117,24 @@ Item {
     readonly property color btAccent: window.mauve
 
     property string activeMode: "bt"
+
+    // Current AirPods noise-control mode, reported by bluetooth_panel_logic.sh.
+    property string btAnc: ""
+
+    function ancLabel(m) {
+        if (m === "off") return "Off";
+        if (m === "anc") return "Noise Cancellation";
+        if (m === "transparency") return "Transparency";
+        if (m === "adaptive") return "Adaptive";
+        return "Not set";
+    }
+
+    function ancIcon(m) {
+        if (m === "anc") return "󰆧";
+        if (m === "transparency") return "󰗀";
+        if (m === "adaptive") return "󰓅";
+        return "󰝟";
+    }
     readonly property color activeColor: activeMode === "wifi" ? window.wifiAccent : window.btAccent
     readonly property color activeGradientSecondary: Qt.darker(window.activeColor, 1.25)
 
@@ -426,6 +444,20 @@ Item {
                     if (obj.profile) {
                         nodes.push({ id: "prof_" + obj.mac, name: obj.profile, icon: (obj.profile === "Hi-Fi (A2DP)" ? "󰓃" : "󰋎"), action: "Audio Profile", isInfoNode: true, isActionable: false, parentIndex: cIndex });
                     }
+                    if (obj.airpods) {
+                        // Noise control via librepods-ctl. Click cycles
+                        // off -> ANC -> Transparency -> Adaptive.
+                        nodes.push({
+                            id: "anc_" + obj.mac,
+                            name: window.ancLabel(window.btAnc),
+                            icon: window.ancIcon(window.btAnc),
+                            action: "Noise Control",
+                            isInfoNode: true,
+                            isActionable: true,
+                            cmdStr: "bash " + window.scriptsDir + "/bluetooth_panel_logic.sh --anc-cycle",
+                            parentIndex: cIndex
+                        });
+                    }
                     nodes.push({ id: "mac_" + obj.mac, name: obj.mac || "Unknown", icon: "󰒋", action: "MAC Address", isInfoNode: true, isActionable: false, parentIndex: cIndex });
                 }
             }
@@ -546,6 +578,11 @@ Item {
             } else {
                 window.btPower = fetchedPower;
                 window.expectedBtPower = "";
+            }
+
+            if (data.anc !== undefined && data.anc !== window.btAnc) {
+                window.btAnc = data.anc;
+                if (window.activeMode === "bt") window.updateInfoNodes();
             }
 
             let oldBtLen = window.btConnected.length;
