@@ -34,11 +34,18 @@
             "mpris",
             "custom/audio",
             "pulseaudio#microphone",
+            "custom/mullvad",
+            "tray",
+            // One merged status pill (see style.css). The caps are network and
+            // wlogout because those are the only two present on every machine:
+            // backlight and battery drop out on the desktop, so making either
+            // of them a cap would leave a square corner there. Order is fixed
+            // -- changing it here without changing the border-radii there
+            // breaks the shape.
             "network",
             "bluetooth",
             "backlight",
             "battery",
-            "tray",
             "custom/wlogout"
         ]
     },

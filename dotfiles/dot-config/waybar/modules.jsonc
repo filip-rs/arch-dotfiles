@@ -44,23 +44,42 @@
         "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
         "on-click": "~/.config/hypr/scripts/qs_manager.sh toggle calendar --anchor=left"
     },
-    // Wi-Fi icon. Click opens the quickshell network panel in wifi mode.
+    // Wi-Fi. The icon itself carries the signal strength (format-icons is
+    // indexed low-to-high by signalStrength), so no percentage on the bar --
+    // it is in the tooltip instead. Right cap of the merged status group.
     "network": {
-        "format-wifi": "  {signalStrength}%",
+        "format-wifi": "{icon}",
+        "format-icons": [
+            "󰤯",
+            "󰤟",
+            "󰤢",
+            "󰤥",
+            "󰤨"
+        ],
         "format-ethernet": "{ipaddr}",
-        "tooltip-format": "{essid} — {ifname} via {gwaddr}",
-        "format-linked": "{ifname} (No IP)",
-        "format-disconnected": "Disconnected",
+        "format-linked": "󰤫  {ifname}",
+        "format-disconnected": "󰤮",
+        "tooltip-format": "{ifname} via {gwaddr}",
+        "tooltip-format-wifi": "{essid}  {signalStrength}%  ({frequency} GHz)\n{ifname} via {gwaddr}",
+        "tooltip-format-ethernet": "{ipaddr}\n{ifname} via {gwaddr}",
+        "tooltip-format-disconnected": "Disconnected",
         "on-click": "~/.config/hypr/scripts/qs_manager.sh toggle network wifi --anchor=right"
     },
-    // Bluetooth icon. Click opens the same panel in bluetooth mode.
+    // Bluetooth. Material Design glyphs (U+F0000 plane) so the icon matches
+    // the weight of its battery/brightness neighbours -- the old Font Awesome
+    // bluetooth glyph rendered noticeably smaller than everything around it.
+    // The rune is still narrow for its em box, so a pango span nudges just the
+    // glyph up a size -- doing it in CSS would enlarge {num_connections} too.
+    // Never hidden: it is the left cap of the merged status group.
     "bluetooth": {
-        "format": "",
-        "format-disabled": "",
-        "format-connected": " {num_connections}",
-        "tooltip-format": "{device_alias}",
-        "tooltip-format-connected": " {device_enumerate}",
+        "format": "<span size='large'>󰂯</span>",
+        "format-disabled": "<span size='large'>󰂲</span>",
+        "format-off": "<span size='large'>󰂲</span>",
+        "format-connected": "<span size='large'>󰂱</span> {num_connections}",
+        "tooltip-format": "{controller_alias}",
+        "tooltip-format-connected": "󰂱 {device_enumerate}",
         "tooltip-format-enumerate-connected": "{device_alias}",
+        "tooltip-format-enumerate-connected-battery": "{device_alias}  {device_battery_percentage}%",
         "on-click": "~/.config/hypr/scripts/qs_manager.sh toggle network bt --anchor=right"
     },
     // Real output device, resolved through the Live EQ filter-chain.
@@ -84,6 +103,22 @@
         "on-scroll-down": "wpctl set-volume @DEFAULT_AUDIO_SOURCE@ 1%-",
         "scroll-step": 5,
         "on-click-right": "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"
+    },
+    // Mullvad tunnel state. Streams from `mullvad status listen` (see
+    // scripts/mullvad-status.sh) rather than polling, so an idle tunnel costs
+    // no timer wakeups. Left click opens the quickshell panel; right click
+    // toggles the tunnel without opening anything.
+    //
+    // Deliberately NOT part of the merged status pill to its right -- that
+    // group's caps carry hand-tuned border radii (see style.css).
+    "custom/mullvad": {
+        "exec": "~/.config/waybar/scripts/mullvad-status.sh",
+        "return-type": "json",
+        "format": "{}",
+        "tooltip": true,
+        "on-click": "~/.config/hypr/scripts/qs_manager.sh toggle mullvad --anchor=right",
+        "on-click-right": "bash -c 'if mullvad status | grep -q \"^Connected\"; then mullvad disconnect; else mullvad connect; fi'",
+        "on-click-middle": "mullvad reconnect"
     },
     "battery": {
         "states": {
@@ -126,7 +161,7 @@
     },
     "backlight": {
         "device": "intel_backlight",
-        "format": "{icon}   {percent}%",
+        "format": "{icon} {percent}%",
         "format-icons": [
             "󰃞",
             "󰃟",

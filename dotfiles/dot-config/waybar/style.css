@@ -23,6 +23,7 @@ tooltip {
 }
 
 #custom-power_profile,
+#custom-mullvad,
 #custom-weather,
 #window,
 #clock,
@@ -87,20 +88,50 @@ tooltip {
   border-radius: 10px;
 }
 
+/* ── AFK lecture capture ──
+   Idle emits an empty text field, which makes waybar hide the widget outright,
+   so there is no pill at all when nothing is being captured. The rule below
+   only ever paints while recording or processing. */
+#custom-afk {
+  border-radius: 10px;
+  margin-right: 7px;
+}
+
+/* The pulse animates `color`, not `opacity`: opacity fades the whole widget,
+   which took the pill's background down with the text. Both endpoints are
+   written out so GTK has something to interpolate between. */
 #custom-afk.recording {
-  color: #f38ba8;
-  /* the dot in the text field pulses so it is visible from the back row */
+  color: @red;
   animation: afk-blink 2s ease-in-out infinite;
 }
 
-#custom-afk.processing {
-  color: #f9e2af;
+/* GTK3 rejects comma-grouped keyframe selectors ("0%, 100%"), hence from/to.
+   alpha() keeps the trough tied to the generated theme colour rather than
+   hardcoding a second shade that theme_apply.sh would never update. */
+@keyframes afk-blink {
+  from {
+    color: @red;
+  }
+  50% {
+    color: alpha(@red, 0.3);
+  }
+  to {
+    color: @red;
+  }
 }
 
-@keyframes afk-blink {
-  50% {
-    opacity: 0.4;
-  }
+/* Recording stopped, transcription/summarisation still queued. Static: there
+   is nothing live to draw the eye to. */
+#custom-afk.processing {
+  color: @yellow;
+}
+
+/* Belt and braces — if a future state ever emits blank-but-not-empty text,
+   this keeps it from drawing an empty pill. */
+#custom-afk.idle {
+  background: transparent;
+  padding: 0px;
+  margin: 0px;
 }
 
 #temperature {
@@ -111,8 +142,34 @@ tooltip {
   color: @maroon;
 }
 
-#backlight {
-  border-radius: 10px 0px 0px 10px;
+
+/* Mullvad tunnel. A standalone chip, not part of the status pill to its right:
+   that group's border-radii are hand-tuned to its exact member order. Colour
+   carries the state, matching how #network and #custom-audio signal theirs. */
+#custom-mullvad {
+  border-radius: 10px;
+  margin-right: 7px;
+  padding: 0px 14px;
+  color: @text_muted;
+}
+
+#custom-mullvad.connected {
+  color: @green;
+}
+
+#custom-mullvad.connecting {
+  color: @yellow;
+}
+
+/* Lockdown mode: tunnel down *and* traffic deliberately cut. Distinct from a
+   plain disconnect, so it gets the alarm colour rather than the muted one. */
+#custom-mullvad.blocked {
+  color: @red;
+}
+
+#custom-mullvad.disconnected,
+#custom-mullvad.unavailable {
+  color: @text_muted;
 }
 
 #tray {
@@ -144,15 +201,52 @@ tooltip {
   margin-right: 7px;
 }
 
+/* ── Merged status pill: wifi · bluetooth · brightness · battery · power ──
+   Five modules rendered as one rounded block. Only the caps are rounded and
+   only the right cap carries the trailing margin, so the group does not
+   collide with whatever sits beside it.
+
+   The caps are deliberately network and custom-wlogout: they are the only two
+   members that exist on every machine. backlight has no intel_backlight on the
+   desktop and battery has no battery, so waybar drops both there — making
+   either one a cap would leave the desktop with a square corner.
+
+   Inner padding is tighter than a standalone module's 20px because five of
+   them share one pill; the caps get the difference back on their outer edge.
+   Order is set in config.jsonc and must match the radii below. */
+#network,
+#bluetooth,
+#backlight,
+#battery,
+#custom-wlogout {
+  border-radius: 0px;
+  margin-right: 0px;
+  padding: 0px 11px;
+}
+
 #network {
   color: @yellow;
   border-radius: 10px 0px 0px 10px;
+  padding-left: 18px;
+}
+
+#network.disconnected {
+  color: @text_muted;
 }
 
 #bluetooth {
   color: @accent;
-  border-radius: 0px 10px 10px 0px;
-  margin-right: 0px;
+}
+
+/* Adapter present but switched off — still drawn rather than hidden, so the
+   pill keeps its shape either way. */
+#bluetooth.disabled,
+#bluetooth.off {
+  color: @text_muted;
+}
+
+#battery {
+  color: @green;
 }
 
 #custom-audio {
@@ -181,20 +275,16 @@ tooltip {
   margin-right: 7px;
 }
 
-#battery {
-  color: @green;
-  border-radius: 0px 10px 10px 0px;
-  margin-right: 7px;
-}
-
 #custom-weather {
   border-radius: 10px 10px 10px 10px;
   margin-right: 7px;
 }
 
+/* Right cap of the merged status pill. */
 #custom-wlogout {
   color: @red;
-  border-radius: 10px;
+  border-radius: 0px 10px 10px 0px;
+  padding-right: 18px;
   margin-right: 7px;
 }
 

@@ -9,11 +9,11 @@ hl.monitor({ output = "", mode = "preferred", position = "auto", scale = "auto" 
 
 -- Laptop: mirror the internal panel onto HDMI (projectors, TVs).
 hl.monitor({
-    output   = "HDMI-A-1",
-    mode     = "1920x1080@60",
-    position = "auto",
-    scale    = 1.25,
-    mirror   = "eDP-1",
+	output = "HDMI-A-1",
+	mode = "1920x1080@60",
+	position = "auto",
+	scale = 1.25,
+	mirror = "eDP-1",
 })
 
 -- Workspace -> output pinning.
@@ -21,19 +21,19 @@ hl.monitor({
 --   6-10  DP-1      (desktop centre)
 --   11-15 DP-3      (desktop right)
 local pinned = {
-    ["HDMI-A-1"] = { 1, 2, 3, 4, 5 },
-    ["DP-1"]     = { 6, 7, 8, 9, 10 },
-    ["DP-3"]     = { 11, 12, 13, 14, 15 },
+	["HDMI-A-1"] = { 1, 2, 3, 4, 5 },
+	["DP-1"] = { 6, 7, 8, 9, 10 },
+	["DP-3"] = { 11, 12, 13, 14, 15 },
 }
 
 for output, workspaces in pairs(pinned) do
-    for _, id in ipairs(workspaces) do
-        hl.workspace_rule({
-            workspace  = tostring(id),
-            monitor    = output,
-            persistent = true,
-        })
-    end
+	for _, id in ipairs(workspaces) do
+		hl.workspace_rule({
+			workspace = tostring(id),
+			monitor = output,
+			persistent = false,
+		})
+	end
 end
 
 -- Machine-specific monitor layout + session env.

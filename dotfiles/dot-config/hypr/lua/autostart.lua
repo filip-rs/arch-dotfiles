@@ -4,7 +4,12 @@
 hl.on("hyprland.start", function()
     -- Tray applets
     hl.exec_cmd("blueman-applet")
-    hl.exec_cmd("nm-applet --no-agent --indicator")
+    -- nm-applet is deliberately not started: the bar's own network module and
+    -- the quickshell wifi panel cover everything it did. It ran with
+    -- --no-agent, so it was never the secret agent either -- NetworkPopup.qml
+    -- passes the passphrase inline via `nmcli device wifi connect ... password`.
+    -- Re-enable by uncommenting if you ever want the indicator back:
+    -- hl.exec_cmd("nm-applet --no-agent --indicator")
 
     -- Serial adapter kernel module.
     -- NOTE: this needs a passwordless sudo rule to actually work. The proper

@@ -20,7 +20,8 @@ export PATH="$PATH:/opt/miniconda3/bin"
 
 export BROWSER=librewolf
 
-export GH_CONFIG_DIR="$HOME/.config/gh"
+# Default gh config dir, but keep an explicit override (gh-acc-swap relies on this).
+export GH_CONFIG_DIR="${GH_CONFIG_DIR:-$HOME/.config/gh}"
 
 export NVM_DIR=/usr/share/nvm
 #source $NVM_DIR/init-nvm.sh
@@ -251,6 +252,69 @@ search home
 nameserver 1.1.1.1
 options edns0 trust-ad
 EOF
+}
+
+gh-acc-swap() {
+    local alt_dir="$HOME/.config/gh-alt"
+    local alt_cfg="$alt_dir/gitconfig"
+    local name email id default_email
+
+    # 1. Log the alt account into its own isolated gh config dir (if needed).
+    if ! GH_CONFIG_DIR="$alt_dir" gh auth status &>/dev/null; then
+        echo "==> No alt account in $alt_dir — starting login."
+        echo "    (pick HTTPS; the 'configure git credentials' prompt is fine to answer either way)"
+        GH_CONFIG_DIR="$alt_dir" gh auth login --git-protocol https
+    fi
+
+    # 2. Build an isolated "global" gitconfig that inherits your real one, then
+    #    overrides commit identity and disables GPG signing (signing with
+    #    filip-rs's key would link the alt account to your main one).
+    if [[ ! -f "$alt_cfg" ]]; then
+        mkdir -p "$alt_dir"
+        name=$(GH_CONFIG_DIR="$alt_dir" gh api user --jq .login 2>/dev/null)
+        [[ -z "$name" ]] && name="alt-user"
+        id=$(GH_CONFIG_DIR="$alt_dir" gh api user --jq .id 2>/dev/null)
+        email=$(GH_CONFIG_DIR="$alt_dir" gh api user --jq .email 2>/dev/null)
+        [[ "$email" == "null" ]] && email=""
+        if [[ -z "$email" ]]; then
+            email=$(GH_CONFIG_DIR="$alt_dir" gh api user/emails --jq '.[] | select(.primary==true) | .email' 2>/dev/null | head -1)
+        fi
+        if [[ -z "$email" ]]; then
+            default_email="${id:+$id+}${name}@users.noreply.github.com"
+            printf "Commit email for '%s' [enter = %s]: " "$name" "$default_email"
+            read -r email
+            [[ -z "$email" ]] && email="$default_email"
+        fi
+        cat > "$alt_cfg" <<EOF
+[include]
+    path = $HOME/.gitconfig
+
+[user]
+    name = $name
+    email = $email
+
+[commit]
+    gpgsign = false
+EOF
+        echo "==> Wrote $alt_cfg  (name=$name  email=$email  gpgsign=false)"
+    fi
+
+    # Use whatever identity is actually in the file (lets you edit it later).
+    name=$(git config --file "$alt_cfg" user.name)
+    email=$(git config --file "$alt_cfg" user.email)
+
+    echo "==> Entering alt-GitHub shell: $name <$email>"
+    echo "    gh: $(GH_CONFIG_DIR="$alt_dir" gh api user --jq .login 2>/dev/null || echo "?")   — exit returns you to filip-rs"
+    echo "    verify any time with:  gh auth status   /   git config user.email"
+
+    GH_CONFIG_DIR="$alt_dir" \
+    GIT_CONFIG_GLOBAL="$alt_cfg" \
+    GIT_AUTHOR_NAME="$name"    GIT_AUTHOR_EMAIL="$email" \
+    GIT_COMMITTER_NAME="$name" GIT_COMMITTER_EMAIL="$email" \
+    GH_ACCOUNT=alt \
+    POWERLEVEL9K_INSTANT_PROMPT=quiet \
+    TMUX="${TMUX:-gh-alt-sandbox}" \
+    command zsh -i
 }
 
 #alias powersave="sudo echo "2000000" > /sys/devices/system/cpu/cpu*/cpufreq/scaling_max_freq"
