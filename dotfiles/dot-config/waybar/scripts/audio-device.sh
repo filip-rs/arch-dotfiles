@@ -128,8 +128,15 @@ emit() {
         text="$glyph  ${volume}%"
     fi
 
+    # Waybar closing our stdout is how a module is told to stop. bash reports that
+    # as an EPIPE return from the write rather than killing us with SIGPIPE, so
+    # without an explicit exit the loop below runs forever against a dead pipe --
+    # one leaked process per waybar restart, each still holding the terminal that
+    # waybar was started from and printing "write error: Broken pipe" into it on
+    # every event it wakes for. The write's own stderr is dropped so the exit is
+# silent -- bash would otherwise announce the EPIPE before we act on it.
     printf '{"text":%s,"tooltip":%s,"class":%s,"percentage":%d}\n' \
-        "$(json_str "$text")" "$(json_str "$tooltip")" "$(json_str "$class")" "$volume"
+        "$(json_str "$text")" "$(json_str "$tooltip")" "$(json_str "$class")" "$volume" 2>/dev/null || exit 0
 }
 
 json_str() {
@@ -140,11 +147,45 @@ emit
 
 # Re-emit on any sink / card / server change. `pactl subscribe` is chatty, so
 # coalesce bursts into a single update.
-pactl subscribe 2>/dev/null | while read -r line; do
+#
+# Fed by process substitution rather than `pactl subscribe | while`: a pipeline
+# would put this loop in a subshell, which waybar does not know about and so
+# cannot kill. That subshell outlived every waybar restart and kept writing to
+# the dead pipe. Read this way the loop runs in the main shell, so the exit in
+# emit() actually ends the script and `pactl subscribe` gets EPIPE and follows.
+# Waybar kills only the pid it spawned, and a process-substitution feeder is not
+# that pid -- left alone it lingers until its next write, leaking one stray
+# listener per waybar restart. Reap it on the way out instead. TERM/HUP are
+# trapped alongside EXIT because bash does not run an EXIT trap when it is
+# killed by an untrapped signal, which is exactly how waybar stops a module.
+_reap() {
+    trap - EXIT TERM INT HUP
+    [ -n "${FEEDER:-}" ] && kill "$FEEDER" 2>/dev/null
+    exit 0
+}
+trap _reap EXIT TERM INT HUP
+
+# Waybar stops a module by killing the pid it spawned, and SIGKILL cannot be
+# trapped -- so a long-lived child of ours (the event feeder below) would be
+# left behind, one per waybar restart. PR_SET_PDEATHSIG has the kernel signal it
+# for us when we die, however we die. Empty where setpriv is missing (this
+# config is shared across machines); the EXIT trap still covers the ordinary
+# pipe-closed path there.
+if command -v setpriv >/dev/null 2>&1 && setpriv --pdeathsig TERM true 2>/dev/null; then
+    DIEWITH=(setpriv --pdeathsig TERM)
+else
+    DIEWITH=()
+fi
+
+# `exec` inside the substitution so no stray bash is left wrapping the feeder.
+exec 3< <(exec "${DIEWITH[@]}" pactl subscribe 2>/dev/null)
+FEEDER=$!
+
+while read -r line <&3; do
     case "$line" in
         *" on sink "*|*" on card "*|*" on server "*|*" on sink-input "*)
             # drain the rest of the burst
-            while read -r -t 0.1 _; do :; done
+            while read -r -t 0.1 _ <&3; do :; done
             emit
             ;;
     esac

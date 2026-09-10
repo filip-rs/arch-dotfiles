@@ -120,6 +120,29 @@
         "on-click-right": "bash -c 'if mullvad status | grep -q \"^Connected\"; then mullvad disconnect; else mullvad connect; fi'",
         "on-click-middle": "mullvad reconnect"
     },
+    // Idle inhibition, via hyprcaffeine. Goes through
+    // scripts/hyprcaffeine-status.sh rather than calling `hyprcaffeine waybar`
+    // on a 2s interval the way the vendor's waybar-setup wires it:
+    //
+    //   - the vendor text counts a running timer down in *seconds*, so the
+    //     module's width changes every tick and shoves the tray beside it
+    //     sideways. The wrapper rounds to whole minutes.
+    //   - it blocks on the state file instead of polling, so an idle machine
+    //     costs no timer wakeups -- same reasoning as custom/mullvad above.
+    //   - it self-hides where the binary is absent (this config is shared with
+    //     machines that do not have hyprcaffeine installed).
+    //
+    // Left click opens the quickshell panel; the direct toggles are on the
+    // other two buttons so the common gestures need no panel at all.
+    "custom/hyprcaffeine": {
+        "exec": "~/.config/waybar/scripts/hyprcaffeine-status.sh",
+        "return-type": "json",
+        "format": "{}",
+        "tooltip": true,
+        "on-click": "~/.config/hypr/scripts/qs_manager.sh toggle caffeine --anchor=right",
+        "on-click-right": "hyprcaffeine toggle",
+        "on-click-middle": "hyprcaffeine monitor toggle"
+    },
     "battery": {
         "states": {
             "good": 95,

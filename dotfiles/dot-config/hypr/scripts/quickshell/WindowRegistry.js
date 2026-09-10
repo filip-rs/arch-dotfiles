@@ -52,6 +52,7 @@ var DOCKED = {
     "volume":   { w: 480,  h: 760, anchor: "right",  comp: "volume/VolumePopup.qml" },
     "network":  { w: 900,  h: 700, anchor: "right",  comp: "network/NetworkPopup.qml" },
     "mullvad":  { w: 860,  h: 700, anchor: "right",  comp: "mullvad/MullvadPopup.qml" },
+    "caffeine": { w: 520,  h: 660, anchor: "right",  comp: "caffeine/CaffeinePopup.qml" },
     "calendar": { w: 1450, h: 750, anchor: "center", comp: "calendar/CalendarPopup.qml" },
     "music":    { w: 700,  h: 620, anchor: "left",   comp: "music/MusicPopup.qml" }
 };

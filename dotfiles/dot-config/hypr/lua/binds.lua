@@ -46,6 +46,19 @@ hl.bind(mod .. " + CTRL + SHIFT + I",
     hl.dsp.exec_cmd("/home/filip/Programming/Bash/mullvad-location-switcher/mullvad-switch.sh next"),
     { description = "Next Mullvad location" })
 
+-- Idle inhibition (hyprcaffeine). The panel is on SUPER + CTRL + C with the
+-- other quickshell panels below; these are the gestures worth having without
+-- opening it. They live here rather than in the file `hyprcaffeine keybinds
+-- install` writes, because that file binds its menu over SUPER + CTRL + SHIFT
+-- + I -- the Mullvad relay switcher directly above -- and is require()d after
+-- this one, so it silently won.
+hl.bind(mod .. " + CTRL + I", hl.dsp.exec_cmd("hyprcaffeine toggle"),
+    { description = "Caffeine: block suspend" })
+hl.bind(mod .. " + CTRL + D", hl.dsp.exec_cmd("hyprcaffeine monitor toggle"),
+    { description = "Caffeine: keep display on" })
+hl.bind(mod .. " + CTRL + SHIFT + D", hl.dsp.exec_cmd("hyprcaffeine lid toggle"),
+    { description = "Caffeine: block lid close" })
+
 -- ───────────────────────── quickshell panels ─────────────────────
 -- Keybind invocations get the centre anchor; waybar icons pass their own.
 
@@ -57,6 +70,7 @@ local panels = {
     { key = "S",     target = "calendar",  desc = "Calendar" },
     { key = "N",     target = "network",   desc = "Network" },
     { key = "V",     target = "volume",    desc = "Volume" },
+    { key = "C",     target = "caffeine",  desc = "Caffeine" },
 }
 
 for _, p in ipairs(panels) do

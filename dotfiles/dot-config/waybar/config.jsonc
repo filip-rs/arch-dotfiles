@@ -34,7 +34,12 @@
             "mpris",
             "custom/audio",
             "pulseaudio#microphone",
+            // Merged tray pill (see style.css): the two custom indicators that
+            // replaced tray apps, plus the real tray they sit next to. Caps are
+            // mullvad and tray -- both always render, so the shape holds even
+            // when caffeine self-hides on a machine without the binary.
             "custom/mullvad",
+            "custom/hyprcaffeine",
             "tray",
             // One merged status pill (see style.css). The caps are network and
             // wlogout because those are the only two present on every machine:

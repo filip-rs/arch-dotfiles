@@ -25,6 +25,7 @@ tooltip {
 #custom-power_profile,
 #custom-mullvad,
 #custom-weather,
+#custom-hyprcaffeine,
 #window,
 #clock,
 #battery,
@@ -143,13 +144,32 @@ tooltip {
 }
 
 
-/* Mullvad tunnel. A standalone chip, not part of the status pill to its right:
-   that group's border-radii are hand-tuned to its exact member order. Colour
-   carries the state, matching how #network and #custom-audio signal theirs. */
+/* ── Merged tray pill: mullvad · caffeine · tray ──
+   The two custom indicators that stand in for tray applications, rendered as
+   one rounded block together with the real tray beside them. Same construction
+   as the status pill further down: only the caps are rounded, and only the
+   right cap carries the trailing margin.
+
+   The caps are mullvad and tray because both always draw. mullvad-status.sh
+   emits an "unavailable" state rather than going quiet, and an empty tray still
+   draws its box. custom-hyprcaffeine is deliberately a middle segment: it emits
+   empty text on machines without the binary, and waybar drops a module with
+   empty text outright -- as a cap that would leave a square corner behind.
+
+   Order is set in config.jsonc and must match the radii below. */
+#custom-mullvad,
+#custom-hyprcaffeine,
+#tray {
+  border-radius: 0px;
+  margin-right: 0px;
+  padding: 0px 11px;
+}
+
+/* Left cap. Colour carries the tunnel state, matching how #network and
+   #custom-audio signal theirs. */
 #custom-mullvad {
-  border-radius: 10px;
-  margin-right: 7px;
-  padding: 0px 14px;
+  border-radius: 10px 0px 0px 10px;
+  padding-left: 18px;
   color: @text_muted;
 }
 
@@ -172,8 +192,11 @@ tooltip {
   color: @text_muted;
 }
 
+/* Right cap of the merged tray pill. The tray spaces its own icons
+   (modules.jsonc), so it needs less side padding than a glyph module. */
 #tray {
-  border-radius: 10px;
+  border-radius: 0px 10px 10px 0px;
+  padding-right: 14px;
   margin-right: 7px;
 }
 
@@ -318,4 +341,61 @@ tooltip {
 #mpris {
   border-radius: 10px 10px 10px 10px;
   margin-right: 6px;
+}
+
+/* ── Idle inhibition (hyprcaffeine) ──
+   Middle segment of the tray pill; geometry is in the group rule above.
+
+   The class names are hyprcaffeine's own (see `hyprcaffeine waybar`) and are
+   fixed -- one per combination of the three independent inhibitors -- but the
+   colours are ours. `hyprcaffeine waybar-setup` writes this block for you with
+   Catppuccin Mocha hardcoded, which is exactly what theme_apply.sh cannot
+   follow; every colour below resolves through colors.css instead, so a theme
+   switch carries the module with it.
+
+   The glyphs already say *which* inhibitors are held -- a filled cup for
+   suspend, plus a loop/timer/monitor/lid glyph per active toggle -- so colour
+   is left to say how much is being held, warming as holds accumulate and
+   landing on the alarm colour when all three are up at once. */
+#custom-hyprcaffeine.hc-off {
+  color: @text_muted;
+}
+
+/* Bounded: it expires on its own. Same colour as a connecting tunnel -- both
+   are states that resolve without being told to. */
+#custom-hyprcaffeine.hc-timer {
+  color: @yellow;
+}
+
+/* Unbounded: suspend is blocked until something turns it off. */
+#custom-hyprcaffeine.hc-infinite {
+  color: @peach;
+}
+
+#custom-hyprcaffeine.hc-monitor {
+  color: @sapphire;
+}
+
+#custom-hyprcaffeine.hc-lid {
+  color: @mauve;
+}
+
+#custom-hyprcaffeine.hc-timer-monitor,
+#custom-hyprcaffeine.hc-infinite-monitor {
+  color: @teal;
+}
+
+#custom-hyprcaffeine.hc-timer-lid,
+#custom-hyprcaffeine.hc-infinite-lid {
+  color: @pink;
+}
+
+#custom-hyprcaffeine.hc-monitor-lid {
+  color: @blue;
+}
+
+/* Suspend, display and lid all held. Nothing will put this machine to sleep --
+   worth the same colour as the power button. */
+#custom-hyprcaffeine.hc-all {
+  color: @red;
 }
