@@ -10,10 +10,8 @@
 -- Split across lua/*.lua. Each require() is its own scope, so an error in one
 -- file does not take the rest of the config down with it.
 --
--- The old hyprlang config is still on disk (hyprland.conf and friends).
--- Hyprland ignores it while this file exists, so
---     mv ~/.config/hypr/hyprland.lua{,.off}
--- is a complete rollback.
+-- The old hyprlang config (hyprland.conf and friends) has been removed; it
+-- lives in git history if it is ever needed again.
 
 require("lua.env")
 require("lua.theme")
@@ -23,4 +21,5 @@ require("lua.animations")
 require("lua.input")
 require("lua.rules")
 require("lua.binds")
+require("lua.plugins")
 require("lua.autostart")
