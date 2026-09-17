@@ -1,1 +1,1 @@
-stow . -t /home/filip/.local/share/applications
+stow . -t $HOME/.local/share/applications
