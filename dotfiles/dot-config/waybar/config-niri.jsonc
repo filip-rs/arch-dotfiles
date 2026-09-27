@@ -1,0 +1,66 @@
+// Niri variant of config.jsonc
+[
+    {
+        "name": "primary",
+        "include": ["modules.jsonc"],
+        "niri/workspaces": { "format": "{value}", "on-click": "activate" },
+        "niri/window": { "format": "{}" },
+        "output": ["eDP-1", "DP-1"],
+        "layer": "top",
+        "position": "bottom",
+        "mod": "dock",
+        "exclusive": true,
+        "passthrough": false,
+        "gtk-layer-shell": true,
+        "height": 0,
+
+        "modules-left": [
+            "clock",
+            "custom/weather",
+            "niri/workspaces"
+        ],
+        "modules-center": [
+            "custom/os_button",
+            "wlr/taskbar"
+        ],
+        "modules-right": [
+            "custom/afk",
+            "mpris",
+            "custom/audio",
+            "pulseaudio#microphone",
+            "custom/mullvad",
+            "custom/hyprcaffeine",
+            "tray",
+            "network",
+            "bluetooth",
+            "backlight",
+            "battery",
+            "custom/wlogout"
+        ]
+    },
+    {
+        "name": "complementary",
+        "include": ["modules.jsonc"],
+        "niri/workspaces": { "format": "{value}", "on-click": "activate" },
+        "niri/window": { "format": "{}" },
+        "output": ["DP-2", "DP-3", "HDMI-A-1"],
+        "layer": "top",
+        "position": "bottom",
+        "mod": "dock",
+        "exclusive": true,
+        "passthrough": false,
+        "gtk-layer-shell": true,
+        "height": 0,
+
+        "modules-left": [
+            "niri/workspaces"
+        ],
+        "modules-center": [
+            "clock",
+            "custom/weather"
+        ],
+        "modules-right": [
+            "niri/window"
+        ]
+    }
+]

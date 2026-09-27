@@ -1,0 +1,317 @@
+// niri config
+
+environment {
+    GTK_THEME "Orchis-Dark-Compact"
+    WALLPAPER_DIR "~/Pictures/Wallpapers"
+    SCRIPT_DIR "~/.config/hypr/scripts"
+    GDK_SCALE "1"
+    GDK_DPI_SCALE "1"
+}
+
+cursor {
+    xcursor-size 21
+}
+
+input {
+    keyboard {
+        xkb {
+            layout "us,no"
+            variant "altgr-intl,"
+            options "lv3:caps_switch"
+        }
+    }
+
+    touchpad {
+        tap
+        natural-scroll
+        accel-speed 0.1
+        scroll-factor 0.8
+    }
+
+    mouse {
+        accel-profile "flat"
+        accel-speed -0.35
+    }
+
+    focus-follows-mouse
+}
+
+output "eDP-1" {
+    mode "1920x1200@120"
+    scale 1
+    position x=0 y=0
+}
+
+output "DP-2" {
+    mode "1920x1080@60"
+    scale 1
+    position x=0 y=0
+}
+
+output "DP-1" {
+    mode "2560x1440@360"
+    scale 1
+    position x=1920 y=0
+}
+
+output "DP-3" {
+    mode "1920x1080@60"
+    scale 1
+    position x=4480 y=0
+}
+
+output "HDMI-A-1" {
+    mode "1920x1080@60"
+    scale 1.25
+}
+
+layout {
+    gaps 7
+    center-focused-column "never"
+    default-column-width { proportion 0.5; }
+
+    preset-column-widths {
+        proportion 0.33333
+        proportion 0.5
+        proportion 0.66667
+    }
+
+    focus-ring {
+        off
+    }
+
+    border {
+        width 1
+        active-color "#1a3a5caa"
+        inactive-color "#00081066"
+        urgent-color "#ff5458"
+    }
+}
+
+prefer-no-csd
+
+hotkey-overlay {
+    skip-at-startup
+}
+
+screenshot-path "~/Pictures/Screenshots/Screenshot_%Y-%m-%d_%H-%M-%S.png"
+
+spawn-sh-at-startup "systemctl --user start hyprpolkitagent"
+spawn-at-startup "swaync"
+spawn-at-startup "awww-daemon"
+spawn-sh-at-startup "waybar -c ~/.config/waybar/config-niri.jsonc"
+spawn-sh-at-startup "quickshell -p ~/.config/hypr/scripts/quickshell/Main.qml"
+spawn-sh-at-startup "hypridle -c ~/.config/niri/hypridle.conf"
+spawn-at-startup "librepods" "--hide"
+spawn-sh-at-startup "gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'"
+spawn-sh-at-startup "~/.config/hypr/scripts/quickshell/music/equalizer.sh apply"
+
+window-rule {
+    geometry-corner-radius 16
+    clip-to-geometry true
+}
+
+window-rule {
+    match app-id="mullvad-vpn"
+    match app-id="pavucontrol"
+    open-floating true
+    default-column-width { proportion 0.3; }
+    default-window-height { proportion 0.4; }
+    default-floating-position x=10 y=10 relative-to="bottom-right"
+}
+
+window-rule {
+    match title="^Volume$"
+    open-floating true
+    default-column-width { proportion 0.3; }
+    default-window-height { proportion 0.4; }
+    border {
+        active-color "#185ac4"
+        inactive-color "#185ac4"
+    }
+}
+
+window-rule {
+    match app-id="(?i)^thunar$"
+    match app-id="BadlionClient"
+    match title="^Untitled - Brave$"
+    open-floating true
+    default-column-width { proportion 0.5; }
+    default-window-height { proportion 0.5; }
+}
+
+window-rule {
+    match title="^discord$"
+    open-floating true
+    open-on-output "DP-2"
+    default-column-width { proportion 0.5; }
+    default-window-height { proportion 0.5; }
+}
+
+window-rule {
+    match app-id="^me\\.kavishdevar\\.librepods$"
+    open-floating true
+    open-focused false
+    default-column-width { proportion 0.35; }
+    default-window-height { proportion 0.6; }
+}
+
+layer-rule {
+    match namespace="^logout_dialog$"
+    background-effect {
+        blur true
+    }
+}
+
+binds {
+    Mod+Shift+Slash { show-hotkey-overlay; }
+
+    Mod+Q { spawn "alacritty"; }
+    Mod+X repeat=false { close-window; }
+    Mod+E { spawn "thunar"; }
+    Mod+V { toggle-window-floating; }
+    Mod+F { fullscreen-window; }
+    Mod+Shift+F { maximize-column; }
+    Mod+Space { spawn "wofi"; }
+    Mod+O { spawn "hyprlock"; }
+    Mod+U { spawn "wlogout" "--protocol" "layer-shell"; }
+    Mod+Shift+M { quit; }
+    Mod+Tab repeat=false { toggle-overview; }
+    Mod+R { spawn "obsidian" "--ozone-platform-hint=auto"; }
+
+    Mod+Minus { set-column-width "-10%"; }
+    Mod+Equal { set-column-width "+10%"; }
+    Mod+Shift+Minus { set-window-height "-10%"; }
+    Mod+Shift+Equal { set-window-height "+10%"; }
+    Mod+Comma { consume-or-expel-window-left; }
+    Mod+Period { consume-or-expel-window-right; }
+    Mod+C { center-column; }
+    Mod+Z { switch-preset-column-width; }
+    Mod+Shift+Z { toggle-column-tabbed-display; }
+
+    Mod+F5 { spawn-sh "niri msg action move-window-to-floating && niri msg action set-window-width 480 && niri msg action set-window-height 1080 && niri msg action center-window"; }
+
+    Mod+A { focus-column-left; }
+    Mod+D { focus-column-right; }
+    Mod+W { focus-workspace-up; }
+    Mod+S { focus-workspace-down; }
+    Mod+Shift+A { move-column-left; }
+    Mod+Shift+D { move-column-right; }
+    Mod+Shift+W { move-window-to-workspace-up; }
+    Mod+Shift+S { move-window-to-workspace-down; }
+
+    ISO_Level3_Shift+A { focus-column-left; }
+    ISO_Level3_Shift+D { focus-column-right; }
+    ISO_Level3_Shift+S { focus-workspace-down; }
+
+    Mod+H { focus-column-or-monitor-left; }
+    Mod+L { focus-column-or-monitor-right; }
+    Mod+K { focus-window-or-workspace-up; }
+    Mod+J { focus-window-or-workspace-down; }
+    Mod+Shift+H { move-column-left-or-to-monitor-left; }
+    Mod+Shift+L { move-column-right-or-to-monitor-right; }
+    Mod+Shift+K { move-window-up-or-to-workspace-up; }
+    Mod+Shift+J { move-window-down-or-to-workspace-down; }
+
+    Mod+1 { focus-workspace 1; }
+    Mod+2 { focus-workspace 2; }
+    Mod+3 { focus-workspace 3; }
+    Mod+4 { focus-workspace 4; }
+    Mod+5 { focus-workspace 5; }
+    Mod+6 { focus-workspace 6; }
+    Mod+7 { focus-workspace 7; }
+    Mod+8 { focus-workspace 8; }
+    Mod+9 { focus-workspace 9; }
+    Mod+0 { focus-workspace 10; }
+    Mod+Shift+1 { move-window-to-workspace 1; }
+    Mod+Shift+2 { move-window-to-workspace 2; }
+    Mod+Shift+3 { move-window-to-workspace 3; }
+    Mod+Shift+4 { move-window-to-workspace 4; }
+    //Mod+Shift+5 { move-window-to-workspace 5; }
+    Mod+Shift+6 { move-window-to-workspace 6; }
+    Mod+Shift+7 { move-window-to-workspace 7; }
+    Mod+Shift+8 { move-window-to-workspace 8; }
+    Mod+Shift+9 { move-window-to-workspace 9; }
+    Mod+Shift+0 { move-window-to-workspace 10; }
+
+    Mod+WheelScrollDown cooldown-ms=150 { focus-workspace-down; }
+    Mod+WheelScrollUp cooldown-ms=150 { focus-workspace-up; }
+    Mod+Shift+WheelScrollDown { focus-column-right; }
+    Mod+Shift+WheelScrollUp { focus-column-left; }
+
+    Print { screenshot; }
+    Mod+Shift+5 { spawn "~/.config/hypr/scripts/screenshot_copy.sh"; }
+    Mod+Ctrl+Shift+S { spawn "~/.config/hypr/scripts/screenshot_save.sh"; }
+    Mod+Ctrl+Shift+Space { spawn-sh "niri msg action switch-layout next && notify-send Keyboard \"$(niri msg -j keyboard-layouts | jq -r '.names[.current_idx]')\""; }
+    Mod+Ctrl+Shift+7 { spawn "~/.config/hypr/scripts/speaker_toggle.sh"; }
+
+    Mod+Shift+R { spawn-sh "~/.local/bin/afk toggle"; }
+    Mod+Ctrl+L { spawn-sh "~/.local/bin/login-bind type school"; }
+    Mod+Ctrl+Shift+I { spawn-sh "~/Programming/Bash/mullvad-location-switcher/mullvad-switch.sh next"; }
+
+    Mod+Ctrl+I { spawn-sh "hyprcaffeine toggle"; }
+    Mod+Ctrl+D { spawn-sh "hyprcaffeine monitor toggle"; }
+    Mod+Ctrl+Shift+D { spawn-sh "hyprcaffeine lid toggle"; }
+
+    Mod+Ctrl+M { spawn-sh "~/.config/hypr/scripts/qs_manager.sh toggle monitors --anchor=center"; }
+    Mod+Ctrl+Q { spawn-sh "~/.config/hypr/scripts/qs_manager.sh toggle music --anchor=center"; }
+    Mod+Ctrl+B { spawn-sh "~/.config/hypr/scripts/qs_manager.sh toggle battery --anchor=center"; }
+    Mod+Ctrl+W { spawn-sh "~/.config/hypr/scripts/qs_manager.sh toggle wallpaper --anchor=center"; }
+    Mod+Ctrl+S { spawn-sh "~/.config/hypr/scripts/qs_manager.sh toggle calendar --anchor=center"; }
+    Mod+Ctrl+N { spawn-sh "~/.config/hypr/scripts/qs_manager.sh toggle network --anchor=center"; }
+    Mod+Ctrl+V { spawn-sh "~/.config/hypr/scripts/qs_manager.sh toggle volume --anchor=center"; }
+    Mod+Ctrl+C { spawn-sh "~/.config/hypr/scripts/qs_manager.sh toggle caffeine --anchor=center"; }
+    Mod+Shift+T { spawn-sh "~/.config/hypr/scripts/qs_manager.sh toggle focustime --anchor=center"; }
+    Mod+Ctrl+Shift+G { spawn-sh "~/.config/hypr/scripts/qs_manager.sh toggle guide --anchor=center"; }
+    Mod+Ctrl+Space { spawn-sh "~/.config/hypr/scripts/qs_menu.sh"; }
+
+    Mod+Shift+B { spawn-sh "killall waybar; waybar -c ~/.config/waybar/config-niri.jsonc"; }
+    Mod+Shift+N { spawn-sh "swaync-client -t -sw"; }
+    Mod+Shift+C { spawn-sh "wl-color-picker clipboard --no-notify"; }
+    Mod+Shift+E { spawn-sh "bemoji -t"; }
+
+    Ctrl+Shift+B { spawn "brave-beta" "--new-window" "https://www.bible.com/bible/111/MAT.1.NIV"; }
+    Ctrl+Shift+Alt+E { spawn "brave-beta" "--new-window" "https://chat.openai.com/"; }
+    Ctrl+Shift+Alt+A { spawn "brave-beta" "--new-window" "https://claude.ai/"; }
+    Ctrl+Shift+Alt+L { spawn "brave-beta" "--new-window" "https://linkedin.com/"; }
+
+    Mod+Y { spawn "wl-kbptr" "-o" "modes=floating,bisect" "-o" "mode_floating.source=detect"; }
+    Mod+T { spawn "wl-kbptr"; }
+
+    Mod+BracketLeft { spawn "wtype" "å"; }
+    Mod+Semicolon { spawn "wtype" "ø"; }
+    Mod+Apostrophe { spawn "wtype" "æ"; }
+    Ctrl+Alt+2 { spawn "wtype" "@"; }
+    Ctrl+Alt+3 { spawn "wtype" "£"; }
+    Ctrl+Alt+4 { spawn "wtype" "$"; }
+    Ctrl+Alt+7 { spawn "wtype" "{"; }
+    Ctrl+Alt+8 { spawn "wtype" "["; }
+    Ctrl+Alt+9 { spawn "wtype" "]"; }
+    Ctrl+Alt+0 { spawn "wtype" "}"; }
+
+    ISO_Level3_Shift+Q { spawn "alacritty"; }
+    ISO_Level3_Shift+O { spawn "hyprlock"; }
+    ISO_Level3_Shift+E { spawn "thunar"; }
+    ISO_Level3_Shift+V { toggle-window-floating; }
+    ISO_Level3_Shift+F { fullscreen-window; }
+    ISO_Level3_Shift+Space { spawn "wofi"; }
+
+    XF86Launch1 { spawn "rog-control-center"; }
+    XF86Launch4 { spawn-sh "asusctl profile -n; pkill -SIGRTMIN+8 waybar"; }
+    XF86Launch3 { spawn-sh "asusctl led-mode -n"; }
+
+    XF86AudioMute allow-when-locked=true { spawn-sh "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"; }
+    XF86AudioLowerVolume allow-when-locked=true { spawn-sh "wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 5%-"; }
+    XF86AudioRaiseVolume allow-when-locked=true { spawn-sh "wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 5%+"; }
+    XF86AudioPlay allow-when-locked=true { spawn-sh "playerctl play-pause"; }
+    XF86AudioPrev allow-when-locked=true { spawn-sh "playerctl previous"; }
+    XF86AudioNext allow-when-locked=true { spawn-sh "playerctl next"; }
+
+    XF86MonBrightnessDown allow-when-locked=true { spawn-sh "brightnessctl set 1%-"; }
+    XF86MonBrightnessUp allow-when-locked=true { spawn-sh "brightnessctl set 1%+"; }
+    Mod+XF86MonBrightnessDown allow-when-locked=true { spawn-sh "brightnessctl set 100%-"; }
+    Mod+XF86MonBrightnessUp allow-when-locked=true { spawn-sh "brightnessctl set 50%+"; }
+
+    XF86KbdBrightnessDown { spawn-sh "brightnessctl -d asus::kbd_backlight set 33%-"; }
+    XF86KbdBrightnessUp { spawn-sh "brightnessctl -d asus::kbd_backlight set 33%+"; }
+}
