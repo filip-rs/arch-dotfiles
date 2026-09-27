@@ -4,12 +4,12 @@
 #
 # Reads a theme JSON and generates per-app color configs.
 # In wallpaper mode, reads the matugen-generated qs_colors.json.
-# In manual mode, copies a theme file from ~/.config/hypr/themes/.
+# In manual mode, copies a theme file from ~/.config/scripts/desktop/themes/.
 
 set -euo pipefail
 
-THEME_DIR="$HOME/.config/hypr/themes"
-QS_JSON="$HOME/.config/hypr/scripts/quickshell/qs_colors.json"
+THEME_DIR="$HOME/.config/scripts/desktop/themes"
+QS_JSON="$HOME/.config/quickshell/qs_colors.json"
 STATE_FILE="$HOME/.cache/current_theme"
 
 mode="${1:-}"
@@ -362,7 +362,7 @@ if [ "$skip_reload" != "--no-reload" ]; then
     disown
 
     # Hyprland (reloads config including colors.lua)
-    hyprctl reload 2>/dev/null || true
+    [ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ] && { hyprctl reload >/dev/null 2>&1 || true; }
 
     # CAVA (rebuild config from base + generated colors)
     if [ -f "$HOME/.config/cava/config_base" ] && [ -f "$HOME/.config/cava/colors" ]; then

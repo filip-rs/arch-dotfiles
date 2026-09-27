@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Wofi menu for toggling Quickshell widgets and switching themes.
 
-QS="$HOME/.config/hypr/scripts/qs_manager.sh"
-THEME_APPLY="$HOME/.config/hypr/scripts/theme_apply.sh"
-THEME_DIR="$HOME/.config/hypr/themes"
+QS="$HOME/.config/scripts/desktop/qs_manager.sh"
+THEME_APPLY="$HOME/.config/scripts/desktop/theme_apply.sh"
+THEME_DIR="$HOME/.config/scripts/desktop/themes"
 
 # Icons via printf so multi-byte glyphs survive copy/paste.
 CAL=$(printf '\xef\x81\xb3')    # U+F073  (FontAwesome calendar)

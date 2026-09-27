@@ -131,7 +131,7 @@ handle_wallpaper_prep() {
 
     if [ -z "$CURRENT_SRC" ]; then
         # Derive current wallpaper name from the cached split used as center.png
-        SPLIT_DIR="$HOME/.config/hypr/scripts/WallpaperSplitter"
+        SPLIT_DIR="$HOME/.config/scripts/desktop/WallpaperSplitter"
         CENTER="$SPLIT_DIR/center.png"
         if [ -f "$CENTER" ]; then
             CENTER_SUM=$(md5sum "$CENTER" 2>/dev/null | awk '{print $1}')
@@ -177,7 +177,7 @@ handle_network_prep() {
 # -----------------------------------------------------------------------------
 # ZOMBIE WATCHDOG
 # -----------------------------------------------------------------------------
-MAIN_QML_PATH="$HOME/.config/hypr/scripts/quickshell/Main.qml"
+MAIN_QML_PATH="$HOME/.config/quickshell/Main.qml"
 
 if ! pgrep -f "quickshell.*Main\.qml" >/dev/null; then
     quickshell -p "$MAIN_QML_PATH" >/dev/null 2>&1 &

@@ -28,6 +28,6 @@ for s in json.load(sys.stdin):
 print('none')"
         ;;
     toggle-port)
-        bash "$HOME/.config/hypr/scripts/speaker_toggle.sh"
+        bash "$HOME/.config/scripts/desktop/speaker_toggle.sh"
         ;;
 esac

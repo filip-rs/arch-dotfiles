@@ -42,7 +42,7 @@
     "clock": {
         "format": "{:%H:%M %b %e}",
         "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
-        "on-click": "~/.config/hypr/scripts/qs_manager.sh toggle calendar --anchor=left"
+        "on-click": "~/.config/scripts/desktop/qs_manager.sh toggle calendar --anchor=left"
     },
     // Wi-Fi. The icon itself carries the signal strength (format-icons is
     // indexed low-to-high by signalStrength), so no percentage on the bar --
@@ -63,7 +63,7 @@
         "tooltip-format-wifi": "{essid}  {signalStrength}%  ({frequency} GHz)\n{ifname} via {gwaddr}",
         "tooltip-format-ethernet": "{ipaddr}\n{ifname} via {gwaddr}",
         "tooltip-format-disconnected": "Disconnected",
-        "on-click": "~/.config/hypr/scripts/qs_manager.sh toggle network wifi --anchor=right"
+        "on-click": "~/.config/scripts/desktop/qs_manager.sh toggle network wifi --anchor=right"
     },
     // Bluetooth. Material Design glyphs (U+F0000 plane) so the icon matches
     // the weight of its battery/brightness neighbours -- the old Font Awesome
@@ -80,7 +80,7 @@
         "tooltip-format-connected": "󰂱 {device_enumerate}",
         "tooltip-format-enumerate-connected": "{device_alias}",
         "tooltip-format-enumerate-connected-battery": "{device_alias}  {device_battery_percentage}%",
-        "on-click": "~/.config/hypr/scripts/qs_manager.sh toggle network bt --anchor=right"
+        "on-click": "~/.config/scripts/desktop/qs_manager.sh toggle network bt --anchor=right"
     },
     // Real output device, resolved through the Live EQ filter-chain.
     // See scripts/audio-device.sh — the built-in pulseaudio module cannot
@@ -89,7 +89,7 @@
         "exec": "~/.config/waybar/scripts/audio-device.sh",
         "return-type": "json",
         "format": "{}",
-        "on-click": "~/.config/hypr/scripts/qs_manager.sh toggle volume --anchor=right",
+        "on-click": "~/.config/scripts/desktop/qs_manager.sh toggle volume --anchor=right",
         "on-click-right": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
         "on-scroll-up": "wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 1%+",
         "on-scroll-down": "wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 1%-"
@@ -98,7 +98,7 @@
         "format": "{format_source}",
         "format-source": "  {volume}%",
         "format-source-muted": "    Muted",
-        "on-click": "~/.config/hypr/scripts/qs_manager.sh toggle volume --anchor=right",
+        "on-click": "~/.config/scripts/desktop/qs_manager.sh toggle volume --anchor=right",
         "on-scroll-up": "wpctl set-volume @DEFAULT_AUDIO_SOURCE@ 1%+",
         "on-scroll-down": "wpctl set-volume @DEFAULT_AUDIO_SOURCE@ 1%-",
         "scroll-step": 5,
@@ -116,7 +116,7 @@
         "return-type": "json",
         "format": "{}",
         "tooltip": true,
-        "on-click": "~/.config/hypr/scripts/qs_manager.sh toggle mullvad --anchor=right",
+        "on-click": "~/.config/scripts/desktop/qs_manager.sh toggle mullvad --anchor=right",
         "on-click-right": "bash -c 'if mullvad status | grep -q \"^Connected\"; then mullvad disconnect; else mullvad connect; fi'",
         "on-click-middle": "mullvad reconnect"
     },
@@ -139,7 +139,7 @@
         "return-type": "json",
         "format": "{}",
         "tooltip": true,
-        "on-click": "~/.config/hypr/scripts/qs_manager.sh toggle caffeine --anchor=right",
+        "on-click": "~/.config/scripts/desktop/qs_manager.sh toggle caffeine --anchor=right",
         "on-click-right": "hyprcaffeine toggle",
         "on-click-middle": "hyprcaffeine monitor toggle"
     },
@@ -167,7 +167,7 @@
             "󰁹"
         ],
         "tooltip-format": "{timeTo}  ({power}W)",
-        "on-click": "~/.config/hypr/scripts/qs_manager.sh toggle battery --anchor=right"
+        "on-click": "~/.config/scripts/desktop/qs_manager.sh toggle battery --anchor=right"
     },
     "mpris": {
         "format": "{player_icon} <i>{title}</i>",
@@ -180,7 +180,7 @@
             "paused": "▶"
         },
         "max-length": 45,
-        "on-click": "~/.config/hypr/scripts/qs_manager.sh toggle music --anchor=left"
+        "on-click": "~/.config/scripts/desktop/qs_manager.sh toggle music --anchor=left"
     },
     "backlight": {
         "device": "intel_backlight",

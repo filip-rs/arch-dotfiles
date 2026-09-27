@@ -76,7 +76,7 @@ Item {
     // -------------------------------------------------------------------------
     // STATE
     // -------------------------------------------------------------------------
-    readonly property string scriptsDir: Quickshell.env("HOME") + "/.config/hypr/scripts/quickshell/mullvad"
+    readonly property string scriptsDir: Quickshell.env("HOME") + "/.config/quickshell/mullvad"
 
     // "connected" | "connecting" | "disconnected" | "disconnecting" | "error"
     property string tunnelState: "disconnected"

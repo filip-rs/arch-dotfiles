@@ -9,10 +9,10 @@
 
 set -euo pipefail
 
-SPLIT_DIR="$HOME/.config/hypr/scripts/WallpaperSplitter"
+SPLIT_DIR="$HOME/.config/scripts/desktop/WallpaperSplitter"
 SPLITTER="$SPLIT_DIR/split_wallpaper.py"
 CACHE_DIR="$HOME/.cache/wallpaper_splits"
-THEME_APPLY="$HOME/.config/hypr/scripts/theme_apply.sh"
+THEME_APPLY="$HOME/.config/scripts/desktop/theme_apply.sh"
 
 LEFT_OUTPUT="DP-2"
 CENTER_OUTPUT="DP-1"
@@ -26,10 +26,18 @@ src="${src/#\~/$HOME}"
 src=$(readlink -f "$src")
 [ -f "$src" ] || { echo "File not found: $src"; exit 1; }
 
-# ── Detect connected outputs ──
-mapfile -t OUTPUTS < <(hyprctl -j monitors 2>/dev/null | jq -r '.[].name')
+# ── Detect connected outputs (Hyprland or niri) ──
+list_outputs() {
+    if [ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]; then
+        hyprctl -j monitors 2>/dev/null | jq -r '.[].name'
+    elif [ -n "${NIRI_SOCKET:-}" ]; then
+        # Skip disabled outputs (no logical geometry)
+        niri msg -j outputs 2>/dev/null | jq -r '.[] | select(.logical != null) | .name'
+    fi
+}
+mapfile -t OUTPUTS < <(list_outputs)
 if [ "${#OUTPUTS[@]}" -eq 0 ]; then
-    echo "No outputs reported by hyprctl; aborting"; exit 1
+    echo "No outputs reported by compositor; aborting"; exit 1
 fi
 
 # ── Measure image width ──

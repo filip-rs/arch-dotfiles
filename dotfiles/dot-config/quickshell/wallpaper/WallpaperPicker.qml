@@ -91,7 +91,7 @@ Item {
         let cleanName = window.getCleanName(safeFileName)
 
         const escapeBash = (str) => String(str).replace(/(["\\$`])/g, '\\$1');
-        const splitScript = Quickshell.env("HOME") + "/.config/hypr/scripts/wallpaper_split.sh";
+        const splitScript = Quickshell.env("HOME") + "/.config/scripts/desktop/wallpaper_split.sh";
 
         if (window.currentFilter === "Search" && window.hasSearched) {
             let alreadyExists = window.isDownloaded(safeFileName);

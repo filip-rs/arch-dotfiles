@@ -33,7 +33,7 @@ Item {
 
     Process {
         id: themeReader
-	command: ["cat", Quickshell.env("HOME") + "/.config/hypr/scripts/quickshell/qs_colors.json"]
+	command: ["cat", Quickshell.env("HOME") + "/.config/quickshell/qs_colors.json"]
 	stdout: StdioCollector {
             onStreamFinished: {
                 let txt = this.text.trim();

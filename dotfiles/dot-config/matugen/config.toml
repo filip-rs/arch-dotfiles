@@ -9,8 +9,8 @@
 # primary = "#65b2ff"
 
 [templates.quickshell]
-input_path = "~/.config/hypr/scripts/quickshell/colors.json.template"
-output_path = "~/.config/hypr/scripts/quickshell/qs_colors.json"
+input_path = "~/.config/quickshell/colors.json.template"
+output_path = "~/.config/quickshell/qs_colors.json"
 
 [templates.millennium]
 input_path = "~/.steam/steam/millennium/themes/Material-Theme/matugentemplate.css"

@@ -63,7 +63,7 @@ Item {
     readonly property color maroon: _theme.maroon
     readonly property color peach: _theme.peach
 
-    readonly property string scriptsDir: Quickshell.env("HOME") + "/.config/hypr/scripts/quickshell/network"
+    readonly property string scriptsDir: Quickshell.env("HOME") + "/.config/quickshell/network"
     
     readonly property color ethAccent: Qt.lighter(window.sapphire, 1.15) 
     readonly property color activeColor: window.ethAccent

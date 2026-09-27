@@ -3,7 +3,7 @@
 environment {
     GTK_THEME "Orchis-Dark-Compact"
     WALLPAPER_DIR "~/Pictures/Wallpapers"
-    SCRIPT_DIR "~/.config/hypr/scripts"
+    SCRIPT_DIR "~/.config/scripts/desktop"
     GDK_SCALE "1"
     GDK_DPI_SCALE "1"
 }
@@ -100,11 +100,11 @@ spawn-sh-at-startup "systemctl --user start hyprpolkitagent"
 spawn-at-startup "swaync"
 spawn-at-startup "awww-daemon"
 spawn-sh-at-startup "waybar -c ~/.config/waybar/config-niri.jsonc"
-spawn-sh-at-startup "quickshell -p ~/.config/hypr/scripts/quickshell/Main.qml"
+spawn-sh-at-startup "quickshell -p ~/.config/quickshell/Main.qml"
 spawn-sh-at-startup "hypridle -c ~/.config/niri/hypridle.conf"
 spawn-at-startup "librepods" "--hide"
 spawn-sh-at-startup "gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'"
-spawn-sh-at-startup "~/.config/hypr/scripts/quickshell/music/equalizer.sh apply"
+spawn-sh-at-startup "~/.config/quickshell/music/equalizer.sh apply"
 
 window-rule {
     geometry-corner-radius 16
@@ -240,10 +240,10 @@ binds {
     Mod+Shift+WheelScrollUp { focus-column-left; }
 
     Print { screenshot; }
-    Mod+Shift+5 { spawn "~/.config/hypr/scripts/screenshot_copy.sh"; }
-    Mod+Ctrl+Shift+S { spawn "~/.config/hypr/scripts/screenshot_save.sh"; }
+    Mod+Shift+5 { spawn "~/.config/scripts/desktop/screenshot_copy.sh"; }
+    Mod+Ctrl+Shift+S { spawn "~/.config/scripts/desktop/screenshot_save.sh"; }
     Mod+Ctrl+Shift+Space { spawn-sh "niri msg action switch-layout next && notify-send Keyboard \"$(niri msg -j keyboard-layouts | jq -r '.names[.current_idx]')\""; }
-    Mod+Ctrl+Shift+7 { spawn "~/.config/hypr/scripts/speaker_toggle.sh"; }
+    Mod+Ctrl+Shift+7 { spawn "~/.config/scripts/desktop/speaker_toggle.sh"; }
 
     Mod+Shift+R { spawn-sh "~/.local/bin/afk toggle"; }
     Mod+Ctrl+L { spawn-sh "~/.local/bin/login-bind type school"; }
@@ -253,17 +253,17 @@ binds {
     Mod+Ctrl+D { spawn-sh "hyprcaffeine monitor toggle"; }
     Mod+Ctrl+Shift+D { spawn-sh "hyprcaffeine lid toggle"; }
 
-    Mod+Ctrl+M { spawn-sh "~/.config/hypr/scripts/qs_manager.sh toggle monitors --anchor=center"; }
-    Mod+Ctrl+Q { spawn-sh "~/.config/hypr/scripts/qs_manager.sh toggle music --anchor=center"; }
-    Mod+Ctrl+B { spawn-sh "~/.config/hypr/scripts/qs_manager.sh toggle battery --anchor=center"; }
-    Mod+Ctrl+W { spawn-sh "~/.config/hypr/scripts/qs_manager.sh toggle wallpaper --anchor=center"; }
-    Mod+Ctrl+S { spawn-sh "~/.config/hypr/scripts/qs_manager.sh toggle calendar --anchor=center"; }
-    Mod+Ctrl+N { spawn-sh "~/.config/hypr/scripts/qs_manager.sh toggle network --anchor=center"; }
-    Mod+Ctrl+V { spawn-sh "~/.config/hypr/scripts/qs_manager.sh toggle volume --anchor=center"; }
-    Mod+Ctrl+C { spawn-sh "~/.config/hypr/scripts/qs_manager.sh toggle caffeine --anchor=center"; }
-    Mod+Shift+T { spawn-sh "~/.config/hypr/scripts/qs_manager.sh toggle focustime --anchor=center"; }
-    Mod+Ctrl+Shift+G { spawn-sh "~/.config/hypr/scripts/qs_manager.sh toggle guide --anchor=center"; }
-    Mod+Ctrl+Space { spawn-sh "~/.config/hypr/scripts/qs_menu.sh"; }
+    Mod+Ctrl+M { spawn-sh "~/.config/scripts/desktop/qs_manager.sh toggle monitors --anchor=center"; }
+    Mod+Ctrl+Q { spawn-sh "~/.config/scripts/desktop/qs_manager.sh toggle music --anchor=center"; }
+    Mod+Ctrl+B { spawn-sh "~/.config/scripts/desktop/qs_manager.sh toggle battery --anchor=center"; }
+    Mod+Ctrl+W { spawn-sh "~/.config/scripts/desktop/qs_manager.sh toggle wallpaper --anchor=center"; }
+    Mod+Ctrl+S { spawn-sh "~/.config/scripts/desktop/qs_manager.sh toggle calendar --anchor=center"; }
+    Mod+Ctrl+N { spawn-sh "~/.config/scripts/desktop/qs_manager.sh toggle network --anchor=center"; }
+    Mod+Ctrl+V { spawn-sh "~/.config/scripts/desktop/qs_manager.sh toggle volume --anchor=center"; }
+    Mod+Ctrl+C { spawn-sh "~/.config/scripts/desktop/qs_manager.sh toggle caffeine --anchor=center"; }
+    Mod+Shift+T { spawn-sh "~/.config/scripts/desktop/qs_manager.sh toggle focustime --anchor=center"; }
+    Mod+Ctrl+Shift+G { spawn-sh "~/.config/scripts/desktop/qs_manager.sh toggle guide --anchor=center"; }
+    Mod+Ctrl+Space { spawn-sh "~/.config/scripts/desktop/qs_menu.sh"; }
 
     Mod+Shift+B { spawn-sh "killall waybar; waybar -c ~/.config/waybar/config-niri.jsonc"; }
     Mod+Shift+N { spawn-sh "swaync-client -t -sw"; }

@@ -11,6 +11,10 @@ arch-dotfiles/
 ├── dotfiles/
 │   ├── dot-config/        # ~/.config/
 │   │   ├── hypr/          # Hyprland 0.55+ config
+│   │   ├── niri/          # niri config
+│   │   ├── quickshell/    # Quickshell widgets (shared by both compositors)
+│   │   ├── scripts/
+│   │   │   └── desktop/   # theme/wallpaper pipeline, qs_manager, screenshots, themes/
 │   │   ├── nvim/          # Neovim (lua/filip/)
 │   │   ├── waybar/        # bar config + custom status scripts
 │   │   ├── wofi/  swaync/  wlogout/  nwg-dock-hyprland/  nwg-look/
@@ -83,8 +87,10 @@ pacman -S --needed - < pacman-list.txt
   `rules`, `theme`, `autostart`).
 - Per-machine settings (monitors, host env) live in `host.lua` — not tracked.
   `scripts/monitor_apply.sh` can rewrite the monitor section for you.
-- `scripts/quickshell/` holds helper scripts for the Quickshell widgets
-  (network/audio/bluetooth panels, music, mullvad relays, weather).
+- Compositor-agnostic pieces live outside `hypr/`: `~/.config/quickshell/`
+  holds the Quickshell widgets and their helper scripts (network/audio/bluetooth
+  panels, music, mullvad relays, weather), and `~/.config/scripts/desktop/`
+  holds the theme/wallpaper pipeline, `qs_manager.sh` and the other bound scripts.
 - `hyprback/` is the old conf-based setup kept around for reference.
 
 ## CI

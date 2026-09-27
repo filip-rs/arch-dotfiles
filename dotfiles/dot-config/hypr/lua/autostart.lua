@@ -14,7 +14,7 @@ hl.on("hyprland.start", function()
 	hl.exec_cmd("swaync")
 	hl.exec_cmd("awww-daemon")
 	hl.exec_cmd("waybar")
-	hl.exec_cmd("quickshell -p ~/.config/hypr/scripts/quickshell/Main.qml")
+	hl.exec_cmd("quickshell -p ~/.config/quickshell/Main.qml")
 	hl.exec_cmd("hypridle")
 
 	-- AirPods control daemon. librepods-ctl and the me.kavishdevar.* D-Bus
@@ -24,10 +24,10 @@ hl.on("hyprland.start", function()
 	hl.exec_cmd("gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'")
 
 	-- 10-band EQ PipeWire filter-chain (this is what replaces easyeffects).
-	hl.exec_cmd("~/.config/hypr/scripts/quickshell/music/equalizer.sh apply")
+	hl.exec_cmd("~/.config/quickshell/music/equalizer.sh apply")
 
 	-- restore wallpaper + theme on login.
-	-- hl.exec_cmd("~/.config/hypr/scripts/init.sh")
+	-- hl.exec_cmd("~/.config/scripts/desktop/init.sh")
 
 	hl.dispatch(hl.dsp.focus({ workspace = 3 }))
 end)

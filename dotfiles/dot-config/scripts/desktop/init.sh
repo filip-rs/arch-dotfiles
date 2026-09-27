@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 FLAG="$HOME/.cache/wallpaper_initialized"
-THEME_APPLY="$HOME/.config/hypr/scripts/theme_apply.sh"
-WALLPAPER_SPLIT="$HOME/.config/hypr/scripts/wallpaper_split.sh"
+THEME_APPLY="$HOME/.config/scripts/desktop/theme_apply.sh"
+WALLPAPER_SPLIT="$HOME/.config/scripts/desktop/wallpaper_split.sh"
 STATE_FILE="$HOME/.cache/current_theme"
 
 # Determine current theme mode
@@ -17,7 +17,7 @@ apply_theme() {
 
 # If the flag exists, just re-apply the split wallpapers and theme
 if [ -f "$FLAG" ]; then
-    SPLIT_DIR="$HOME/.config/hypr/scripts/WallpaperSplitter"
+    SPLIT_DIR="$HOME/.config/scripts/desktop/WallpaperSplitter"
 
     # Wait for awww-daemon to be ready
     for _ in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do

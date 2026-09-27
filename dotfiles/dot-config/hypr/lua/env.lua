@@ -3,7 +3,7 @@
 
 hl.env("GTK_THEME", "Orchis-Dark-Compact")
 hl.env("WALLPAPER_DIR", "~/Pictures/Wallpapers")
-hl.env("SCRIPT_DIR", "~/.config/hypr/scripts")
+hl.env("SCRIPT_DIR", "~/.config/scripts/desktop")
 
 hl.env("GDK_SCALE", "1")
 hl.env("GDK_DPI_SCALE", "1")

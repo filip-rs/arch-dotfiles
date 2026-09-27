@@ -3,7 +3,7 @@
 
 local mod   = "SUPER"
 local mod5  = "MOD5"     -- caps-as-level3 (kb_options = lv3:caps_switch)
-local scr   = "~/.config/hypr/scripts"
+local scr   = "~/.config/scripts/desktop"
 local qs    = scr .. "/qs_manager.sh"
 
 local browser = "brave-beta"

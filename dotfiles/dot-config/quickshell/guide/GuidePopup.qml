@@ -67,7 +67,7 @@ Item {
     Keys.onReturnPressed: {
         if (currentTab === 3) { 
             let target = modulesDataModel.get(selectedModuleIndex).target;
-            Quickshell.execDetached(["bash", Quickshell.env("HOME") + "/.config/hypr/scripts/qs_manager.sh", "toggle", target]);
+            Quickshell.execDetached(["bash", Quickshell.env("HOME") + "/.config/scripts/desktop/qs_manager.sh", "toggle", target]);
             event.accepted = true;
         }
     }
@@ -153,7 +153,7 @@ Item {
     // Load Weather Env config immediately on startup
     Process {
         id: envReader
-        command: ["bash", "-c", "cat ~/.config/hypr/scripts/quickshell/calendar/.env 2>/dev/null || echo ''"]
+        command: ["bash", "-c", "cat ~/.config/quickshell/calendar/.env 2>/dev/null || echo ''"]
         running: true
         stdout: StdioCollector {
             onStreamFinished: {
@@ -341,29 +341,29 @@ Item {
             { k1: "SUPER+SHIFT", k2: "1 - 0", action: "Move to Workspace", cmd: "" },
             { k1: "SUPER", k2: "D / A", action: "Next / Prev Workspace", cmd: "hyprctl dispatch 'hl.dsp.focus({ workspace = \"r+1\" })'" },
             { k1: "SUPER", k2: "S", action: "Special Workspace", cmd: "hyprctl dispatch 'hl.dsp.workspace.toggle_special(\"\")'" },
-            { k1: "SUPER+CTRL", k2: "SPACE", action: "Quickshell Module Menu", cmd: "bash ~/.config/hypr/scripts/qs_menu.sh" },
-            { k1: "SUPER+CTRL", k2: "S", action: "Calendar", cmd: "bash ~/.config/hypr/scripts/qs_manager.sh toggle calendar --anchor=center" },
-            { k1: "SUPER+CTRL", k2: "N", action: "Network (Wi-Fi / Bluetooth)", cmd: "bash ~/.config/hypr/scripts/qs_manager.sh toggle network --anchor=center" },
-            { k1: "SUPER+CTRL", k2: "V", action: "Volume", cmd: "bash ~/.config/hypr/scripts/qs_manager.sh toggle volume --anchor=center" },
-            { k1: "SUPER+CTRL", k2: "B", action: "Battery", cmd: "bash ~/.config/hypr/scripts/qs_manager.sh toggle battery --anchor=center" },
-            { k1: "SUPER+CTRL", k2: "Q", action: "Music", cmd: "bash ~/.config/hypr/scripts/qs_manager.sh toggle music --anchor=center" },
-            { k1: "SUPER+CTRL", k2: "M", action: "Monitors", cmd: "bash ~/.config/hypr/scripts/qs_manager.sh toggle monitors --anchor=center" },
-            { k1: "SUPER+CTRL", k2: "W", action: "Wallpaper Picker", cmd: "bash ~/.config/hypr/scripts/qs_manager.sh toggle wallpaper --anchor=center" },
-            { k1: "SUPER+SHIFT", k2: "T", action: "Focus Time", cmd: "bash ~/.config/hypr/scripts/qs_manager.sh toggle focustime --anchor=center" },
-            { k1: "SUPER+CTRL+SHIFT", k2: "G", action: "This Guide", cmd: "bash ~/.config/hypr/scripts/qs_manager.sh toggle guide --anchor=center" },
+            { k1: "SUPER+CTRL", k2: "SPACE", action: "Quickshell Module Menu", cmd: "bash ~/.config/scripts/desktop/qs_menu.sh" },
+            { k1: "SUPER+CTRL", k2: "S", action: "Calendar", cmd: "bash ~/.config/scripts/desktop/qs_manager.sh toggle calendar --anchor=center" },
+            { k1: "SUPER+CTRL", k2: "N", action: "Network (Wi-Fi / Bluetooth)", cmd: "bash ~/.config/scripts/desktop/qs_manager.sh toggle network --anchor=center" },
+            { k1: "SUPER+CTRL", k2: "V", action: "Volume", cmd: "bash ~/.config/scripts/desktop/qs_manager.sh toggle volume --anchor=center" },
+            { k1: "SUPER+CTRL", k2: "B", action: "Battery", cmd: "bash ~/.config/scripts/desktop/qs_manager.sh toggle battery --anchor=center" },
+            { k1: "SUPER+CTRL", k2: "Q", action: "Music", cmd: "bash ~/.config/scripts/desktop/qs_manager.sh toggle music --anchor=center" },
+            { k1: "SUPER+CTRL", k2: "M", action: "Monitors", cmd: "bash ~/.config/scripts/desktop/qs_manager.sh toggle monitors --anchor=center" },
+            { k1: "SUPER+CTRL", k2: "W", action: "Wallpaper Picker", cmd: "bash ~/.config/scripts/desktop/qs_manager.sh toggle wallpaper --anchor=center" },
+            { k1: "SUPER+SHIFT", k2: "T", action: "Focus Time", cmd: "bash ~/.config/scripts/desktop/qs_manager.sh toggle focustime --anchor=center" },
+            { k1: "SUPER+CTRL+SHIFT", k2: "G", action: "This Guide", cmd: "bash ~/.config/scripts/desktop/qs_manager.sh toggle guide --anchor=center" },
             { k1: "SUPER", k2: "O", action: "Lock Screen", cmd: "hyprlock" },
             { k1: "SUPER", k2: "U", action: "Logout Menu", cmd: "wlogout --protocol layer-shell" },
-            { k1: "SUPER+SHIFT", k2: "S", action: "Screenshot to Clipboard", cmd: "bash ~/.config/hypr/scripts/screenshot_copy.sh" },
-            { k1: "SUPER+SHIFT+CTRL", k2: "S", action: "Screenshot to File", cmd: "bash ~/.config/hypr/scripts/screenshot_save.sh" },
+            { k1: "SUPER+SHIFT", k2: "S", action: "Screenshot to Clipboard", cmd: "bash ~/.config/scripts/desktop/screenshot_copy.sh" },
+            { k1: "SUPER+SHIFT+CTRL", k2: "S", action: "Screenshot to File", cmd: "bash ~/.config/scripts/desktop/screenshot_save.sh" },
             { k1: "SUPER+SHIFT", k2: "N", action: "Notification Panel", cmd: "swaync-client -t -sw" },
             { k1: "SUPER+SHIFT", k2: "C", action: "Colour Picker", cmd: "wl-color-picker clipboard --no-notify" },
             { k1: "SUPER+SHIFT", k2: "E", action: "Emoji Picker", cmd: "bemoji -t" },
             { k1: "SUPER+SHIFT", k2: "B", action: "Restart Waybar", cmd: "killall waybar && waybar" },
             { k1: "SUPER", k2: "Y / T", action: "Keyboard Mouse (wl-kbptr)", cmd: "wl-kbptr" },
-            { k1: "SUPER+CTRL+SHIFT", k2: "SPACE", action: "Switch Keyboard Layout", cmd: "bash ~/.config/hypr/scripts/switch_layout.sh" },
-            { k1: "SUPER+CTRL+SHIFT", k2: "6", action: "Toggle 60 / 120 Hz", cmd: "bash ~/.config/hypr/scripts/switch_refreshrate.sh" },
-            { k1: "SUPER+CTRL+SHIFT", k2: "7", action: "Speakers / Headphones", cmd: "bash ~/.config/hypr/scripts/speaker_toggle.sh" },
-            { k1: "SUPER+CTRL+SHIFT", k2: "0", action: "Focus Mode (blank side screens)", cmd: "bash ~/.config/hypr/scripts/screen_manager.sh" },
+            { k1: "SUPER+CTRL+SHIFT", k2: "SPACE", action: "Switch Keyboard Layout", cmd: "bash ~/.config/scripts/desktop/switch_layout.sh" },
+            { k1: "SUPER+CTRL+SHIFT", k2: "6", action: "Toggle 60 / 120 Hz", cmd: "bash ~/.config/scripts/desktop/switch_refreshrate.sh" },
+            { k1: "SUPER+CTRL+SHIFT", k2: "7", action: "Speakers / Headphones", cmd: "bash ~/.config/scripts/desktop/speaker_toggle.sh" },
+            { k1: "SUPER+CTRL+SHIFT", k2: "0", action: "Focus Mode (blank side screens)", cmd: "bash ~/.config/scripts/desktop/screen_manager.sh" },
             { k1: "SUPER+SHIFT", k2: "R", action: "Toggle AFK Capture", cmd: "~/.local/bin/afk toggle" },
             { k1: "SUPER", k2: "[ ; '", action: "Type å ø æ", cmd: "" }
         ];
@@ -395,7 +395,7 @@ Item {
             NumberAnimation { target: root; property: "introSidebar"; to: 0.0; duration: 150; easing.type: Easing.InExpo }
         }
         NumberAnimation { target: root; property: "introBase"; to: 0.0; duration: 200; easing.type: Easing.InQuart }
-        ScriptAction { script: Quickshell.execDetached(["bash", Quickshell.env("HOME") + "/.config/hypr/scripts/qs_manager.sh", "close"]) }
+        ScriptAction { script: Quickshell.execDetached(["bash", Quickshell.env("HOME") + "/.config/scripts/desktop/qs_manager.sh", "close"]) }
     }
 
     // -------------------------------------------------------------------------
@@ -1311,7 +1311,7 @@ Item {
                             MouseArea {
                                 id: launchMa
                                 anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
-                                onClicked: Quickshell.execDetached(["bash", Quickshell.env("HOME") + "/.config/hypr/scripts/qs_manager.sh", "toggle", modulesDataModel.get(root.selectedModuleIndex).target])
+                                onClicked: Quickshell.execDetached(["bash", Quickshell.env("HOME") + "/.config/scripts/desktop/qs_manager.sh", "toggle", modulesDataModel.get(root.selectedModuleIndex).target])
                             }
                         }
                     }
@@ -1428,7 +1428,7 @@ Item {
                                 }
                                 onDoubleClicked: {
                                     root.selectedModuleIndex = index;
-                                    Quickshell.execDetached(["bash", Quickshell.env("HOME") + "/.config/hypr/scripts/qs_manager.sh", "toggle", model.target])
+                                    Quickshell.execDetached(["bash", Quickshell.env("HOME") + "/.config/scripts/desktop/qs_manager.sh", "toggle", model.target])
                                 }
                             }
                         }
@@ -1485,7 +1485,7 @@ Item {
                                             
                                             MouseArea {
                                                 id: wsMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
-                                                onClicked: Quickshell.execDetached(["bash", Quickshell.env("HOME") + "/.config/hypr/scripts/qs_manager.sh", wsNum.toString()])
+                                                onClicked: Quickshell.execDetached(["bash", Quickshell.env("HOME") + "/.config/scripts/desktop/qs_manager.sh", wsNum.toString()])
                                             }
                                         }
                                     }
@@ -1741,7 +1741,7 @@ Item {
                 property bool apiKeyVisible: false
 
                 function saveWeatherConfig() {
-                    var file = Quickshell.env("HOME") + "/.config/hypr/scripts/quickshell/calendar/.env";
+                    var file = Quickshell.env("HOME") + "/.config/quickshell/calendar/.env";
                     var cmds = [
                         "mkdir -p $(dirname " + file + ")",
                         "echo '# OpenWeather API Configuration (OVERWRITE, not add)' > " + file,

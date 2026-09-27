@@ -157,7 +157,7 @@ Variants {
             // 1. The continuous background daemon
             Process {
                 id: wsDaemon
-                command: ["bash", "-c", "~/.config/hypr/scripts/quickshell/workspaces.sh"]
+                command: ["bash", "-c", "~/.config/quickshell/workspaces.sh"]
                 running: true
             }
 
@@ -208,7 +208,7 @@ Variants {
             Process {
                 id: musicForceRefresh
                 running: true
-                command: ["bash", "-c", "bash ~/.config/hypr/scripts/quickshell/music/music_info.sh | tee /tmp/music_info.json"]
+                command: ["bash", "-c", "bash ~/.config/quickshell/music/music_info.sh | tee /tmp/music_info.json"]
                 stdout: StdioCollector {
                     onStreamFinished: {
                         let txt = this.text.trim();
@@ -288,7 +288,7 @@ Variants {
             Process {
                 id: sysPoller
                 running: true
-                command: ["bash", "-c", "~/.config/hypr/scripts/quickshell/sys_info.sh"]
+                command: ["bash", "-c", "~/.config/quickshell/sys_info.sh"]
                 stdout: StdioCollector {
                     onStreamFinished: {
                         let txt = this.text.trim();
@@ -333,16 +333,16 @@ Variants {
             
             Process {
                 id: sysWaiter
-                command: ["bash", "-c", "~/.config/hypr/scripts/quickshell/sys_waiter.sh"]
+                command: ["bash", "-c", "~/.config/quickshell/sys_waiter.sh"]
                 // Strictly use onExited. Quickshell will no longer hook into stdout, preventing pipe deadlocks.
                 onExited: sysPoller.running = true 
             }            // Weather remains a slow poll since it fetches from web
             Process {
                 id: weatherPoller
                 command: ["bash", "-c", `
-                    echo "$(~/.config/hypr/scripts/quickshell/calendar/weather.sh --current-icon)"
-                    echo "$(~/.config/hypr/scripts/quickshell/calendar/weather.sh --current-temp)"
-                    echo "$(~/.config/hypr/scripts/quickshell/calendar/weather.sh --current-hex)"
+                    echo "$(~/.config/quickshell/calendar/weather.sh --current-icon)"
+                    echo "$(~/.config/quickshell/calendar/weather.sh --current-temp)"
+                    echo "$(~/.config/quickshell/calendar/weather.sh --current-hex)"
                 `]
                 stdout: StdioCollector {
                     onStreamFinished: {
@@ -422,7 +422,7 @@ Variants {
                         id: centerMouse
                         anchors.fill: parent
                         hoverEnabled: true
-                        onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/qs_manager.sh toggle calendar"])
+                        onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/scripts/desktop/qs_manager.sh toggle calendar"])
                     }
 
                     // Using RowLayout to perfectly align children to vertical center naturally
@@ -634,7 +634,7 @@ Variants {
                                         id: wsPillMouse
                                         hoverEnabled: true
                                         anchors.fill: parent
-                                        onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/qs_manager.sh " + wsName])
+                                        onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/scripts/desktop/qs_manager.sh " + wsName])
                                     }
                                 }
                             }
@@ -685,7 +685,7 @@ Variants {
                                     width: infoLayout.width
                                     height: innerMediaLayout.height
                                     hoverEnabled: true
-                                    onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/qs_manager.sh toggle music"])
+                                    onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/scripts/desktop/qs_manager.sh toggle music"])
                                     
                                     Row {
                                         id: infoLayout
@@ -1002,7 +1002,7 @@ Variants {
                                         width: Math.min(implicitWidth, barWindow.s(100)); elide: Text.ElideRight 
                                     }
                                 }
-                                MouseArea { id: wifiMouse; hoverEnabled: true; anchors.fill: parent; onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/qs_manager.sh toggle network wifi"]) }
+                                MouseArea { id: wifiMouse; hoverEnabled: true; anchors.fill: parent; onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/scripts/desktop/qs_manager.sh toggle network wifi"]) }
                             }
 
                             // Bluetooth (Collapsed on Desktop)
@@ -1053,7 +1053,7 @@ Variants {
                                         width: Math.min(implicitWidth, barWindow.s(100)); elide: Text.ElideRight 
                                     }
                                 }
-                                MouseArea { id: btMouse; hoverEnabled: true; anchors.fill: parent; onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/qs_manager.sh toggle network bt"]) }
+                                MouseArea { id: btMouse; hoverEnabled: true; anchors.fill: parent; onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/scripts/desktop/qs_manager.sh toggle network bt"]) }
                             }
 
                             // Volume
@@ -1103,7 +1103,7 @@ Variants {
                                         color: barWindow.isSoundActive ? mocha.base : mocha.text; 
                                     }
                                 }
-                                MouseArea { id: volMouse; hoverEnabled: true; anchors.fill: parent; onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/qs_manager.sh toggle volume"]) }
+                                MouseArea { id: volMouse; hoverEnabled: true; anchors.fill: parent; onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/scripts/desktop/qs_manager.sh toggle volume"]) }
                             }
 
                             // Battery (or Power button for Desktop)
@@ -1158,7 +1158,7 @@ Variants {
                                         Behavior on color { ColorAnimation { duration: 300 } }
                                     }
                                 }
-                                MouseArea { id: batMouse; hoverEnabled: true; anchors.fill: parent; onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/qs_manager.sh toggle battery"]) }
+                                MouseArea { id: batMouse; hoverEnabled: true; anchors.fill: parent; onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/scripts/desktop/qs_manager.sh toggle battery"]) }
                             }
                         }
                     }
