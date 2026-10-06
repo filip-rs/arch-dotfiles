@@ -25,9 +25,15 @@ if [ -f "$FLAG" ]; then
         sleep 0.2
     done
 
-    awww img --outputs DP-2 --resize crop --transition-type none "$SPLIT_DIR/left.png" 2>/dev/null || true
-    awww img --outputs DP-1 --resize crop --transition-type none "$SPLIT_DIR/center.png" 2>/dev/null || true
-    awww img --outputs DP-3 --resize crop --transition-type none "$SPLIT_DIR/right.png" 2>/dev/null || true
+    # Same mapping as wallpaper_split.sh: desktop sides get their split,
+    # everything else (incl. the laptop panel) gets the center image.
+    source "$HOME/.config/scripts/lib/compositor.sh"
+    for o in $(list_outputs); do
+        img="$SPLIT_DIR/center.png"
+        [ "$o" = "DP-2" ] && [ -f "$SPLIT_DIR/left.png" ]  && img="$SPLIT_DIR/left.png"
+        [ "$o" = "DP-3" ] && [ -f "$SPLIT_DIR/right.png" ] && img="$SPLIT_DIR/right.png"
+        awww img --outputs "$o" --resize crop --transition-type none "$img" 2>/dev/null || true
+    done
 
     if [ "$current_theme" = "wallpaper" ] && [ -f "/tmp/lock_bg.png" ]; then
         matugen image "/tmp/lock_bg.png" --source-color-index 0

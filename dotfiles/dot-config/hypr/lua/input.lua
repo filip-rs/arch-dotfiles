@@ -1,14 +1,10 @@
 -- Keyboard, mouse, touchpad, gestures.
 -- Ported from the input{} / device{} / gestures{} blocks.
---
--- Two layouts are declared so switch_layout.sh can flip between them with
--- `hyprctl switchxkblayout` instead of sed-editing this file at runtime.
--- `us` stays first so keybinds resolve against it.
 
 hl.config({
     input = {
-        kb_layout  = "us,no",
-        kb_variant = "altgr-intl,",
+        kb_layout  = "us",
+        kb_variant = "altgr-intl",
         kb_model   = "",
         kb_options = "lv3:caps_switch",
         kb_rules   = "",

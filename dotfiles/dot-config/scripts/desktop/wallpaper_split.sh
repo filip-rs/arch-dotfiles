@@ -27,14 +27,7 @@ src=$(readlink -f "$src")
 [ -f "$src" ] || { echo "File not found: $src"; exit 1; }
 
 # ── Detect connected outputs (Hyprland or niri) ──
-list_outputs() {
-    if [ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]; then
-        hyprctl -j monitors 2>/dev/null | jq -r '.[].name'
-    elif [ -n "${NIRI_SOCKET:-}" ]; then
-        # Skip disabled outputs (no logical geometry)
-        niri msg -j outputs 2>/dev/null | jq -r '.[] | select(.logical != null) | .name'
-    fi
-}
+source "$HOME/.config/scripts/lib/compositor.sh"
 mapfile -t OUTPUTS < <(list_outputs)
 if [ "${#OUTPUTS[@]}" -eq 0 ]; then
     echo "No outputs reported by compositor; aborting"; exit 1

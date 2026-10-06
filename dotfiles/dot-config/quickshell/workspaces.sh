@@ -17,19 +17,6 @@ cleanup() {
 }
 trap cleanup EXIT SIGTERM SIGINT
 
-# --- Special Cleanup for Network/Bluetooth ---
-# The network toggle starts a background bluetooth scan that must be killed explicitly.
-BT_PID_FILE="$HOME/.cache/bt_scan_pid"
-
-if [ -f "$BT_PID_FILE" ]; then
-    kill $(cat "$BT_PID_FILE") 2>/dev/null
-    rm -f "$BT_PID_FILE"
-fi
-
-# Ensure bluetooth scan is explicitly turned off (timeout prevents deadlocks on fresh installs)
-(timeout 2 bluetoothctl scan off > /dev/null 2>&1) &
-# ---------------------------------------------
-
 # Configuration: How many workspaces do you want to show?
 SEQ_END=8
 

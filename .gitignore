@@ -2,6 +2,7 @@ latest.log
 dotfiles/dot-config/nvim/lazy-lock.json
 dotfiles/dot-config/hypr/local.conf
 dotfiles/dot-config/hypr/host.lua
+dotfiles/dot-config/niri/host.kdl
 dotfiles/dot-config/quickshell/guide/previews/
 
 .env

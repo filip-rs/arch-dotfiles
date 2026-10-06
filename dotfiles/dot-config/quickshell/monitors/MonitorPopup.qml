@@ -201,7 +201,8 @@ Item {
     // -------------------------------------------------------------------------
     Process {
         id: displayPoller
-        command: ["hyprctl", "monitors", "-j"]
+        // Hyprland- or niri-backed, always in `hyprctl monitors -j` shape
+        command: ["bash", Quickshell.env("HOME") + "/.config/scripts/lib/compositor.sh", "monitors-json"]
         running: true
         stdout: StdioCollector {
             onStreamFinished: {
@@ -772,6 +773,7 @@ Item {
                             model: [
                                 { resW: 3840, resH: 2160, label: "4K",   accent: window.pink }, 
                                 { resW: 2560, resH: 1440, label: "QHD",  accent: window.mauve },
+                                { resW: 1920, resH: 1200, label: "WUXGA", accent: window.sapphire },
                                 { resW: 1920, resH: 1080, label: "FHD",  accent: window.blue },
                                 { resW: 1600, resH: 900,  label: "HD+",  accent: window.teal }, 
                                 { resW: 1366, resH: 768,  label: "WXGA", accent: window.yellow }, 
@@ -1080,10 +1082,10 @@ Item {
                             let mon = monitorsModel.get(0);
                             let monitorStr = mon.name + "," + mon.resW + "x" + mon.resH + "@" + mon.rate + ",0x0," + mon.sysScale;
 
-                            // monitor_apply.sh applies the layout live (hyprctl eval + hl.monitor)
-                            // and rewrites the monitor block in host.lua.
+                            // monitor_apply.sh applies the layout live and persists it
+                            // (hypr/host.lua or niri/host.kdl).
                             Quickshell.execDetached(["notify-send", "Display Update", "Applied & Saved: " + mon.resW + "x" + mon.resH + " @ " + mon.rate + "Hz"]);
-                            Quickshell.execDetached(["sh", "-c", "~/.config/hypr/scripts/monitor_apply.sh '" + monitorStr + "'"]);
+                            Quickshell.execDetached(["sh", "-c", "~/.config/scripts/desktop/monitor_apply.sh '" + monitorStr + "'"]);
                         } else {
                             let rects = [];
                             for (let i = 0; i < monitorsModel.count; i++) {
@@ -1162,10 +1164,10 @@ Item {
                                 summaryString += r.name + " ";
                             }
                             
-                            // monitor_apply.sh applies every layout live (hyprctl eval + hl.monitor)
-                            // and rewrites the monitor block in host.lua.
-                            let fullCommand = "~/.config/hypr/scripts/monitor_apply.sh" + specArgs;
-                            let postReloadCmd = "swww kill ; sleep 0.2 ; swww-daemon &";
+                            // monitor_apply.sh applies every layout live and persists it
+                            // (hypr/host.lua or niri/host.kdl).
+                            let fullCommand = "~/.config/scripts/desktop/monitor_apply.sh" + specArgs;
+                            let postReloadCmd = "sleep 0.5 ; awww restore";
                             
                             Quickshell.execDetached(["sh", "-c", fullCommand + " ; " + postReloadCmd]);
                             Quickshell.execDetached(["notify-send", "Display Update", "Applied & Saved layout for: " + summaryString]);

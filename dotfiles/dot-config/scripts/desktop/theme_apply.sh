@@ -8,6 +8,7 @@
 
 set -euo pipefail
 
+source "$HOME/.config/scripts/lib/compositor.sh"
 THEME_DIR="$HOME/.config/scripts/desktop/themes"
 QS_JSON="$HOME/.config/quickshell/qs_colors.json"
 STATE_FILE="$HOME/.cache/current_theme"
@@ -361,8 +362,8 @@ if [ "$skip_reload" != "--no-reload" ]; then
     swaync > /dev/null 2>&1 &
     disown
 
-    # Hyprland (reloads config including colors.lua)
-    [ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ] && { hyprctl reload >/dev/null 2>&1 || true; }
+    # Hyprland reloads config including colors.lua; niri reloads by itself
+    reload_compositor
 
     # CAVA (rebuild config from base + generated colors)
     if [ -f "$HOME/.config/cava/config_base" ] && [ -f "$HOME/.config/cava/colors" ]; then

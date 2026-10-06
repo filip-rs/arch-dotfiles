@@ -445,3 +445,9 @@ if command -v tmux &>/dev/null \
   fi
 fi
 export GPG_TTY=$(tty)
+# >>> Photon CLI >>>
+case ":$PATH:" in
+  *:'/home/filip/.photon/bin':*) ;;
+  *) export PATH="$PATH":'/home/filip/.photon/bin' ;;
+esac
+# <<< Photon CLI <<<

@@ -360,7 +360,6 @@ Item {
             { k1: "SUPER+SHIFT", k2: "E", action: "Emoji Picker", cmd: "bemoji -t" },
             { k1: "SUPER+SHIFT", k2: "B", action: "Restart Waybar", cmd: "killall waybar && waybar" },
             { k1: "SUPER", k2: "Y / T", action: "Keyboard Mouse (wl-kbptr)", cmd: "wl-kbptr" },
-            { k1: "SUPER+CTRL+SHIFT", k2: "SPACE", action: "Switch Keyboard Layout", cmd: "bash ~/.config/scripts/desktop/switch_layout.sh" },
             { k1: "SUPER+CTRL+SHIFT", k2: "6", action: "Toggle 60 / 120 Hz", cmd: "bash ~/.config/scripts/desktop/switch_refreshrate.sh" },
             { k1: "SUPER+CTRL+SHIFT", k2: "7", action: "Speakers / Headphones", cmd: "bash ~/.config/scripts/desktop/speaker_toggle.sh" },
             { k1: "SUPER+CTRL+SHIFT", k2: "0", action: "Focus Mode (blank side screens)", cmd: "bash ~/.config/scripts/desktop/screen_manager.sh" },

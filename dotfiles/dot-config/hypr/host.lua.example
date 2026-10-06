@@ -9,7 +9,7 @@ hl.env("XDG_SESSION_TYPE", "wayland")
 hl.env("XDG_CURRENT_DESKTOP", "Hyprland")
 hl.env("XDG_SESSION_DESKTOP", "Hyprland")
 
--- >>> monitors (rewritten by scripts/monitor_apply.sh — edit above this line)
+-- >>> monitors (rewritten by scripts/desktop/monitor_apply.sh — edit above this line)
 -- Laptop (archflipper):
 -- hl.monitor({ output = "eDP-1", mode = "1920x1200@120", position = "0x0", scale = 1 })
 

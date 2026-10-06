@@ -15,8 +15,8 @@ cursor {
 input {
     keyboard {
         xkb {
-            layout "us,no"
-            variant "altgr-intl,"
+            layout "us"
+            variant "altgr-intl"
             options "lv3:caps_switch"
         }
     }
@@ -64,6 +64,10 @@ output "HDMI-A-1" {
     mode "1920x1080@60"
     scale 1.25
 }
+
+// Per-machine overrides (untracked). The quickshell monitor panel writes its
+// layout here via scripts/desktop/monitor_apply.sh.
+include optional=true "host.kdl"
 
 layout {
     gaps 7
@@ -242,8 +246,9 @@ binds {
     Print { screenshot; }
     Mod+Shift+5 { spawn "~/.config/scripts/desktop/screenshot_copy.sh"; }
     Mod+Ctrl+Shift+S { spawn "~/.config/scripts/desktop/screenshot_save.sh"; }
-    Mod+Ctrl+Shift+Space { spawn-sh "niri msg action switch-layout next && notify-send Keyboard \"$(niri msg -j keyboard-layouts | jq -r '.names[.current_idx]')\""; }
+    Mod+Ctrl+Shift+6 { spawn "~/.config/scripts/desktop/switch_refreshrate.sh"; }
     Mod+Ctrl+Shift+7 { spawn "~/.config/scripts/desktop/speaker_toggle.sh"; }
+    Mod+Ctrl+Shift+0 { spawn "~/.config/scripts/desktop/screen_manager.sh"; }
 
     Mod+Shift+R { spawn-sh "~/.local/bin/afk toggle"; }
     Mod+Ctrl+L { spawn-sh "~/.local/bin/login-bind type school"; }

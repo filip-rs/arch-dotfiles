@@ -4,8 +4,10 @@
 # CONSTANTS & ARGUMENTS
 # -----------------------------------------------------------------------------
 QS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BT_PID_FILE="$HOME/.cache/bt_scan_pid"
-BT_SCAN_LOG="$HOME/.cache/bt_scan.log"
+source "$HOME/.config/scripts/lib/compositor.sh"
+# Shared with quickshell/network/bluetooth_panel_logic.sh
+BT_PID_FILE="${XDG_RUNTIME_DIR:-$HOME/.cache}/quickshell_network_cache/bt_scan_pid"
+BT_SCAN_SECONDS=90
 SRC_DIR="${WALLPAPER_DIR:-${srcdir:-$HOME/Pictures/Wallpapers}}"
 # Expand leading ~ (hyprland env vars don't expand tilde)
 SRC_DIR="${SRC_DIR/#\~/$HOME}"
@@ -45,18 +47,7 @@ resolve_monitor() {
         return
     fi
 
-    local pos name
-    pos=$(hyprctl cursorpos -j 2>/dev/null)
-    if [ -n "$pos" ]; then
-        name=$(hyprctl monitors -j 2>/dev/null | jq -r --argjson c "$pos" '
-            .[] | select(
-                $c.x >= .x and $c.x < (.x + (.width / .scale)) and
-                $c.y >= .y and $c.y < (.y + (.height / .scale))
-            ) | .name' 2>/dev/null | head -1)
-        [ -n "$name" ] && { printf '%s' "$name"; return; }
-    fi
-
-    hyprctl monitors -j 2>/dev/null | jq -r '.[] | select(.focused) | .name' 2>/dev/null | head -1
+    printf '%s' "$(pointer_output)"
 }
 
 # Wire format consumed by Main.qml: "<cmd>[:<arg>]|<anchor>|<monitor>"
@@ -72,9 +63,9 @@ if [[ "$ACTION" =~ ^[0-9]+$ ]]; then
     echo "close" > "$IPC_FILE" # Tell QML to hide the widget natively
     
     if [[ "$2" == "move" ]]; then
-        hyprctl dispatch "hl.dsp.window.move({ workspace = $WORKSPACE_NUM })" >/dev/null 2>&1
+        move_window_to_workspace "$WORKSPACE_NUM" >/dev/null 2>&1
     else
-        hyprctl dispatch "hl.dsp.focus({ workspace = $WORKSPACE_NUM })" >/dev/null 2>&1
+        focus_workspace "$WORKSPACE_NUM" >/dev/null 2>&1
     fi
     exit 0
 fi
@@ -167,10 +158,28 @@ handle_wallpaper_prep() {
     export WALLPAPER_THUMB="$TARGET_THUMB"
 }
 
-handle_network_prep() {
-    echo "" > "$BT_SCAN_LOG"
-    { echo "scan on"; sleep infinity; } | stdbuf -oL bluetoothctl > "$BT_SCAN_LOG" 2>&1 &
+# The scan runs in its own process group with a hard time limit: the panel can
+# also be closed from QML (Escape, click-away) without going through here, and
+# an unbounded scan would keep the adapter discovering forever.
+stop_bt_scan() {
+    local pgid
+    pgid=$(cat "$BT_PID_FILE" 2>/dev/null)
+    # Only signal the group if the leader is still our timeout (PIDs get reused)
+    if [ -n "$pgid" ] && [ "$(ps -o comm= -p "$pgid" 2>/dev/null)" = "timeout" ]; then
+        kill -- "-$pgid" 2>/dev/null
+    fi
+    rm -f "$BT_PID_FILE"
+}
+
+start_bt_scan() {
+    stop_bt_scan
+    mkdir -p "$(dirname "$BT_PID_FILE")"
+    setsid timeout $((BT_SCAN_SECONDS + 5)) bluetoothctl --timeout "$BT_SCAN_SECONDS" scan on >/dev/null 2>&1 &
     echo $! > "$BT_PID_FILE"
+}
+
+handle_network_prep() {
+    start_bt_scan
     (nmcli device wifi rescan) &
 }
 
@@ -188,17 +197,11 @@ fi
 # The widget overlay (Main.qml) still works via keybinds below.
 
 # -----------------------------------------------------------------------------
-# IPC ROUTING (No hyprctl focus/move commands needed!)
+# IPC ROUTING
 # -----------------------------------------------------------------------------
 if [[ "$ACTION" == "close" ]]; then
     echo "close" > "$IPC_FILE"
-    if [[ "$TARGET" == "network" || "$TARGET" == "all" || -z "$TARGET" ]]; then
-        if [ -f "$BT_PID_FILE" ]; then
-            kill $(cat "$BT_PID_FILE") 2>/dev/null
-            rm -f "$BT_PID_FILE"
-        fi
-        (bluetoothctl scan off > /dev/null 2>&1) &
-    fi
+    stop_bt_scan
     exit 0
 fi
 
@@ -211,12 +214,14 @@ if [[ "$ACTION" == "open" || "$ACTION" == "toggle" ]]; then
             if [[ -n "$SUBTARGET" ]]; then
                 if [[ "$CURRENT_MODE" == "$SUBTARGET" ]]; then
                     echo "close" > "$IPC_FILE"
+                    stop_bt_scan
                 else
                     echo "$SUBTARGET" > "$NETWORK_MODE_FILE"
                     emit "$TARGET"
                 fi
             else
                 echo "close" > "$IPC_FILE"
+                stop_bt_scan
             fi
         else
             handle_network_prep
@@ -225,6 +230,9 @@ if [[ "$ACTION" == "open" || "$ACTION" == "toggle" ]]; then
         fi
         exit 0
     fi
+
+    # Any other panel replaces the network one, so its scan can go too
+    stop_bt_scan
 
     if [[ "$ACTION" == "toggle" && "$ACTIVE_WIDGET" == "$TARGET" ]]; then
         echo "close" > "$IPC_FILE"

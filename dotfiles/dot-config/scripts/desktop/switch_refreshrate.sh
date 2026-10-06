@@ -2,18 +2,18 @@
 # Toggle the laptop panel between 60 Hz and 120 Hz.
 # Bound to SUPER + CTRL + SHIFT + 6.
 
-STATE_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/hypr-refreshrate"
-mkdir -p "$(dirname "$STATE_FILE")"
+source "$HOME/.config/scripts/lib/compositor.sh"
 
-[ -f "$STATE_FILE" ] || echo "60" > "$STATE_FILE"
-STATE=$(cat "$STATE_FILE")
+OUTPUT="eDP-1"
 
-if [ "$STATE" = "60" ]; then
-    RATE=120
-else
+CURRENT=$(monitors_json | jq --arg o "$OUTPUT" '.[] | select(.name == $o) | .refreshRate | round')
+[ -n "$CURRENT" ] || { notify-send "Refresh rate" "$OUTPUT not found"; exit 1; }
+
+if [ "$CURRENT" -gt 90 ]; then
     RATE=60
+else
+    RATE=120
 fi
 
-hyprctl eval "hl.monitor({ output = 'eDP-1', mode = '1920x1200@${RATE}', position = '0x0', scale = 1 })"
+set_output "$OUTPUT" "1920x1200@${RATE}" 0 0 1
 notify-send "Set refreshrate to ${RATE}hz"
-echo "$RATE" > "$STATE_FILE"

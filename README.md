@@ -86,11 +86,17 @@ pacman -S --needed - < pacman-list.txt
   (`env`, `monitors`, `input`, `binds`, `looknfeel`, `animations`, `plugins`,
   `rules`, `theme`, `autostart`).
 - Per-machine settings (monitors, host env) live in `host.lua` — not tracked.
-  `scripts/monitor_apply.sh` can rewrite the monitor section for you.
+  `~/.config/scripts/desktop/monitor_apply.sh` (used by the Quickshell monitor
+  panel) can rewrite the monitor section for you. On niri the same script writes
+  `~/.config/niri/host.kdl`, which `config.kdl` includes if it exists.
 - Compositor-agnostic pieces live outside `hypr/`: `~/.config/quickshell/`
   holds the Quickshell widgets and their helper scripts (network/audio/bluetooth
   panels, music, mullvad relays, weather), and `~/.config/scripts/desktop/`
   holds the theme/wallpaper pipeline, `qs_manager.sh` and the other bound scripts.
+- Everything that talks to the compositor goes through
+  `~/.config/scripts/lib/compositor.sh`, which picks Hyprland or niri from
+  `$HYPRLAND_INSTANCE_SIGNATURE` / `$NIRI_SOCKET`. Source it from bash, or run it
+  directly (`compositor.sh monitors-json`) from QML/Python.
 - `hyprback/` is the old conf-based setup kept around for reference.
 
 ## CI

@@ -33,7 +33,6 @@ end, { description = "Phone-shaped floating window" })
 
 hl.bind(mod .. " + SHIFT + S", hl.dsp.exec_cmd(scr .. "/screenshot_copy.sh"))
 hl.bind(mod .. " + SHIFT + CTRL + S", hl.dsp.exec_cmd(scr .. "/screenshot_save.sh"))
-hl.bind(mod .. " + CTRL + SHIFT + SPACE", hl.dsp.exec_cmd(scr .. "/switch_layout.sh"))
 hl.bind(mod .. " + CTRL + SHIFT + 6", hl.dsp.exec_cmd(scr .. "/switch_refreshrate.sh"))
 hl.bind(mod .. " + CTRL + SHIFT + 7", hl.dsp.exec_cmd(scr .. "/speaker_toggle.sh"))
 hl.bind(mod .. " + CTRL + SHIFT + 0", hl.dsp.exec_cmd(scr .. "/screen_manager.sh"))

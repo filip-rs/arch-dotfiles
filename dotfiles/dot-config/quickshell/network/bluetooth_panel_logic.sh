@@ -195,10 +195,16 @@ toggle_power() {
 
 connect_dev() {
     local mac="$1"
-    if [ -f "$PID_FILE" ]; then kill -STOP $(cat "$PID_FILE") 2>/dev/null; fi
+    # Discovery interferes with connecting; stop the panel's scan (started by
+    # qs_manager.sh as a process group led by `timeout`) for good.
+    local pgid
+    pgid=$(cat "$PID_FILE" 2>/dev/null)
+    if [ -n "$pgid" ] && [ "$(ps -o comm= -p "$pgid" 2>/dev/null)" = "timeout" ]; then
+        kill -- "-$pgid" 2>/dev/null
+    fi
+    rm -f "$PID_FILE"
     bluetoothctl trust "$mac" > /dev/null 2>&1
     bluetoothctl connect "$mac"
-    if [ -f "$PID_FILE" ]; then kill -CONT $(cat "$PID_FILE") 2>/dev/null; fi
 }
 
 disconnect_dev() {
