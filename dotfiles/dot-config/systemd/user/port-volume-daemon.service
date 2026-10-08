@@ -1,0 +1,12 @@
+[Unit]
+Description=Remember volume level per audio output (jack headphones/speakers, bluetooth)
+# Needs pipewire (pactl), which is socket-activated anyway; this is just ordering.
+After=pipewire.service
+
+[Service]
+ExecStart=/usr/bin/python3 %h/.config/scripts/audio/port_volume_daemon.py
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=default.target

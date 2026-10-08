@@ -14,11 +14,13 @@ arch-dotfiles/
 │   │   ├── niri/          # niri config
 │   │   ├── quickshell/    # Quickshell widgets (shared by both compositors)
 │   │   ├── scripts/
+│   │   │   ├── audio/     # port_volume_daemon.py: remember volume per output
 │   │   │   └── desktop/   # theme/wallpaper pipeline, qs_manager, screenshots, themes/
 │   │   ├── nvim/          # Neovim (lua/filip/)
 │   │   ├── waybar/        # bar config + custom status scripts
 │   │   ├── wofi/  swaync/  wlogout/  nwg-dock-hyprland/  nwg-look/
 │   │   ├── alacritty/  ghostty/  zathura/  pacseek/
+│   │   ├── systemd/user/  # user services (port-volume-daemon)
 │   │   └── fastfetch/  neofetch/  matugen/  wireplumber/
 │   │
 │   ├── dot-tmux.conf      # ~/.tmux.conf

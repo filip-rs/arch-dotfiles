@@ -1,10 +1,10 @@
 /* @theme-colors-start */
-@define-color bg_base #010d1a;
-@define-color bg_crust #000810;
-@define-color text_primary #CBE0F0;
-@define-color text_bright #91ddff;
-@define-color selection #0f3f63;
-@define-color border_color #000810;
+@define-color bg_base #191724;
+@define-color bg_crust #14121f;
+@define-color text_primary #e0def4;
+@define-color text_bright #ebbcba;
+@define-color selection #403d52;
+@define-color border_color #14121f;
 /* @theme-colors-end */
 
 window {
