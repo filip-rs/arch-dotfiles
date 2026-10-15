@@ -30,8 +30,15 @@ hl.device({
     sensitivity = 0.1,
 })
 
+-- Niri-style: swipe sideways to scroll the column tape, up/down for workspaces.
 hl.gesture({
     fingers   = 3,
     direction = "horizontal",
+    action    = "scroll_move",
+})
+
+hl.gesture({
+    fingers   = 3,
+    direction = "vertical",
     action    = "workspace",
 })
