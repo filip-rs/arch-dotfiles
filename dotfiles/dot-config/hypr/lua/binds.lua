@@ -8,6 +8,81 @@ local qs = scr .. "/qs_manager.sh"
 
 local browser = "brave-beta"
 
+-- Page the scrolling tape one screen sideways (Super + A/D).
+--
+-- Right stops once the view sits just past the last column: the whole screen
+-- is empty (wallpaper), and a window opened there becomes the next column
+-- right where you are looking, with no snap. Left stops at the first column.
+--
+-- Plain `move ±px` can't rest in empty space: it focuses the column under the
+-- middle of the screen, and that focus re-fits the view onto it. So the last
+-- page finishes with `move +col` from the last column, which Hyprland
+-- special-cases: view to the end of the tape, focus dropped.
+
+-- Where the tape is relative to the view, from the tiled windows' target
+-- positions (so it is right even mid-animation). nil on an empty workspace.
+local function tape_geometry()
+	local m = hl.get_active_monitor()
+	local ws = hl.get_active_workspace()
+	if not m or not ws then
+		return nil
+	end
+
+	-- Window boxes exclude the border; the tape's outer edges include it.
+	local border = hl.get_config("general:border_size")
+	local first, last
+	for _, w in ipairs(hl.get_windows({ workspace = ws.id })) do
+		if not w.floating and not w.hidden then
+			first = math.min(first or math.huge, w.at.x - border)
+			last = math.max(last or -math.huge, w.at.x + w.size.x + border)
+		end
+	end
+	if not first then
+		return nil
+	end
+
+	-- The tape scrolls inside the usable area: the screen minus bars and
+	-- gaps_out. width/height are raw mode pixels, so swap them when rotated
+	-- 90/270 and undo the scale.
+	local gaps = hl.get_config("general:gaps_out")
+	local px = (m.transform % 2 == 1) and m.height or m.width
+	local left = m.x + m.reserved.left + gaps.left
+	local right = m.x + px / m.scale - m.reserved.right - gaps.right
+
+	return {
+		page = right - left,
+		room_left = left - first, -- how far the tape's start is left of the view
+		room_right = last - left, -- how far the tape's end is right of the view's left edge
+	}
+end
+
+-- `move +N` shifts the windows right, i.e. pans the view left.
+local function move_tape(px)
+	hl.dispatch(hl.dsp.layout(string.format("move %+d", px < 0 and -math.floor(-px + 0.5) or math.floor(px + 0.5))))
+end
+
+local function page(dir)
+	return function()
+		local t = tape_geometry()
+		if not t then
+			return
+		end
+
+		if dir == "l" then
+			if t.room_left >= 1 then
+				move_tape(math.min(t.page, t.room_left))
+			end
+		elseif t.room_right > t.page then
+			move_tape(-t.page)
+		elseif t.room_right >= 1 then
+			-- Last page: this lands focus (and the view) on the last column...
+			move_tape(-t.room_right)
+			-- ...so this has no next column and goes to the end of the tape.
+			hl.dispatch(hl.dsp.layout("move +col"))
+		end
+	end
+end
+
 -- ───────────────────────────── core ─────────────────────────────
 
 hl.bind(mod .. " + Q", hl.dsp.exec_cmd("alacritty"))
@@ -143,8 +218,8 @@ hl.bind(mod5 .. " + V", hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mod5 .. " + F", hl.dsp.window.fullscreen())
 hl.bind(mod5 .. " + SPACE", hl.dsp.exec_cmd("wofi"))
 -- No caps + W: that is how å gets typed on altgr-intl.
-hl.bind(mod5 .. " + A", hl.dsp.layout("focus l"))
-hl.bind(mod5 .. " + D", hl.dsp.layout("focus r"))
+hl.bind(mod5 .. " + A", page("l"))
+hl.bind(mod5 .. " + D", page("r"))
 hl.bind(mod5 .. " + S", hl.dsp.focus({ workspace = "r+1" }))
 
 -- ──────────── ROG G15 Strix (2021) hardware keys, by keycode ─────
@@ -174,8 +249,8 @@ hl.bind("code:237", hl.dsp.exec_cmd("brightnessctl -d asus::kbd_backlight set 33
 hl.bind("code:238", hl.dsp.exec_cmd("brightnessctl -d asus::kbd_backlight set 33%+"), { repeating = true })
 
 -- ───────────────────── workspaces & focus ────────────────────────
--- Laid out like niri: columns scroll sideways on A/D, workspaces stack
--- vertically on W/S.
+-- Laid out like niri: the column tape scrolls sideways, workspaces stack
+-- vertically on W/S. A/D page a whole screen; H/L step one column.
 
 for i = 1, 10 do
 	local key = i % 10 -- 10 maps to key 0
@@ -190,8 +265,8 @@ hl.bind(mod .. " + S", hl.dsp.focus({ workspace = "r+1" }))
 hl.bind(mod .. " + SHIFT + W", hl.dsp.window.move({ workspace = "r-1" }))
 hl.bind(mod .. " + SHIFT + S", hl.dsp.window.move({ workspace = "r+1" }))
 
-hl.bind(mod .. " + A", hl.dsp.layout("focus l"))
-hl.bind(mod .. " + D", hl.dsp.layout("focus r"))
+hl.bind(mod .. " + A", page("l"), { description = "Page tape left" })
+hl.bind(mod .. " + D", page("r"), { description = "Page tape right" })
 hl.bind(mod .. " + SHIFT + A", hl.dsp.layout("swapcol l"))
 hl.bind(mod .. " + SHIFT + D", hl.dsp.layout("swapcol r"))
 

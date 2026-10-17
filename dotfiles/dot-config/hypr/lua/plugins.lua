@@ -34,16 +34,20 @@ end
 -- ───────────────────────── scrolloverview ─────────────────────────
 -- Stands in for niri's toggle-overview: Super + Tab, or a 4-finger swipe
 -- up/down (3 fingers is the workspace swipe in input.lua). Opens on every
--- monitor at once, like niri's.
+-- monitor at once, like niri's. Super + Shift + Tab is the same overview
+-- zoomed right out.
 
 if has("scrolloverview") then
+	local SCALE = 0.35 -- Super + Tab and the gesture
+	local SCALE_WIDE = 0.1 -- Super + Shift + Tab; the plugin's minimum
+
 	hl.config({
 		plugin = {
 			scrolloverview = {
-				scale = 0.35, -- niri's default overview zoom
+				scale = SCALE,
 				layout = "vertical", -- workspaces stacked top to bottom
 				workspace_gap = 35,
-				wallpaper = 2, -- wallpaper inside each workspace, plain backdrop behind
+				wallpaper = 2, -- wallpaper both behind and inside each workspace
 				blur = true,
 				shadow = {
 					enabled = true,
@@ -59,6 +63,15 @@ if has("scrolloverview") then
 	hl.bind("SUPER + TAB", function()
 		overview.overview("toggle all")
 	end, { description = "Toggle overview" })
+
+	-- The plugin reads `scale` once, as an overview opens, so the wide view
+	-- swaps it in for that one call and puts it straight back for Super + Tab
+	-- and the gesture.
+	hl.bind("SUPER + SHIFT + TAB", function()
+		overview.configure({ scale = SCALE_WIDE })
+		overview.overview("toggle all")
+		overview.configure({ scale = SCALE })
+	end, { description = "Toggle zoomed-out overview" })
 
 	overview.gesture({ fingers = 4, direction = "vertical" })
 end

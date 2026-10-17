@@ -36,14 +36,15 @@ hl.config({
 	},
 
 	-- Niri-style scrolling tape; values mirror the layout{} block in
-	-- niri/config.kdl. Super A/D walk the columns, Super W/S the workspaces.
+	-- niri/config.kdl. Super H/L step columns, A/D page a screen, W/S workspaces.
 	scrolling = {
 		column_width = 0.5,
 		explicit_column_widths = "0.333, 0.5, 0.667", -- Super + Z cycles these
-		fullscreen_on_one_column = false, -- a lone window stays half-width, like niri
+		fullscreen_on_one_column = true,
 		focus_fit_method = 1, -- scroll just enough to fit (niri center-focused-column "never")
-		wrap_focus = false,
-		wrap_swapcol = false,
+		follow_focus = true,
+		wrap_focus = true,
+		wrap_swapcol = true,
 	},
 
 	-- Unused while layout = "scrolling"; kept for switching back.
