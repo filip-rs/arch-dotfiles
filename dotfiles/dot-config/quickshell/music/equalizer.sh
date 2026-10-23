@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 # 10-band EQ using PipeWire filter-chain (replaces easyeffects)
+#
+# The EQ is a WirePlumber "smart filter": it is never the default sink.
+# WirePlumber slots it in front of whatever the default output is (speakers,
+# jack headphones, bluetooth) and the default stays the real device. That keeps
+# the volume keys on the hardware, where WirePlumber remembers a separate level
+# per port/device, instead of on one EQ knob shared by every output.
 
 STATE_DIR="$HOME/.local/state"
 STATE_FILE="$STATE_DIR/eq_state.json"
@@ -7,7 +13,8 @@ CONFIG_DIR="$HOME/.config/pipewire/filter-chain.conf.d"
 CONFIG_FILE="$CONFIG_DIR/eq-live.conf"
 PID_FILE="/tmp/pw_eq_pid"
 EQ_SINK="effect_input.live_eq"
-# Per-machine hardware output target for the EQ playback. Set via `equalizer.sh save_target`.
+# Optional per-machine hardware sink to restrict the EQ to (other outputs then
+# play without it). Unset = EQ follows the default output. Set via `equalizer.sh save_target`.
 TARGET_FILE="$STATE_DIR/live-eq-target"
 
 mkdir -p "$STATE_DIR"
@@ -43,7 +50,7 @@ generate_config() {
     if [ -r "$TARGET_FILE" ]; then
         local hw_sink
         hw_sink=$(tr -d '[:space:]' < "$TARGET_FILE")
-        [ -n "$hw_sink" ] && target_line=$'\n                target.object = "'"$hw_sink"'"'
+        [ -n "$hw_sink" ] && target_line=$'\n                filter.smart.target = { node.name = "'"$hw_sink"'" }'
     fi
 
     local nodes="" links=""
@@ -79,10 +86,12 @@ context.modules = [
             capture.props = {
                 node.name   = "${EQ_SINK}"
                 media.class = Audio/Sink
+                filter.smart = true
+                filter.smart.name = "live_eq"${target_line}
             }
             playback.props = {
                 node.name   = "effect_output.live_eq"
-                node.passive = true${target_line}
+                node.passive = true
             }
         }
     }
@@ -102,13 +111,19 @@ start_eq() {
     echo $! > "$PID_FILE"
     disown
 
-    # Wait for sink to appear, set as default, move existing streams
+    # Wait for the sink to appear. WirePlumber routes streams into it by itself;
+    # it only needs to sit at unity gain, since volume lives on the hardware now.
     for _ in $(seq 1 20); do
         if pactl list sinks short 2>/dev/null | grep -q "$EQ_SINK"; then
-            pactl set-default-sink "$EQ_SINK" 2>/dev/null
-            for input in $(pactl list sink-inputs short 2>/dev/null | awk '{print $1}'); do
-                pactl move-sink-input "$input" "$EQ_SINK" 2>/dev/null
-            done
+            pactl set-sink-volume "$EQ_SINK" 100% 2>/dev/null
+            pactl set-sink-mute "$EQ_SINK" 0 2>/dev/null
+            # Older versions of this script made the EQ the default sink, and
+            # WirePlumber keeps honouring that stored choice. Drop it (this also
+            # clears the stored history the EQ is in) so the default falls back
+            # to real hardware; the next device picked by hand is remembered.
+            if [ "$(pactl get-default-sink 2>/dev/null)" = "$EQ_SINK" ]; then
+                pw-metadata -n default -d 0 default.configured.audio.sink >/dev/null 2>&1
+            fi
             return 0
         fi
         sleep 0.1
@@ -151,7 +166,7 @@ arg2=$3
 case $cmd in
     "get") cat "$STATE_FILE" ;;
     "save_target")
-        # Persist a per-machine hardware sink that the EQ playback should feed.
+        # Persist a per-machine hardware sink to restrict the EQ to.
         # Usage: equalizer.sh save_target [sink_name]
         # With no arg, auto-detects whichever sink effect_output.live_eq currently feeds.
         if [ -n "$arg1" ]; then

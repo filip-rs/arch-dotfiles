@@ -1,15 +1,10 @@
 #!/usr/bin/env bash
-# Waybar custom module: the real audio output device.
+# Waybar custom module: the audio output device, with the bluetooth profile and
+# AirPods battery in the tooltip.
 #
-# The default sink on this system is `effect_input.live_eq`, the PipeWire
-# filter-chain created by quickshell/music/equalizer.sh (which is what stands in
-# for easyeffects here). That node is a plain filter: no card, no device.bus, no
-# device.form_factor. Waybar's built-in pulseaudio module reads the default sink
-# and therefore can never tell that a Bluetooth headset is connected.
-#
-# This script follows the filter-chain's output link to the device actually
-# playing the audio and reports *that* — while still reading volume and mute
-# from the default sink, since that is what the volume keys control.
+# The Live EQ (quickshell/music/equalizer.sh) is a WirePlumber smart filter, so
+# the default sink is always the real device: identity, volume and mute all
+# come straight from it. The tooltip notes when the EQ is in the path.
 #
 # Streams: emits one JSON line per PipeWire/PulseAudio event.
 
@@ -23,7 +18,6 @@ ICON_HEADSET=""
 ICON_HANDSFREE=""
 ICON_MUTED=""
 
-EQ_SINK="effect_input.live_eq"
 EQ_OUT="effect_output.live_eq"
 
 # Resolve the node the EQ chain feeds into. Empty if the chain isn't in use.
@@ -61,7 +55,7 @@ pods_battery() {
 }
 
 emit() {
-    local default_sink volume mute real props desc bus form icon mac profile
+    local default_sink volume mute props desc bus form icon mac profile
     local text tooltip class
 
     default_sink=$(pactl get-default-sink 2>/dev/null) || default_sink=""
@@ -71,14 +65,7 @@ emit() {
     volume=${volume:-0}
     mute=$(pactl get-sink-mute "$default_sink" 2>/dev/null | awk '{print $2}')
 
-    # Identity comes from the device behind the EQ chain, not the chain itself.
-    real="$default_sink"
-    if [ "$default_sink" = "$EQ_SINK" ]; then
-        real=$(eq_target)
-        real=${real:-$default_sink}
-    fi
-
-    props=$(sink_props "$real")
+    props=$(sink_props "$default_sink")
     desc=$(sed -n 's/^[[:space:]]*Description: //p' <<< "$props" | head -1)
     bus=$(prop "$props" "device.bus")
     form=$(prop "$props" "device.form_factor")
@@ -100,7 +87,7 @@ emit() {
             ;;
     esac
 
-    tooltip="${desc:-$real}"
+    tooltip="${desc:-$default_sink}"
 
     if [ "$bus" = "bluetooth" ]; then
         class="bluetooth"
@@ -117,7 +104,7 @@ emit() {
         [ -n "$batt" ] && tooltip="$tooltip"$'\n'"Battery: $batt"
     fi
 
-    if [ "$default_sink" = "$EQ_SINK" ]; then
+    if [ "$(eq_target)" = "$default_sink" ]; then
         tooltip="$tooltip"$'\n'"via Live EQ"
     fi
 

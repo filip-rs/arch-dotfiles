@@ -73,6 +73,10 @@ def get_data():
         if props.get("application.id") != "org.PulseAudio.pavucontrol":
             apps.append(format_node(s, is_app=True))
 
+    # Smart filters (the Live EQ) sit in front of the real output automatically;
+    # making one the default would take it out of that role, so don't offer it.
+    sinks = [s for s in sinks if s.get("properties", {}).get("filter.smart") != "true"]
+
     out = {
         "outputs": [format_node(s, s.get("name") == default_sink) for s in sinks],
         "inputs": [format_node(s, s.get("name") == default_source) for s in sources],

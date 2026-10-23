@@ -82,9 +82,8 @@
         "tooltip-format-enumerate-connected-battery": "{device_alias}  {device_battery_percentage}%",
         "on-click": "~/.config/scripts/desktop/qs_manager.sh toggle network bt --anchor=right"
     },
-    // Real output device, resolved through the Live EQ filter-chain.
-    // See scripts/audio-device.sh — the built-in pulseaudio module cannot
-    // see past that filter node and always showed a generic speaker.
+    // Output device with bluetooth profile / AirPods battery in the tooltip.
+    // See scripts/audio-device.sh.
     "custom/audio": {
         "exec": "~/.config/waybar/scripts/audio-device.sh",
         "return-type": "json",
