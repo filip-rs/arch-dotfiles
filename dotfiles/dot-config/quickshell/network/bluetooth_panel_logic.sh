@@ -17,12 +17,48 @@ PID_FILE="$CACHE_DIR/bt_scan_pid"
 # here.
 ANC_STATE_FILE="$CACHE_DIR/anc_mode"
 
+# bluetoothctl colours its output even when stdout is not a terminal, and while
+# discovery is running (qs_manager.sh starts a scan every time the panel opens)
+# it interleaves async "[NEW]/[CHG]/[DEL] Device ..." event lines into the
+# output of every command. Left in, both end up inside the JSON and break
+# JSON.parse in NetworkPopup.qml, which then shows Bluetooth as off.
+# btctl strips the colour codes; callers must still match only the lines they
+# expect (device lines start with "Device <MAC>", fields start with a tab).
+btctl() {
+    bluetoothctl "$@" 2>/dev/null | sed -E 's/\x1b\[[0-9;]*[A-Za-z]//g; s/\r//g'
+}
+
+# "Device <MAC> <name>" lines only, with event lines and dump output dropped.
+btctl_devices() {
+    btctl devices "$@" | grep -E '^Device ([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}( |$)'
+}
+
+# Value of a tab-indented "<field>: <value>" line of `bluetoothctl info|show`.
+bt_field() {
+    local field="$1"
+    awk -v f="$field" 'index($0, "\t" f ": ") == 1 { sub(/^[^:]*: /, ""); print; exit }'
+}
+
+is_bt_powered() {
+    [[ "$(btctl show | bt_field Powered)" == "yes" ]]
+}
+
+# Escape a string for use inside a JSON string literal.
+json_str() {
+    local s="$1"
+    s="${s//\\/\\\\}"
+    s="${s//\"/\\\"}"
+    s="${s//[[:cntrl:]]/}"
+    printf '%s' "$s"
+}
+
 is_airpods() {
     local mac="$1"
     local name="${2,,}"
+    local info="$3"
     [[ "$name" == *"airpods"* || "$name" == *"pods"* ]] && return 0
     # Apple vendor ID 0x004C in the Modalias.
-    bluetoothctl info "$mac" 2>/dev/null | grep -qi 'Modalias: bluetooth:v004C' && return 0
+    [[ "$(bt_field Modalias <<< "$info")" == [Bb]luetooth:v004[Cc]* ]] && return 0
     return 1
 }
 
@@ -92,16 +128,16 @@ get_audio_profile() {
 
 get_status() {
     power="off"
-    if bluetoothctl show | grep -q "Powered: yes"; then power="on"; fi
+    if is_bt_powered; then power="on"; fi
 
     connected_json="[]"
     devices_json="[]"
 
     if [ "$power" == "on" ]; then
-        paired_macs=$(bluetoothctl devices Paired)
-        mapfile -t devices < <(bluetoothctl devices)
-        mapfile -t connected_info_lines < <(bluetoothctl devices Connected)
-        
+        paired_macs=$(btctl_devices Paired)
+        mapfile -t devices < <(btctl_devices)
+        mapfile -t connected_info_lines < <(btctl_devices Connected)
+
         connected_macs=""
         connected_list_objs=()
         devices_list_objs=()
@@ -113,32 +149,31 @@ get_status() {
             mac="${rest%% *}"
             name="${rest#* }"
             connected_macs+="$mac "
-            
-            CACHE_FILE="$CACHE_DIR/bt_stat_${mac//:/_}"
 
+            CACHE_FILE="$CACHE_DIR/bt_stat_${mac//:/_}"
+            info=$(btctl info "$mac")
+
+            # Values are stored raw (printf %q keeps them safe to source) and
+            # only JSON-escaped when the output is built below.
             if [ -f "$CACHE_FILE" ]; then
                 source "$CACHE_FILE"
             else
-                info=$(bluetoothctl info "$mac")
-                icon_type=$(echo "$info" | awk -F': ' '/Icon:/ {print $2}')
-                icon=$(get_icon "$icon_type" "$name")
-                profile=$(get_audio_profile "$mac")
-                
-                echo "CACHE_NAME=\"${name//\"/\\\"}\"" > "$CACHE_FILE"
-                echo "CACHE_ICON=\"${icon//\"/\\\"}\"" >> "$CACHE_FILE"
-                echo "CACHE_PROFILE=\"${profile//\"/\\\"}\"" >> "$CACHE_FILE"
-                
-                CACHE_NAME="${name//\"/\\\"}"
-                CACHE_ICON="${icon//\"/\\\"}"
-                CACHE_PROFILE="${profile//\"/\\\"}"
+                icon_type=$(bt_field Icon <<< "$info")
+                CACHE_NAME="$name"
+                CACHE_ICON=$(get_icon "$icon_type" "$name")
+                CACHE_PROFILE=$(get_audio_profile "$mac")
+                printf 'CACHE_NAME=%q\nCACHE_ICON=%q\nCACHE_PROFILE=%q\n' \
+                    "$CACHE_NAME" "$CACHE_ICON" "$CACHE_PROFILE" > "$CACHE_FILE"
             fi
-            
-            bat=$(bluetoothctl info "$mac" | awk -F'[(|)]' '/Battery Percentage:/ {print $2}')
-            [ -z "$bat" ] && bat="0"
 
-            if is_airpods "$mac" "$name"; then pods="true"; else pods="false"; fi
+            # "Battery Percentage: 0x64 (100)"
+            bat=$(bt_field "Battery Percentage" <<< "$info")
+            bat="${bat##*(}"; bat="${bat%)}"
+            [[ "$bat" =~ ^[0-9]+$ ]] || bat="0"
 
-            connected_list_objs+=("{\"id\":\"$mac\",\"name\":\"$CACHE_NAME\",\"mac\":\"$mac\",\"icon\":\"$CACHE_ICON\",\"battery\":\"$bat\",\"profile\":\"$CACHE_PROFILE\",\"airpods\":$pods}")
+            if is_airpods "$mac" "$name" "$info"; then pods="true"; else pods="false"; fi
+
+            connected_list_objs+=("{\"id\":\"$mac\",\"name\":\"$(json_str "$CACHE_NAME")\",\"mac\":\"$mac\",\"icon\":\"$(json_str "$CACHE_ICON")\",\"battery\":\"$bat\",\"profile\":\"$(json_str "$CACHE_PROFILE")\",\"airpods\":$pods}")
         done
 
         if [ ${#connected_list_objs[@]} -gt 0 ]; then
@@ -154,7 +189,9 @@ get_status() {
             if [[ "$connected_macs" == *"$mac"* ]]; then continue; fi
 
             name="${rest#* }"
-            name_esc="${name//\"/\\\"}"
+            # A device line without a name has no space after the MAC.
+            [[ "$name" == "$rest" ]] && name=""
+            name_esc=$(json_str "$name")
 
             if [[ "$paired_macs" == *"$mac"* ]]; then
                 action="Connect"
@@ -171,7 +208,7 @@ get_status() {
             fi
 
             icon=$(get_icon "unknown" "$name")
-            icon_esc="${icon//\"/\\\"}"
+            icon_esc=$(json_str "$icon")
 
             devices_list_objs+=("{\"id\":\"$mac\",\"name\":\"$name_esc\",\"mac\":\"$mac\",\"icon\":\"$icon_esc\",\"action\":\"$action\"}")
         done
@@ -181,11 +218,11 @@ get_status() {
         fi
     fi
 
-    echo "{\"power\":\"$power\",\"anc\":\"$(anc_get)\",\"connected\":$connected_json,\"devices\":$devices_json}"
+    echo "{\"power\":\"$power\",\"anc\":\"$(json_str "$(anc_get)")\",\"connected\":$connected_json,\"devices\":$devices_json}"
 }
 
 toggle_power() {
-    if bluetoothctl show | grep -q "Powered: yes"; then
+    if is_bt_powered; then
         bluetoothctl power off
     else
         bluetoothctl power on

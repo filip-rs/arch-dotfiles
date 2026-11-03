@@ -646,7 +646,9 @@ Item {
 
                 if (isNowBtConn || window.isWifiConn) window.updateInfoNodes();
             }
-        } catch(e) {}
+        } catch(e) {
+            console.warn("NetworkPopup: bad bluetooth status JSON:", e, textData.substring(0, 200));
+        }
     }
 
     Process {
