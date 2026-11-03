@@ -155,7 +155,7 @@ Item {
             onStreamFinished: {
                 let txt = this.text.trim();
                 if (txt === "") return;
-                try { window.recents = JSON.parse(txt); } catch(e) {}
+                try { window.recents = JSON.parse(txt); } catch(e) { console.warn("MullvadPopup: bad recents cache JSON:", e); }
             }
         }
     }
@@ -169,7 +169,7 @@ Item {
             onStreamFinished: {
                 let txt = this.text.trim();
                 if (txt === "" || window.countries.length > 0) return;
-                try { window.countries = JSON.parse(txt); } catch(e) {}
+                try { window.countries = JSON.parse(txt); } catch(e) { console.warn("MullvadPopup: bad relay cache JSON:", e); }
             }
         }
     }
@@ -215,7 +215,7 @@ Item {
                     if (window.tunnelState === "connected" || window.tunnelState === "disconnected") {
                         window.busy = false;
                     }
-                } catch(e) {}
+                } catch(e) { console.warn("MullvadPopup: bad `mullvad status -j` output:", e); }
             }
         }
     }
@@ -252,7 +252,7 @@ Item {
                         window.countries = parsed;
                         window.writeCache(window.relaysPath, txt);
                     }
-                } catch(e) {}
+                } catch(e) { console.warn("MullvadPopup: bad relays.sh output:", e); }
             }
         }
     }

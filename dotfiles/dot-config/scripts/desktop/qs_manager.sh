@@ -17,7 +17,6 @@ THUMB_DIR="$HOME/.cache/wallpaper_picker/thumbs"
 QS_NETWORK_CACHE="${XDG_RUNTIME_DIR:-$HOME/.cache}/qs_network"
 mkdir -p "$QS_NETWORK_CACHE"
 
-IPC_FILE="/tmp/qs_widget_state"
 NETWORK_MODE_FILE="$QS_NETWORK_CACHE/mode"
 
 # Flags may appear anywhere; positional args keep their meaning.
@@ -50,9 +49,32 @@ resolve_monitor() {
     printf '%s' "$(pointer_output)"
 }
 
+# Main.qml listens on Quickshell IPC (IpcHandler target "panel").
+MAIN_QML_PATH="$HOME/.config/quickshell/Main.qml"
+
+qs_ipc() {
+    qs -p "$MAIN_QML_PATH" ipc call panel "$@" 2>/dev/null
+}
+
+# Like qs_ipc, but waits up to ~3s for an instance the watchdog below may
+# have only just started.
+qs_ipc_wait() {
+    local _
+    for _ in $(seq 15); do
+        qs_ipc "$@" && return 0
+        sleep 0.2
+    done
+    echo "qs_manager: quickshell is not answering on IPC" >&2
+    return 1
+}
+
+send_close() {
+    qs_ipc_wait command close >/dev/null
+}
+
 # Wire format consumed by Main.qml: "<cmd>[:<arg>]|<anchor>|<monitor>"
 emit() {
-    printf '%s|%s|%s\n' "$1" "$ANCHOR" "$(resolve_monitor)" > "$IPC_FILE"
+    qs_ipc_wait command "$(printf '%s|%s|%s' "$1" "$ANCHOR" "$(resolve_monitor)")" >/dev/null
 }
 
 # -----------------------------------------------------------------------------
@@ -60,7 +82,8 @@ emit() {
 # -----------------------------------------------------------------------------
 if [[ "$ACTION" =~ ^[0-9]+$ ]]; then
     WORKSPACE_NUM="$ACTION"
-    echo "close" > "$IPC_FILE" # Tell QML to hide the widget natively
+    # Hide any open panel; in the background so it doesn't delay the switch.
+    qs_ipc command close >/dev/null &
     
     if [[ "$2" == "move" ]]; then
         move_window_to_workspace "$WORKSPACE_NUM" >/dev/null 2>&1
@@ -186,41 +209,36 @@ handle_network_prep() {
 # -----------------------------------------------------------------------------
 # ZOMBIE WATCHDOG
 # -----------------------------------------------------------------------------
-MAIN_QML_PATH="$HOME/.config/quickshell/Main.qml"
-
 if ! pgrep -f "quickshell.*Main\.qml" >/dev/null; then
     quickshell -p "$MAIN_QML_PATH" >/dev/null 2>&1 &
     disown
 fi
 
-# TopBar intentionally disabled — waybar is in use instead.
-# The widget overlay (Main.qml) still works via keybinds below.
-
 # -----------------------------------------------------------------------------
 # IPC ROUTING
 # -----------------------------------------------------------------------------
 if [[ "$ACTION" == "close" ]]; then
-    echo "close" > "$IPC_FILE"
+    send_close
     stop_bt_scan
     exit 0
 fi
 
 if [[ "$ACTION" == "open" || "$ACTION" == "toggle" ]]; then
-    ACTIVE_WIDGET=$(cat /tmp/qs_active_widget 2>/dev/null)
+    ACTIVE_WIDGET=$(qs_ipc_wait active)
     CURRENT_MODE=$(cat "$NETWORK_MODE_FILE" 2>/dev/null)
 
     if [[ "$TARGET" == "network" ]]; then
         if [[ "$ACTION" == "toggle" && "$ACTIVE_WIDGET" == "network" ]]; then
             if [[ -n "$SUBTARGET" ]]; then
                 if [[ "$CURRENT_MODE" == "$SUBTARGET" ]]; then
-                    echo "close" > "$IPC_FILE"
+                    send_close
                     stop_bt_scan
                 else
                     echo "$SUBTARGET" > "$NETWORK_MODE_FILE"
                     emit "$TARGET"
                 fi
             else
-                echo "close" > "$IPC_FILE"
+                send_close
                 stop_bt_scan
             fi
         else
@@ -235,7 +253,7 @@ if [[ "$ACTION" == "open" || "$ACTION" == "toggle" ]]; then
     stop_bt_scan
 
     if [[ "$ACTION" == "toggle" && "$ACTIVE_WIDGET" == "$TARGET" ]]; then
-        echo "close" > "$IPC_FILE"
+        send_close
         exit 0
     fi
 

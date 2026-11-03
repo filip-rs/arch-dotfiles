@@ -63,7 +63,7 @@ Item {
                         if (c.yellow) root.yellow = c.yellow;
                         if (c.maroon) root.maroon = c.maroon;
                         if (c.teal) root.teal = c.teal;
-                    } catch(e) {}
+                    } catch(e) { console.warn("MatugenColors: bad qs_colors.json:", e); }
                 }
             }
         }

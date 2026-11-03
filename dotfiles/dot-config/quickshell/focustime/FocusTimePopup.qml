@@ -282,7 +282,7 @@ Item {
                 try {
                     let data = JSON.parse(raw);
                     window.updateFromData(data);
-                } catch(e) {}
+                } catch(e) { console.warn("FocusTimePopup: bad state file JSON:", e); }
             }
         }
     }
@@ -304,7 +304,7 @@ Item {
                 try {
                     let data = JSON.parse(raw);
                     window.updateFromData(data);
-                } catch(e) {}
+                } catch(e) { console.warn("FocusTimePopup: bad stats JSON:", e); }
             }
         }
     }

@@ -169,7 +169,7 @@ Item {
                     window.monitorOn = j.monitor === true;
                     window.lidOn = j.lid === true;
                     window.busy = false;
-                } catch(e) {}
+                } catch(e) { console.warn("CaffeinePopup: bad state file JSON:", e); }
             }
         }
     }

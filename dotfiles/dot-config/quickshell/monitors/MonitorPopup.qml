@@ -239,7 +239,7 @@ Item {
                     }
                     
                     window.forceLayoutUpdate();
-                } catch(e) {}
+                } catch(e) { console.warn("MonitorPopup: bad monitors-json output:", e); }
             }
         }
     }

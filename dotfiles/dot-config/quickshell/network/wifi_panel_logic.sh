@@ -16,13 +16,25 @@ get_icon() {
     else echo "󰤯"; fi
 }
 
+# Escape a string for use inside a JSON string literal.
+json_str() {
+    local s="$1"
+    s="${s//\\/\\\\}"
+    s="${s//\"/\\\"}"
+    s="${s//[[:cntrl:]]/}"
+    printf '%s' "$s"
+}
+
 CACHE_DIR="${XDG_RUNTIME_DIR:-$HOME/.cache}/quickshell_network_cache"
 mkdir -p "$CACHE_DIR"
 
-CURRENT_RAW=$(nmcli -t -f active,ssid,signal,security device wifi | awk -F: '$1=="yes"{print; exit}')
+# SSIDs are arbitrary bytes from whoever is broadcasting nearby. With
+# `--escape no` nmcli doesn't backslash-escape ':' and '\', and with the SSID
+# as the last field it is simply everything after the third ':'.
+CURRENT_RAW=$(nmcli -t -e no -f active,signal,security,ssid device wifi | awk -F: '$1=="yes"{print; exit}')
 
 if [[ -n "$CURRENT_RAW" ]]; then
-    IFS=':' read -r active ssid signal security <<< "$CURRENT_RAW"
+    IFS=':' read -r active signal security ssid <<< "$CURRENT_RAW"
     icon=$(get_icon "$signal")
     
     SAFE_SSID="${ssid//[^a-zA-Z0-9]/_}"
@@ -45,22 +57,25 @@ if [[ -n "$CURRENT_RAW" ]]; then
     fi
 
     # Native Bash JSON generation
-    ssid_esc="${ssid//\"/\\\"}"
-    sec_esc="${security//\"/\\\"}"
-    icon_esc="${icon//\"/\\\"}"
+    ssid_esc=$(json_str "$ssid")
+    sec_esc=$(json_str "$security")
+    icon_esc=$(json_str "$icon")
     CONNECTED_JSON="{\"id\":\"$ssid_esc\",\"ssid\":\"$ssid_esc\",\"icon\":\"$icon_esc\",\"signal\":\"$signal\",\"security\":\"$sec_esc\",\"ip\":\"$IP\",\"freq\":\"$FREQ\"}"
 else
     CONNECTED_JSON="null"
 fi
 
 # AWK processes the entire network list natively, zero sub-shells
-NETWORKS_JSON=$(nmcli -t -f active,ssid,signal,security device wifi list --rescan no | awk -F: '
-    !seen[$2]++ && $2 != "" && $1 != "yes" {
-        ssid=$2; signal=$3; security=$4;
-        
-        # Escape quotes inside strings
-        gsub(/"/, "\\\"", ssid);
-        gsub(/"/, "\\\"", security);
+NETWORKS_JSON=$(nmcli -t -e no -f active,signal,security,ssid device wifi list --rescan no | awk -F: '
+    # JSON string escaping: backslashes first ("&&" doubles the match), then
+    # quotes; control characters are dropped.
+    function esc(v) { gsub(/\\/, "&&", v); gsub(/"/, "\\\\&", v); gsub(/[\001-\037]/, "", v); return v }
+    {
+        ssid = $0; sub(/^[^:]*:[^:]*:[^:]*:/, "", ssid);
+    }
+    ssid != "" && $1 != "yes" && !seen[ssid]++ {
+        signal=$2;
+        ssid=esc(ssid); security=esc($3);
         
         if (signal >= 80) icon="󰤨";
         else if (signal >= 60) icon="󰤥";

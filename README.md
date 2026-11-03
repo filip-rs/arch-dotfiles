@@ -93,6 +93,13 @@ pacman -S --needed - < pacman-list.txt
   holds the Quickshell widgets and their helper scripts (network/audio/bluetooth
   panels, music, mullvad relays, weather), and `~/.config/scripts/desktop/`
   holds the theme/wallpaper pipeline, `qs_manager.sh` and the other bound scripts.
+- Panels are opened over Quickshell IPC: `qs_manager.sh` runs
+  `qs -p ~/.config/quickshell/Main.qml ipc call panel command <panel>`
+  (`... panel command close`, `... panel active` to see what is open).
+- The calendar panel reads `quickshell/calendar/.env` (gitignored; copy
+  `.env.example`): `WEATHER_LAT`/`WEATHER_LON` for the Open-Meteo forecast, and
+  optionally `CALENDAR_ICS_URLS` for events, e.g. Google Calendar's
+  "Secret address in iCal format".
 - Everything that talks to the compositor goes through
   `~/.config/scripts/lib/compositor.sh`, which picks Hyprland or niri from
   `$HYPRLAND_INSTANCE_SIGNATURE` / `$NIRI_SOCKET`. Source it from bash, or run it

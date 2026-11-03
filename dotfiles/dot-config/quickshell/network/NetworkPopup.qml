@@ -187,7 +187,7 @@ Item {
                 window.playSfx("error.wav"); 
                 
                 if (window.activeMode === "wifi" && targetSsid !== "") {
-                    Quickshell.execDetached(["bash", "-c", "nmcli connection delete '" + targetSsid + "' 2>/dev/null"]);
+                    Quickshell.execDetached(["nmcli", "connection", "delete", "id", targetSsid]);
                     
                     let newSaved = [];
                     for(let i = 0; i < window.savedWifiNetworks.length; i++) {
@@ -217,12 +217,14 @@ Item {
         
         if (mode === "wifi") {
             if (password !== "") {
-                connectProcess.command = ["bash", "-c", "nmcli device wifi connect '" + macOrSsid + "' password '" + password + "'"];
+                // Arguments, not a shell string: SSIDs come from whoever is
+                // broadcasting nearby, and passwords can contain anything.
+                connectProcess.command = ["nmcli", "device", "wifi", "connect", macOrSsid, "password", password];
             } else {
-                connectProcess.command = ["bash", "-c", "nmcli device wifi connect '" + macOrSsid + "'"];
+                connectProcess.command = ["nmcli", "device", "wifi", "connect", macOrSsid];
             }
         } else {
-            connectProcess.command = ["bash", "-c", window.scriptsDir + "/bluetooth_panel_logic.sh --connect '" + macOrSsid + "'"];
+            connectProcess.command = ["bash", window.scriptsDir + "/bluetooth_panel_logic.sh", "--connect", macOrSsid];
         }
         connectProcess.running = true;
     }
@@ -560,7 +562,7 @@ Item {
 
                 if (isNowWifiConn || window.isBtConn) window.updateInfoNodes();
             }
-        } catch(e) {}
+        } catch(e) { console.warn("NetworkPopup: bad wifi status JSON:", e); }
     }
 
     function processBtJson(textData) {
@@ -1390,10 +1392,10 @@ Item {
                                     window.disconnectingDevices = Object.assign({}, dd);
                                     busyTimeout.restart();
                                     
-                                    let cmd = window.activeMode === "wifi" 
-                                        ? "nmcli device disconnect $(nmcli -t -f DEVICE,TYPE d | grep wifi | cut -d: -f1 | head -n1)"
-                                        : "bash " + window.scriptsDir + "/bluetooth_panel_logic.sh --disconnect '" + coreContainer.myDevice.mac + "'"
-                                    Quickshell.execDetached(["sh", "-c", cmd])
+                                    if (window.activeMode === "wifi")
+                                        Quickshell.execDetached(["sh", "-c", "nmcli device disconnect $(nmcli -t -f DEVICE,TYPE d | grep wifi | cut -d: -f1 | head -n1)"]);
+                                    else
+                                        Quickshell.execDetached(["bash", window.scriptsDir + "/bluetooth_panel_logic.sh", "--disconnect", coreContainer.myDevice.mac]);
                                     
                                     centralCore.disconnectFill = 0.0;
                                     centralCore.disconnectTriggered = false;

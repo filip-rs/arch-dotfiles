@@ -296,7 +296,7 @@ Item {
                                 newData.status = root.musicData.status; 
                             }
                             root.musicData = newData; 
-                        } catch(e) {}
+                        } catch(e) { console.warn("MusicPopup: bad music_info.sh output:", e); }
                     }
                 }
             }
@@ -315,7 +315,7 @@ Item {
 
                     var outStr = this.text.trim();
                     if (outStr.length > 0) {
-                        try { root.eqData = JSON.parse(outStr); } catch(e) {}
+                        try { root.eqData = JSON.parse(outStr); } catch(e) { console.warn("MusicPopup: bad equalizer.sh output:", e); }
                     }
                 }
             }

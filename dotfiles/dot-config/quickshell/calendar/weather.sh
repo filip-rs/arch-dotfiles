@@ -1,312 +1,206 @@
 #!/usr/bin/env bash
+# Weather for the calendar panel, from Open-Meteo (https://open-meteo.com).
+# Free and keyless; hourly data for 16 days in the location's local time.
+#
+#   weather.sh --json    print the cached forecast and refresh it in the
+#                        background when it is older than 15 minutes (fetches
+#                        synchronously when there is no usable cache yet)
+#   weather.sh --fetch   fetch now and print
+#
+# Location and units come from calendar/.env (see .env.example):
+#   WEATHER_LAT, WEATHER_LON, WEATHER_UNIT=metric|imperial
+#
+# Output:
+#   { updated, location, units: {temp, wind, precip},
+#     current: {time, temp, feels, humidity, wind, precip, code, is_day, icon, desc, hex},
+#     days: [ {date, max, min, feels_max, pop, precip, wind, uv, humidity,
+#              sunrise, sunset, code, icon, desc, hex,
+#              hours: [ {time, hour, temp, feels, humidity, pop, precip, wind,
+#                        uv, code, is_day, icon, desc, hex} x24 ]} x16 ] }
+# or { "error": "..." } when there is nothing to show.
 
-# Force standard C locale for number formatting (fixes printf decimal/comma issues on varying OS locales)
-export LC_NUMERIC=C
+export LC_ALL=C
 
-# Paths
-cache_dir="$HOME/.cache/quickshell/weather"
-json_file="${cache_dir}/weather.json"
-view_file="${cache_dir}/view_id"
-daily_cache_file="${cache_dir}/daily_weather_cache.json"
-next_day_cache_file="${cache_dir}/next_day_precache.json"
-env_tracker_file="${cache_dir}/.env_tracker"
-ENV_FILE="$(dirname "$0")/.env"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ENV_FILE="$SCRIPT_DIR/.env"
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/quickshell/weather"
+CACHE_FILE="$CACHE_DIR/forecast.json"
+LOCK_FILE="$CACHE_DIR/fetch.lock"
+MAX_AGE=900
 
-# API Settings
-# Load environment variables silently
+mkdir -p "$CACHE_DIR"
+
+# Read only the keys used here. .env is parsed, not sourced, so nothing in it
+# is ever executed.
+WEATHER_LAT=""
+WEATHER_LON=""
+WEATHER_UNIT="metric"
+env_re='^[[:space:]]*(WEATHER_LAT|WEATHER_LON|WEATHER_UNIT)[[:space:]]*=[[:space:]]*"?([^"]*)"?[[:space:]]*$'
 if [ -f "$ENV_FILE" ]; then
-    export $(grep -v '^#' "$ENV_FILE" | xargs)
+    while IFS= read -r line || [ -n "$line" ]; do
+        [[ "$line" =~ $env_re ]] && printf -v "${BASH_REMATCH[1]}" '%s' "${BASH_REMATCH[2]}"
+    done < "$ENV_FILE"
 fi
+LOCATION="$WEATHER_LAT,$WEATHER_LON,$WEATHER_UNIT"
 
-# API Settings from .env
-KEY="$OPENWEATHER_KEY"
-ID="$OPENWEATHER_CITY_ID"
-UNIT="${OPENWEATHER_UNIT:-metric}" # Default to metric if not set
+read -r -d '' JQ_PROGRAM <<'JQ'
+def r1: if . == null then null else (. * 10 | round) / 10 end;
+def rnd: if . == null then null else round end;
+def hm: if . == null then null else split("T")[1] end;
 
-mkdir -p "${cache_dir}"
+# WMO weather code -> [day icon, night icon, description, day colour, night colour]
+# Icons are from the Weather Icons set bundled with Nerd Fonts.
+def wmo_table: {
+  "0":  ["", "", "Clear sky",               "#f9e2af", "#cba6f7"],
+  "1":  ["", "", "Mainly clear",            "#f9e2af", "#cba6f7"],
+  "2":  ["", "", "Partly cloudy",           "#bac2de", "#bac2de"],
+  "3":  ["", "", "Overcast",                "#bac2de", "#bac2de"],
+  "45": ["", "", "Fog",                     "#84afdb", "#84afdb"],
+  "48": ["", "", "Freezing fog",            "#84afdb", "#84afdb"],
+  "51": ["", "", "Light drizzle",           "#74c7ec", "#74c7ec"],
+  "53": ["", "", "Drizzle",                 "#74c7ec", "#74c7ec"],
+  "55": ["", "", "Heavy drizzle",           "#74c7ec", "#74c7ec"],
+  "56": ["", "", "Freezing drizzle",        "#89dceb", "#89dceb"],
+  "57": ["", "", "Freezing drizzle",        "#89dceb", "#89dceb"],
+  "61": ["", "", "Light rain",              "#74c7ec", "#74c7ec"],
+  "63": ["", "", "Rain",                    "#74c7ec", "#74c7ec"],
+  "65": ["", "", "Heavy rain",              "#74c7ec", "#74c7ec"],
+  "66": ["", "", "Freezing rain",           "#89dceb", "#89dceb"],
+  "67": ["", "", "Freezing rain",           "#89dceb", "#89dceb"],
+  "71": ["", "", "Light snow",              "#cdd6f4", "#cdd6f4"],
+  "73": ["", "", "Snow",                    "#cdd6f4", "#cdd6f4"],
+  "75": ["", "", "Heavy snow",              "#cdd6f4", "#cdd6f4"],
+  "77": ["", "", "Snow grains",             "#cdd6f4", "#cdd6f4"],
+  "80": ["", "", "Light showers",           "#74c7ec", "#74c7ec"],
+  "81": ["", "", "Showers",                 "#74c7ec", "#74c7ec"],
+  "82": ["", "", "Heavy showers",           "#74c7ec", "#74c7ec"],
+  "85": ["", "", "Snow showers",            "#cdd6f4", "#cdd6f4"],
+  "86": ["", "", "Heavy snow showers",      "#cdd6f4", "#cdd6f4"],
+  "95": ["", "", "Thunderstorm",            "#f9e2af", "#f9e2af"],
+  "96": ["", "", "Thunderstorm with hail",  "#f9e2af", "#f9e2af"],
+  "99": ["", "", "Thunderstorm with hail",  "#f9e2af", "#f9e2af"]
+};
+def wmo($code; $is_day):
+  (wmo_table[($code // -1) | tostring] // ["", "", "Unknown", "#cdd6f4", "#cdd6f4"]) as $m
+  | if $is_day == 0 then {icon: $m[1], desc: $m[2], hex: $m[4]}
+    else {icon: $m[0], desc: $m[2], hex: $m[3]} end;
 
-get_icon() {
-    case $1 in
-        "50d"|"50n") icon=""; quote="Mist" ;;
-        "01d") icon=""; quote="Sunny" ;;
-        "01n") icon=""; quote="Clear" ;;
-        "02d"|"02n"|"03d"|"03n"|"04d"|"04n") icon=""; quote="Cloudy" ;;
-        "09d"|"09n"|"10d"|"10n") icon=""; quote="Rainy" ;;
-        "11d"|"11n") icon=""; quote="Storm" ;;
-        "13d"|"13n") icon=""; quote="Snow" ;;
-        *) icon=""; quote="Unknown" ;;
-    esac
-    echo "$icon|$quote"
+. as $r
+| $r.hourly as $h
+| [ range(0; $h.time | length) as $i
+    | $h.time[$i] as $t
+    | { date: ($t | split("T")[0]),
+        time: ($t | hm),
+        hour: ($t | hm | split(":")[0] | tonumber),
+        temp: ($h.temperature_2m[$i] | r1),
+        feels: ($h.apparent_temperature[$i] | r1),
+        humidity: ($h.relative_humidity_2m[$i] | rnd),
+        pop: ($h.precipitation_probability[$i] | rnd),
+        precip: ($h.precipitation[$i] | r1),
+        wind: ($h.wind_speed_10m[$i] | r1),
+        uv: ($h.uv_index[$i] | r1),
+        code: $h.weather_code[$i],
+        is_day: $h.is_day[$i] }
+      + wmo($h.weather_code[$i]; $h.is_day[$i]) ] as $hours
+| $r.daily as $d
+| { updated: (now | floor),
+    location: $loc,
+    units: (if $unit == "imperial"
+            then {temp: "°F", wind: "mph", precip: "in"}
+            else {temp: "°C", wind: "m/s", precip: "mm"} end),
+    current: ($r.current
+      | { time: (.time | hm),
+          temp: (.temperature_2m | r1),
+          feels: (.apparent_temperature | r1),
+          humidity: (.relative_humidity_2m | rnd),
+          wind: (.wind_speed_10m | r1),
+          precip: (.precipitation | r1),
+          code: .weather_code,
+          is_day: .is_day }
+        + wmo(.weather_code; .is_day)),
+    days: [ range(0; $d.time | length) as $i
+      | $d.time[$i] as $date
+      | ($hours | map(select(.date == $date) | del(.date))) as $hs
+      | { date: $date,
+          max: ($d.temperature_2m_max[$i] | r1),
+          min: ($d.temperature_2m_min[$i] | r1),
+          feels_max: ($d.apparent_temperature_max[$i] | r1),
+          pop: ($d.precipitation_probability_max[$i] | rnd),
+          precip: ($d.precipitation_sum[$i] | r1),
+          wind: ($d.wind_speed_10m_max[$i] | r1),
+          uv: ($d.uv_index_max[$i] | r1),
+          humidity: ([$hs[].humidity | select(. != null)]
+                     | if length > 0 then add / length | round else null end),
+          sunrise: ($d.sunrise[$i] | hm),
+          sunset: ($d.sunset[$i] | hm),
+          code: $d.weather_code[$i] }
+        + wmo($d.weather_code[$i]; 1)
+        + { hours: $hs } ] }
+JQ
+
+emit_error() {
+    jq -cn --arg e "$1" '{error: $e}'
 }
 
-get_hex() {
-    case $1 in
-        "50d"|"50n") echo "#84afdb" ;;
-        "01d") echo "#f9e2af" ;;
-        "01n") echo "#cba6f7" ;;
-        "02d"|"02n"|"03d"|"03n"|"04d"|"04n") echo "#bac2de" ;;
-        "09d"|"09n"|"10d"|"10n") echo "#74c7ec" ;;
-        "11d"|"11n") echo "#f9e2af" ;;
-        "13d"|"13n") echo "#cdd6f4" ;;
-        *) echo "#cdd6f4" ;;
-    esac
-}
-
-write_dummy_data() {
-    final_json="["
-    for i in {0..4}; do
-        future_date=$(date -d "+$i days")
-        f_day=$(date -d "$future_date" "+%a")
-        f_full_day=$(date -d "$future_date" "+%A")
-        f_date_num=$(date -d "$future_date" "+%d %b")
-        
-        final_json="${final_json} {
-            \"id\": \"${i}\",
-            \"day\": \"${f_day}\",
-            \"day_full\": \"${f_full_day}\",
-            \"date\": \"${f_date_num}\",
-            \"max\": \"0.0\",
-            \"min\": \"0.0\",
-            \"feels_like\": \"0.0\",
-            \"wind\": \"0\",
-            \"humidity\": \"0\",
-            \"pop\": \"0\",
-            \"icon\": \"\",
-            \"hex\": \"#cdd6f4\",
-            \"desc\": \"No API Key\",
-            \"hourly\": [{\"time\": \"00:00\", \"temp\": \"0.0\", \"icon\": \"\", \"hex\": \"#cdd6f4\"}]
-        },"
-    done
-    final_json="${final_json%,}]"
-    echo "{ \"forecast\": ${final_json} }" > "${json_file}"
-}
-
-get_data() {
-    # ---------------------------------------------------------
-    # DUMMY DATA FALLBACK (If API key is missing or skipped)
-    # ---------------------------------------------------------
-    if [[ -z "$KEY" || "$KEY" == "Skipped" || "$KEY" == "OPENWEATHER_KEY" ]]; then
-        write_dummy_data
-        return
+fetch() {
+    local num_re='^-?[0-9]+(\.[0-9]+)?$'
+    if [[ ! "$WEATHER_LAT" =~ $num_re || ! "$WEATHER_LON" =~ $num_re ]]; then
+        echo "Set WEATHER_LAT and WEATHER_LON in calendar/.env"
+        return 1
     fi
 
-    # ---------------------------------------------------------
-    # STANDARD API FETCH LOGIC
-    # ---------------------------------------------------------
-    forecast_url="http://api.openweathermap.org/data/2.5/forecast?APPID=${KEY}&id=${ID}&units=${UNIT}"
-    raw_api=$(curl -sf "$forecast_url")
-    
-    # Check if curl failed OR if OpenWeather returned an error (like 401 for pending keys)
-    api_cod=$(echo "$raw_api" | jq -r '.cod' 2>/dev/null)
-    
-    if [ -z "$raw_api" ] || [[ "$api_cod" != "200" ]]; then
-        write_dummy_data
-        return
+    local units="temperature_unit=celsius&wind_speed_unit=ms&precipitation_unit=mm"
+    if [ "$WEATHER_UNIT" = "imperial" ]; then
+        units="temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch"
     fi
 
-    current_date=$(date +%Y-%m-%d)
-    tomorrow_date=$(date -d "tomorrow" +%Y-%m-%d)
+    local url="https://api.open-meteo.com/v1/forecast?latitude=${WEATHER_LAT}&longitude=${WEATHER_LON}&timezone=auto&forecast_days=16&${units}"
+    url+="&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m,is_day,precipitation"
+    url+="&hourly=temperature_2m,apparent_temperature,relative_humidity_2m,precipitation_probability,precipitation,weather_code,wind_speed_10m,is_day,uv_index"
+    url+="&daily=weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,precipitation_probability_max,precipitation_sum,wind_speed_10m_max,uv_index_max,sunrise,sunset"
 
-    # 1. ROLLOVER CHECK
-    if [ -f "$next_day_cache_file" ]; then
-        precache_date=$(cat "$next_day_cache_file" | jq -r '.[0].dt_txt' | cut -d' ' -f1)
-        if [ "$precache_date" == "$current_date" ]; then
-            mv "$next_day_cache_file" "$daily_cache_file"
-        fi
+    local raw tmp
+    if ! raw=$(curl -sf --max-time 15 "$url"); then
+        echo "Could not reach Open-Meteo"
+        return 1
     fi
 
-    # 2. PROCESS TODAY
-    api_today_items=$(echo "$raw_api" | jq -c ".list[] | select(.dt_txt | startswith(\"$current_date\"))" | jq -s '.')
-
-    if [ -f "$daily_cache_file" ]; then
-        cached_date=$(cat "$daily_cache_file" | jq -r '.[0].dt_txt' | cut -d' ' -f1)
-        if [ "$cached_date" == "$current_date" ]; then
-            merged_today=$(echo "$api_today_items" | jq --slurpfile cache "$daily_cache_file" \
-                '($cache[0] + .) | unique_by(.dt) | sort_by(.dt)')
-        else
-            merged_today="$api_today_items"
-        fi
+    # Write to a temp file and rename, so readers never see a partial file.
+    tmp=$(mktemp "$CACHE_DIR/forecast.XXXXXX")
+    if jq -c --arg loc "$LOCATION" --arg unit "$WEATHER_UNIT" "$JQ_PROGRAM" <<< "$raw" > "$tmp" 2>/dev/null && [ -s "$tmp" ]; then
+        mv -f "$tmp" "$CACHE_FILE"
     else
-        merged_today="$api_today_items"
-    fi
-
-    echo "$merged_today" > "$daily_cache_file"
-
-    # 3. PRE-CACHE TOMORROW
-    api_tomorrow_items=$(echo "$raw_api" | jq -c ".list[] | select(.dt_txt | startswith(\"$tomorrow_date\"))" | jq -s '.')
-    echo "$api_tomorrow_items" > "$next_day_cache_file"
-
-    # 4. BUILD FINAL JSON
-    processed_forecast=$(echo "$raw_api" | jq --argjson today "$merged_today" --arg date "$current_date" \
-        '.list = ($today + [.list[] | select(.dt_txt | startswith($date) | not)])')
-
-    if [ ! -z "$processed_forecast" ]; then
-        dates=$(echo "$processed_forecast" | jq -r '.list[].dt_txt | split(" ")[0]' | uniq | head -n 5)
-        
-        final_json="["
-        counter=0
-        
-        for d in $dates; do
-            day_data=$(echo "$processed_forecast" | jq "[.list[] | select(.dt_txt | startswith(\"$d\"))]")
-
-            raw_max=$(echo "$day_data" | jq '[.[].main.temp_max] | max')
-            f_max_temp=$(printf "%.1f" "$raw_max")
-
-            raw_min=$(echo "$day_data" | jq '[.[].main.temp_min] | min')
-            f_min_temp=$(printf "%.1f" "$raw_min")
-
-            raw_feels=$(echo "$day_data" | jq '[.[].main.feels_like] | max')
-            f_feels_like=$(printf "%.1f" "$raw_feels")
-
-            f_pop=$(echo "$day_data" | jq '[.[].pop] | max')
-            f_pop_pct=$(awk -v p="$f_pop" 'BEGIN { printf "%d", p * 100 }')
-            f_wind=$(echo "$day_data" | jq '[.[].wind.speed] | max | round')
-            f_hum=$(echo "$day_data" | jq '[.[].main.humidity] | add / length | round')
-            
-            f_code=$(echo "$day_data" | jq -r '.[length/2 | floor].weather[0].icon')
-            f_desc=$(echo "$day_data" | jq -r '.[length/2 | floor].weather[0].description' | sed -e "s/\b\(.\)/\u\1/g")
-            f_icon_data=$(get_icon "$f_code")
-            f_icon=$(echo "$f_icon_data" | cut -d'|' -f1)
-            f_hex=$(get_hex "$f_code")
-            
-            f_day=$(date -d "$d" "+%a")
-            f_full_day=$(date -d "$d" "+%A")
-            f_date_num=$(date -d "$d" "+%d %b")
-
-            hourly_json="["
-            count_slots=$(echo "$day_data" | jq '. | length')
-            count_slots=$((count_slots-1))
-            
-            for i in $(seq 0 1 $count_slots); do
-                slot_item=$(echo "$day_data" | jq ".[$i]")
-                
-                raw_s_temp=$(echo "$slot_item" | jq ".main.temp")
-                s_temp=$(printf "%.1f" "$raw_s_temp")
-                
-                s_dt=$(echo "$slot_item" | jq ".dt")
-                s_time=$(date -d @$s_dt "+%H:%M")
-                s_code=$(echo "$slot_item" | jq -r ".weather[0].icon")
-                s_hex=$(get_hex "$s_code")
-                s_icon=$(get_icon "$s_code" | cut -d'|' -f1)
-                
-                hourly_json="${hourly_json} {\"time\": \"${s_time}\", \"temp\": \"${s_temp}\", \"icon\": \"${s_icon}\", \"hex\": \"${s_hex}\"},"
-            done
-            hourly_json="${hourly_json%,}]"
-
-            final_json="${final_json} {
-                \"id\": \"${counter}\",
-                \"day\": \"${f_day}\",
-                \"day_full\": \"${f_full_day}\",
-                \"date\": \"${f_date_num}\",
-                \"max\": \"${f_max_temp}\",
-                \"min\": \"${f_min_temp}\",
-                \"feels_like\": \"${f_feels_like}\",
-                \"wind\": \"${f_wind}\",
-                \"humidity\": \"${f_hum}\",
-                \"pop\": \"${f_pop_pct}\",
-                \"icon\": \"${f_icon}\",
-                \"hex\": \"${f_hex}\",
-                \"desc\": \"${f_desc}\",
-                \"hourly\": ${hourly_json}
-            },"
-            ((counter++))
-        done
-        final_json="${final_json%,}]"
-
-        echo "{ \"forecast\": ${final_json} }" > "${json_file}"
+        rm -f "$tmp"
+        echo "Unexpected response from Open-Meteo"
+        return 1
     fi
 }
 
-# --- MODE HANDLING ---
-if [[ "$1" == "--getdata" ]]; then
-    get_data
+cache_usable() {
+    [ -s "$CACHE_FILE" ] && [ "$(jq -r '.location // ""' "$CACHE_FILE" 2>/dev/null)" = "$LOCATION" ]
+}
 
-elif [[ "$1" == "--json" ]]; then
-    CACHE_LIMIT=900         # 15 minutes for valid working data
-    PENDING_RETRY_LIMIT=3600 # 1 hour for invalid/activating keys
-
-    # Check if .env file has been modified since we last checked
-    env_changed=0
-    if [ -f "$ENV_FILE" ]; then
-        env_mtime=$(stat -c %Y "$ENV_FILE")
-        last_env_mtime=$(cat "$env_tracker_file" 2>/dev/null || echo "0")
-        
-        if [ "$env_mtime" -gt "$last_env_mtime" ]; then
-            env_changed=1
-            echo "$env_mtime" > "$env_tracker_file"
-        fi
-    fi
-
-    if [ -f "$json_file" ]; then
-        file_time=$(stat -c %Y "$json_file")
-        current_time=$(date +%s)
-        diff=$((current_time - file_time))
-        
-        if [ "$env_changed" -eq 1 ]; then
-            # The user just modified the .env file. Bypass cache entirely.
-            touch "$json_file" 
-            get_data &
-        elif grep -q '"desc": "No API Key"' "$json_file"; then
-            # Key is pending/invalid. Check once an hour.
-            if [ $diff -gt $PENDING_RETRY_LIMIT ]; then
-                touch "$json_file" # Bump file timestamp slightly to avoid spamming processes
-                get_data &
+case "${1:---json}" in
+    --fetch)
+        if err=$(fetch); then cat "$CACHE_FILE"; else emit_error "$err"; fi
+        ;;
+    --json)
+        if cache_usable; then
+            age=$(( $(date +%s) - $(stat -c %Y "$CACHE_FILE") ))
+            if [ "$age" -gt "$MAX_AGE" ]; then
+                # Background refresh: stdout/stderr are detached so the caller
+                # isn't kept waiting, and flock stops overlapping fetches.
+                ( flock -n 9 || exit 0; fetch ) 9>"$LOCK_FILE" >/dev/null 2>&1 &
             fi
+            cat "$CACHE_FILE"
+        elif err=$(fetch); then
+            cat "$CACHE_FILE"
         else
-            # Normal working API key. Check every 15 mins.
-            if [ $diff -gt $CACHE_LIMIT ]; then
-                touch "$json_file"
-                get_data &
-            fi
+            emit_error "$err"
         fi
-        cat "$json_file"
-    else
-        get_data
-        cat "$json_file"
-    fi
-
-elif [[ "$1" == "--view-listener" ]]; then
-    if [ ! -f "$view_file" ]; then echo "0" > "$view_file"; fi
-    tail -F "$view_file"
-
-elif [[ "$1" == "--nav" ]]; then
-    if [ ! -f "$view_file" ]; then echo "0" > "$view_file"; fi
-    current=$(cat "$view_file")
-    direction=$2
-    max_idx=4
-    if [[ "$direction" == "next" ]]; then
-        if [ "$current" -lt "$max_idx" ]; then
-            new=$((current + 1))
-            echo "$new" > "$view_file"
-        fi
-    elif [[ "$direction" == "prev" ]]; then
-        if [ "$current" -gt 0 ]; then
-            new=$((current - 1))
-            echo "$new" > "$view_file"
-        fi
-    fi
-
-elif [[ "$1" == "--icon" ]]; then
-    cat "$json_file" | jq -r '.forecast[0].icon'
-
-elif [[ "$1" == "--temp" ]]; then 
-    t=$(cat "$json_file" | jq -r '.forecast[0].max')
-    echo "${t}°C"
-
-elif [[ "$1" == "--hex" ]]; then 
-    cat "$json_file" | jq -r '.forecast[0].hex'
-
-# --- NEW HOURLY MODES FOR TOPBAR ---
-elif [[ "$1" == "--current-icon" ]]; then
-    curr_time=$(date +%H:%M)
-    cat "$json_file" | jq -r --arg ct "$curr_time" '(.forecast[0].hourly | map(select(.time <= $ct)) | last) // .forecast[0].hourly[0] | .icon'
-
-elif [[ "$1" == "--current-temp" ]]; then 
-    curr_time=$(date +%H:%M)
-    t=$(cat "$json_file" | jq -r --arg ct "$curr_time" '(.forecast[0].hourly | map(select(.time <= $ct)) | last) // .forecast[0].hourly[0] | .temp')
-    echo "${t}°C"
-
-elif [[ "$1" == "--current-hex" ]]; then
-    curr_time=$(date +%H:%M)
-    cat "$json_file" | jq -r --arg ct "$curr_time" '(.forecast[0].hourly | map(select(.time <= $ct)) | last) // .forecast[0].hourly[0] | .hex'
-fi
+        ;;
+    *)
+        echo "usage: $0 [--json|--fetch]" >&2
+        exit 2
+        ;;
+esac

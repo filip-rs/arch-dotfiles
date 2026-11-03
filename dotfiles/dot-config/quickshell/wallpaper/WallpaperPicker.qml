@@ -101,9 +101,9 @@ Item {
             let mapFile = Quickshell.env("HOME") + "/.cache/wallpaper_picker/search_map.txt";
 
             if (alreadyExists) {
+                if (typeof masterWindow !== "undefined") masterWindow.switchWidget("hidden", "");
                 const applyScript = `
                     (
-                        echo 'close' > /tmp/qs_widget_state
                         pkill mpvpaper || true
                         bash "${escapeBash(splitScript)}" "${escapeBash(destFile)}"
                     ) </dev/null >/dev/null 2>&1 & disown
@@ -135,7 +135,7 @@ Item {
                             cp "$TEMP_THUMB" "$FINAL_THUMB"
                             magick "$DEST_FILE" -resize x420 -quality 70 "$FINAL_THUMB" || true
 
-                            echo 'close' > /tmp/qs_widget_state
+                            qs -p "$HOME/.config/quickshell/Main.qml" ipc call panel command close >/dev/null 2>&1
                             pkill mpvpaper || true
                             bash "${escapeBash(splitScript)}" "$DEST_FILE"
                         fi
@@ -150,9 +150,9 @@ Item {
 
         if (isVideo) {
             // Videos: use mpvpaper directly (no splitting)
+            if (typeof masterWindow !== "undefined") masterWindow.switchWidget("hidden", "");
             const fullScript = `
                 (
-                    echo 'close' > /tmp/qs_widget_state
                     pkill mpvpaper || true
                     mpvpaper -o 'loop --no-audio --hwdec=auto --profile=high-quality --video-sync=display-resample --interpolation --tscale=oversample' '*' "${escapeBash(originalFile)}"
                 ) </dev/null >/dev/null 2>&1 & disown
@@ -160,9 +160,9 @@ Item {
             Quickshell.execDetached(["bash", "-c", fullScript]);
         } else {
             // Images: split for triple monitors and apply via hyprpaper
+            if (typeof masterWindow !== "undefined") masterWindow.switchWidget("hidden", "");
             const fullScript = `
                 (
-                    echo 'close' > /tmp/qs_widget_state
                     pkill mpvpaper || true
                     bash "${escapeBash(splitScript)}" "${escapeBash(originalFile)}"
                 ) </dev/null >/dev/null 2>&1 & disown

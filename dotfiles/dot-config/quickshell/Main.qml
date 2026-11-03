@@ -60,12 +60,25 @@ PanelWindow {
         onClicked: switchWidget("hidden", "")
     }
 
-    // Initialize state on boot
-    Component.onCompleted: {
-        Quickshell.execDetached(["bash", "-c", "echo '" + currentActive + "' > /tmp/qs_active_widget"]);
+    // IPC entry point for qs_manager.sh (scripts/desktop):
+    //   qs -p ~/.config/quickshell/Main.qml ipc call panel command '<cmd>'
+    //   qs -p ~/.config/quickshell/Main.qml ipc call panel active
+    IpcHandler {
+        target: "panel"
+
+        // Wire format: "<cmd>[:<arg>][|<anchor>|<monitor>]", e.g.
+        // "network:bt|right|eDP-1" or plain "close".
+        function command(raw: string): void {
+            masterWindow.handleCommand(raw);
+        }
+
+        // Name of the open panel, or "hidden".
+        function active(): string {
+            return masterWindow.currentActive;
+        }
     }
 
-    property string currentActive: "hidden" 
+    property string currentActive: "hidden"
     property bool isVisible: false
     property string activeArg: ""
     property string activeAnchor: ""
@@ -110,10 +123,6 @@ PanelWindow {
         }
     }
     // ---------------------------------------
-
-    onIsVisibleChanged: {
-        if (isVisible) masterWindow.requestActivate();
-    }
 
     // --- THE WIDGET CONTAINER ---
     Item {
@@ -184,10 +193,6 @@ PanelWindow {
     }
 
     function switchWidget(newWidget, arg) {
-        // FIX 1: Immediately update the system state file so the bash manager 
-        // doesn't read stale data during the morph animations.
-        Quickshell.execDetached(["bash", "-c", "echo '" + newWidget + "' > /tmp/qs_active_widget"]);
-
         prepTimer.stop();
         teleportFadeOutTimer.stop();
         teleportFadeInTimer.stop();
@@ -313,43 +318,32 @@ PanelWindow {
         masterWindow.isVisible = true;
     }
 
-    Timer {
-        interval: 50; running: true; repeat: true
-        onTriggered: { if (!ipcPoller.running) ipcPoller.running = true; }
-    }
+    // Wire format: "<cmd>[:<arg>][|<anchor>|<monitor>]".
+    // qs_manager.sh appends the anchor (which side of the bar the invoking
+    // icon lives on) and the output to open on. Both are optional, so plain
+    // "close" and "network" work too.
+    function handleCommand(rawCmd) {
+        rawCmd = (rawCmd || "").trim();
+        if (rawCmd === "") return;
 
-    Process {
-        id: ipcPoller
-        // FIX 2: Use `mv` to make the file read/delete atomic. This prevents 
-        // wiping out rapid subsequent commands that happen during execution.
-        command: ["bash", "-c", "if [ -f /tmp/qs_widget_state ]; then mv /tmp/qs_widget_state /tmp/qs_widget_state_read 2>/dev/null && cat /tmp/qs_widget_state_read && rm /tmp/qs_widget_state_read; fi"]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                let rawCmd = this.text.trim();
-                if (rawCmd === "") return;
+        let envelope = rawCmd.split("|");
+        let head = envelope[0];
+        let anchor = envelope.length > 1 ? envelope[1] : "";
+        let monitor = envelope.length > 2 ? envelope[2] : "";
 
-                // Wire format: "<cmd>[:<arg>][|<anchor>|<monitor>]".
-                // qs_manager.sh appends the anchor (which side of the bar the
-                // invoking icon lives on) and the output to open on. Both are
-                // optional, so older/plain "close" and "network" still work.
-                let envelope = rawCmd.split("|");
-                let head = envelope[0];
-                let anchor = envelope.length > 1 ? envelope[1] : "";
-                let monitor = envelope.length > 2 ? envelope[2] : "";
+        let hp = head.split(":");
+        let cmd = hp[0];
+        let arg = hp.length > 1 ? hp.slice(1).join(":") : "";
 
-                let hp = head.split(":");
-                let cmd = hp[0];
-                let arg = hp.length > 1 ? hp.slice(1).join(":") : "";
-
-                if (cmd === "close") {
-                    switchWidget("hidden", "");
-                } else if (getLayout(cmd)) {
-                    delayedClear.stop();
-                    if (monitor !== "") masterWindow.targetMonitor = monitor;
-                    masterWindow.activeAnchor = anchor;
-                    switchWidget(cmd, arg);
-                }
-            }
+        if (cmd === "close") {
+            switchWidget("hidden", "");
+        } else if (getLayout(cmd)) {
+            delayedClear.stop();
+            if (monitor !== "") masterWindow.targetMonitor = monitor;
+            masterWindow.activeAnchor = anchor;
+            switchWidget(cmd, arg);
+        } else {
+            console.warn("Main: unknown panel command:", rawCmd);
         }
     }
 

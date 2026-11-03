@@ -141,7 +141,7 @@ Item {
             syncModel(inputsModel, data.inputs || []);
             syncModel(appsModel, data.apps || []);
             updateHeroData();
-        } catch(e) {}
+        } catch(e) { console.warn("VolumePopup: bad audio state JSON:", e); }
     }
 
     function updateHeroData() {
