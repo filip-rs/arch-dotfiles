@@ -1,0 +1,7 @@
+#%PAM-1.0
+# Fingerprint stack for the Quickshell lockscreen (../LockContext.qml).
+#
+# One scan per PAM run and no timeout: LockContext counts the misses itself
+# (fpMaxAttempts) and starts a new run after each one, and after reader errors
+# such as the sensor still re-initialising after resume.
+auth  required  pam_fprintd.so max-tries=1 timeout=-1

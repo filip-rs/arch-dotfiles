@@ -92,7 +92,7 @@ hl.bind(mod .. " + V", hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mod .. " + F", hl.dsp.window.fullscreen())
 hl.bind(mod .. " + P", hl.dsp.window.pseudo())
 hl.bind(mod .. " + SPACE", hl.dsp.exec_cmd("wofi"))
-hl.bind(mod .. " + O", hl.dsp.exec_cmd("hyprlock"))
+hl.bind(mod .. " + O", hl.dsp.exec_cmd("~/.config/quickshell/lock/lock.sh"))
 hl.bind(mod .. " + U", hl.dsp.exec_cmd("wlogout --protocol layer-shell"))
 hl.bind(mod .. " + SHIFT + M", hl.dsp.exit())
 
@@ -212,7 +212,7 @@ end
 -- ──────────────── MOD5 (caps) duplicates of the core binds ───────
 
 hl.bind(mod5 .. " + Q", hl.dsp.exec_cmd("alacritty"))
-hl.bind(mod5 .. " + O", hl.dsp.exec_cmd("hyprlock"))
+hl.bind(mod5 .. " + O", hl.dsp.exec_cmd("~/.config/quickshell/lock/lock.sh"))
 hl.bind(mod5 .. " + E", hl.dsp.exec_cmd("thunar"))
 hl.bind(mod5 .. " + V", hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mod5 .. " + F", hl.dsp.window.fullscreen())

@@ -1,6 +1,6 @@
 {
     "label" : "lock",
-    "action" : "hyprlock",
+    "action" : "~/.config/quickshell/lock/lock.sh",
     "text" : "        ",
     "keybind" : "l"
 }

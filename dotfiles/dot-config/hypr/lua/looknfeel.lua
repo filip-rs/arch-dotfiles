@@ -33,6 +33,9 @@ hl.config({
 		disable_splash_rendering = true,
 		animate_manual_resizes = true,
 		vrr = 0,
+		-- Lets a relaunched lockscreen take over after the old one died; the
+		-- session stays locked meanwhile. quickshell/lock/lock.sh relies on it.
+		allow_session_lock_restore = true,
 	},
 
 	-- Niri-style scrolling tape; values mirror the layout{} block in
