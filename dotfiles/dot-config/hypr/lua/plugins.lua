@@ -179,7 +179,7 @@ if has("hyprgrass") then
 	-- this is the most likely line to need fixing.
 	g.bind({
 		pattern = { kind = "swipe", fingers = 3, direction = "leftdown" },
-		action = hl.dsp.exec_cmd("alacritty"),
+		action = hl.dsp.exec_cmd("$TERMINAL"),
 	})
 
 	g.bind({

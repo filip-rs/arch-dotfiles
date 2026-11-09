@@ -51,15 +51,6 @@ hl.window_rule({
     size   = { "monitor_w*0.5", "monitor_h*0.5" },
 })
 
-hl.window_rule({
-    name    = "discord",
-    match   = { initial_title = "discord" },
-    float   = true,
-    center  = true,
-    size    = { "monitor_w*0.5", "monitor_h*0.5" },
-    monitor = "DP-2",
-})
-
 -- librepods autostarts with --hide, but if its window does show up it should
 -- not steal focus or a tile.
 hl.window_rule({

@@ -85,7 +85,7 @@ end
 
 -- ───────────────────────────── core ─────────────────────────────
 
-hl.bind(mod .. " + Q", hl.dsp.exec_cmd("alacritty"))
+hl.bind(mod .. " + Q", hl.dsp.exec_cmd("$TERMINAL"))
 hl.bind(mod .. " + X", hl.dsp.window.close())
 hl.bind(mod .. " + E", hl.dsp.exec_cmd("nautilus --new-window"))
 hl.bind(mod .. " + V", hl.dsp.window.float({ action = "toggle" }))
@@ -211,7 +211,7 @@ end
 
 -- ──────────────── MOD5 (caps) duplicates of the core binds ───────
 
-hl.bind(mod5 .. " + Q", hl.dsp.exec_cmd("alacritty"))
+hl.bind(mod5 .. " + Q", hl.dsp.exec_cmd("$TERMINAL"))
 hl.bind(mod5 .. " + O", hl.dsp.exec_cmd("~/.config/quickshell/lock/lock.sh"))
 hl.bind(mod5 .. " + E", hl.dsp.exec_cmd("nautilus --new-window"))
 hl.bind(mod5 .. " + V", hl.dsp.window.float({ action = "toggle" }))
@@ -221,12 +221,6 @@ hl.bind(mod5 .. " + SPACE", hl.dsp.exec_cmd("wofi"))
 hl.bind(mod5 .. " + A", page("l"))
 hl.bind(mod5 .. " + D", page("r"))
 hl.bind(mod5 .. " + S", hl.dsp.focus({ workspace = "r+1" }))
-
--- ──────────── ROG G15 Strix (2021) hardware keys, by keycode ─────
-
-hl.bind("code:156", hl.dsp.exec_cmd("rog-control-center")) -- Armoury Crate key
-hl.bind("code:211", hl.dsp.exec_cmd("asusctl profile -n; pkill -SIGRTMIN+8 waybar")) -- fan profile, FN+F5
-hl.bind("code:210", hl.dsp.exec_cmd("asusctl led-mode -n")) -- keyboard RGB profile, FN+F4
 
 -- ───────────── volume, brightness and media (SwayOSD popups) ─────────────
 -- Hardware keys are bound by keycode, which both keyboards share. The laptop

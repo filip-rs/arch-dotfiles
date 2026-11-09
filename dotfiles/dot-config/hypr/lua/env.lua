@@ -1,6 +1,13 @@
 -- Environment variables and XWayland.
 -- Ported from hyprland.conf (env = ... / xwayland { ... }).
 
+hl.env("XDG_SESSION_TYPE", "wayland")
+hl.env("XDG_CURRENT_DESKTOP", "Hyprland")
+hl.env("XDG_SESSION_DESKTOP", "Hyprland")
+
+-- Terminal for Super + Q / Caps + Q. Swap alacritty <-> ghostty here.
+hl.env("TERMINAL", "alacritty")
+
 hl.env("GTK_THEME", "Palette") -- adw-gtk3 recoloured by scripts/desktop/theme_apply.sh
 hl.env("WALLPAPER_DIR", "~/Pictures/Wallpapers")
 hl.env("SCRIPT_DIR", "~/.config/scripts/desktop")

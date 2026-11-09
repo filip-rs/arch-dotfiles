@@ -22,4 +22,5 @@ require("lua.input")
 require("lua.rules")
 require("lua.binds")
 require("lua.plugins")
+require("lua.hosts") -- hosts/<hostname>.lua
 require("lua.autostart")
