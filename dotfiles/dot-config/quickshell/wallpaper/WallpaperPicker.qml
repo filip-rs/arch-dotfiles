@@ -891,8 +891,9 @@ Item {
         opacity: window.isReady ? 1.0 : 0.0
         anchors.margins: window.isReady ? 0 : window.s(40) 
         
-        Behavior on opacity { NumberAnimation { duration: 600; easing.type: Easing.OutQuart } }
-        Behavior on anchors.margins { NumberAnimation { duration: 700; easing.type: Easing.OutExpo } }
+        // Kept short: the picker should feel instant (was 600 / 700 ms)
+        Behavior on opacity { NumberAnimation { duration: 220; easing.type: Easing.OutQuart } }
+        Behavior on anchors.margins { NumberAnimation { duration: 280; easing.type: Easing.OutExpo } }
 
         spacing: 0
         orientation: ListView.Horizontal

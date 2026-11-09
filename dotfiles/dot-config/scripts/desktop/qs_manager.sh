@@ -96,82 +96,49 @@ fi
 # -----------------------------------------------------------------------------
 # PREP FUNCTIONS
 # -----------------------------------------------------------------------------
-handle_wallpaper_prep() {
-    mkdir -p "$THUMB_DIR"
+# Thumbnail name of the wallpaper that is on screen now, for the picker to
+# highlight. Fast on purpose: it runs before the picker opens. Videos play in
+# mpvpaper; images are recorded by wallpaper_split.sh.
+current_wallpaper_thumb() {
+    local cur
+    cur=$(pgrep -a mpvpaper 2>/dev/null | grep -o "$SRC_DIR/[^' ]*" | head -n1)
+    [ -n "$cur" ] || cur=$(cat "$HOME/.cache/wallpaper/current" 2>/dev/null)
+    [ -n "$cur" ] || return 0
+    cur=$(basename "$cur")
+    if [[ "${cur##*.}" =~ ^(mp4|mkv|mov|webm)$ || "${cur##*.}" =~ ^(MP4|MKV|MOV|WEBM)$ ]]; then
+        printf '000_%s' "$cur"
+    else
+        printf '%s' "$cur"
+    fi
+}
 
-    # Clean stale thumbnails
+# Bring the thumbnail cache in line with the wallpaper folder. Runs in the
+# background after the picker has opened; the picker's folder model shows new
+# thumbnails as they appear.
+update_wallpaper_thumbs() {
+    mkdir -p "$THUMB_DIR"
+    exec 8>"$THUMB_DIR.lock"
+    flock -n 8 || return 0 # a previous run is still going
+    shopt -s nullglob nocaseglob
+
+    local thumb filename extension img
     for thumb in "$THUMB_DIR"/*; do
-        [ -e "$thumb" ] || continue
-        filename=$(basename "$thumb")
-        clean_name="${filename#000_}"
-        if [ ! -f "$SRC_DIR/$clean_name" ]; then rm -f "$thumb"; fi
+        filename=${thumb##*/}
+        [ -f "$SRC_DIR/${filename#000_}" ] || rm -f "$thumb"
     done
 
     for img in "$SRC_DIR"/*.{jpg,jpeg,png,webp,gif,mp4,mkv,mov,webm}; do
-        [ -e "$img" ] || continue
-        filename=$(basename "$img")
-        extension="${filename##*.}"
-
-        # webp is thumbnailed like any other image (magick, awww and matugen
-        # all read it); the original is never touched.
+        filename=${img##*/}
+        extension=${filename##*.}
         if [[ "${extension,,}" =~ ^(mp4|mkv|mov|webm)$ ]]; then
             thumb="$THUMB_DIR/000_$filename"
-            [ -f "$THUMB_DIR/$filename" ] && rm -f "$THUMB_DIR/$filename"
-            if [ ! -f "$thumb" ]; then
-                 ffmpeg -y -ss 00:00:05 -i "$img" -vframes 1 -f image2 -q:v 2 "$thumb" > /dev/null 2>&1
-            fi
+            [ -f "$thumb" ] || ffmpeg -y -ss 00:00:05 -i "$img" -vframes 1 -f image2 -q:v 2 "$thumb" >/dev/null 2>&1
         else
+            # webp is thumbnailed like any other image; the original is never touched
             thumb="$THUMB_DIR/$filename"
-            if [ ! -f "$thumb" ]; then
-                magick "$img" -resize x420 -quality 70 "$thumb"
-            fi
+            [ -f "$thumb" ] || magick "$img" -resize x420 -quality 70 "$thumb"
         fi
     done
-
-    TARGET_THUMB=""
-    CURRENT_SRC=""
-
-    if pgrep -a "mpvpaper" > /dev/null; then
-        CURRENT_SRC=$(pgrep -a mpvpaper | grep -o "$SRC_DIR/[^' ]*" | head -n1)
-        CURRENT_SRC=$(basename "$CURRENT_SRC")
-    fi
-
-    if [ -z "$CURRENT_SRC" ]; then
-        # Derive current wallpaper name from the cached split used as center.png
-        SPLIT_DIR="$HOME/.config/scripts/desktop/WallpaperSplitter"
-        CENTER="$SPLIT_DIR/center.png"
-        if [ -f "$CENTER" ]; then
-            CENTER_SUM=$(md5sum "$CENTER" 2>/dev/null | awk '{print $1}')
-            for cache in "$HOME/.cache/wallpaper_splits"/*/center.png; do
-                [ -e "$cache" ] || continue
-                if [ "$(md5sum "$cache" | awk '{print $1}')" = "$CENTER_SUM" ]; then
-                    key=$(basename "$(dirname "$cache")")
-                    for candidate in "$SRC_DIR"/*; do
-                        [ -e "$candidate" ] || continue
-                        cand_base=$(basename "$candidate")
-                        cand_key="${cand_base%.*}"
-                        cand_key=$(echo "$cand_key" | tr ' ' '_' | tr -cd 'a-zA-Z0-9_-')
-                        if [ "$cand_key" = "$key" ]; then
-                            CURRENT_SRC="$cand_base"
-                            break
-                        fi
-                    done
-                    break
-                fi
-            done
-        fi
-    fi
-
-    if [ -n "$CURRENT_SRC" ]; then
-        EXT="${CURRENT_SRC##*.}"
-        if [[ "${EXT,,}" =~ ^(mp4|mkv|mov|webm)$ ]]; then
-            TARGET_THUMB="000_$CURRENT_SRC"
-        else
-            TARGET_THUMB="$CURRENT_SRC"
-        fi
-    fi
-    
-    export WALLPAPER_THUMB="$TARGET_THUMB"
 }
 
 # The scan runs in its own process group with a hard time limit: the panel can
@@ -200,25 +167,30 @@ handle_network_prep() {
 }
 
 # -----------------------------------------------------------------------------
-# ZOMBIE WATCHDOG
+# WATCHDOG: (re)start Quickshell when it does not answer on IPC
 # -----------------------------------------------------------------------------
-if ! pgrep -f "quickshell.*Main\.qml" >/dev/null; then
+start_quickshell() {
     # Without qt6ct, like autostart.lua: the panels are styled by hand
     QT_QPA_PLATFORMTHEME= quickshell -p "$MAIN_QML_PATH" >/dev/null 2>&1 &
     disown
-fi
+}
 
 # -----------------------------------------------------------------------------
 # IPC ROUTING
 # -----------------------------------------------------------------------------
 if [[ "$ACTION" == "close" ]]; then
-    send_close
+    # Nothing to close if Quickshell is not running, so no waiting here
+    qs_ipc command close >/dev/null
     stop_bt_scan
     exit 0
 fi
 
 if [[ "$ACTION" == "open" || "$ACTION" == "toggle" ]]; then
-    ACTIVE_WIDGET=$(qs_ipc_wait active)
+    # The first IPC call doubles as the liveness check (cheaper than pgrep -f)
+    if ! ACTIVE_WIDGET=$(qs_ipc active); then
+        start_quickshell
+        ACTIVE_WIDGET=$(qs_ipc_wait active)
+    fi
     CURRENT_MODE=$(cat "$NETWORK_MODE_FILE" 2>/dev/null)
 
     if [[ "$TARGET" == "network" ]]; then
@@ -252,8 +224,9 @@ if [[ "$ACTION" == "open" || "$ACTION" == "toggle" ]]; then
     fi
 
     if [[ "$TARGET" == "wallpaper" ]]; then
-        handle_wallpaper_prep
-        emit "$TARGET:$WALLPAPER_THUMB"
+        emit "$TARGET:$(current_wallpaper_thumb)"
+        ( update_wallpaper_thumbs ) </dev/null >/dev/null 2>&1 &
+        disown
     else
         emit "$TARGET"
     fi
