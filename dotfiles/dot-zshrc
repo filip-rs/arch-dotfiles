@@ -1,228 +1,185 @@
-# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.config/zsh/.zshrc.
+# ~/.zshrc — plain zsh with plugins from the Arch repos/AUR, no framework.
+#
+# Kept fast on purpose: the completion dump is cached, and every plugin apart
+# from the prompt loads right after the first prompt is drawn (zsh-defer).
+# Profile startup by uncommenting the next line and running `zprof`.
 #zmodload zsh/zprof
 
-# Initialization code that may require console input (password prompts, [y/n]
-# confirmations, etc.) must go above this block; everything else may go below.
+# ── Powerlevel10k instant prompt (keep at the top) ───────────────────
+# Anything that may ask for input (passwords, [y/n]) must go above this.
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
-
 typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
 
-# Path to oh-my-zsh installation.
-export ZSH="$HOME/.config/zsh/ohmyzsh"
-export TERMINAL_EMULATOR="ghostty"
+# ── Environment ──────────────────────────────────────────────────────
+typeset -U path  # no duplicate entries when shells nest (tmux, gh-acc-swap)
+path=("$HOME/.local/bin" "$HOME/.cargo/bin" "$HOME/go/bin" $path /opt/miniconda3/bin)
 
-# path to cargo programs
-export PATH="$HOME/.cargo/bin:$PATH"
-export PATH="$HOME/go/bin:$PATH"
-export PATH="$PATH:/opt/miniconda3/bin"
-
+export EDITOR=nvim
 export BROWSER=librewolf
-
+export GPG_TTY=$TTY
+export NVM_DIR=/usr/share/nvm
 # Default gh config dir, but keep an explicit override (gh-acc-swap relies on this).
 export GH_CONFIG_DIR="${GH_CONFIG_DIR:-$HOME/.config/gh}"
+# Flatpak apps for launchers, added in front of whatever the session already has
+[[ ":$XDG_DATA_DIRS:" == *":/var/lib/flatpak/exports/share:"* ]] ||
+  export XDG_DATA_DIRS="/var/lib/flatpak/exports/share:${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
 
-export NVM_DIR=/usr/share/nvm
-#source $NVM_DIR/init-nvm.sh
+# ── History ──────────────────────────────────────────────────────────
+HISTFILE=~/.zshhist
+HISTSIZE=12000
+SAVEHIST=10000
+setopt INC_APPEND_HISTORY SHARE_HISTORY HIST_IGNORE_SPACE HIST_IGNORE_ALL_DUPS \
+       HIST_IGNORE_DUPS HIST_SAVE_NO_DUPS HIST_FIND_NO_DUPS
 
-ZSH_THEME="powerlevel10k"
+# ── Completion ───────────────────────────────────────────────────────
+# A full rebuild of the dump (scanning every completion file) runs at most
+# once a day; other shells load the cached one.
+autoload -Uz compinit
+() {
+  setopt local_options extended_glob
+  local dump=${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump
+  [[ -d ${dump:h} ]] || mkdir -p ${dump:h}
+  if [[ -n $dump(#qN.mh-24) ]]; then compinit -C -d $dump; else compinit -d $dump; fi
+}
+# Case-insensitive, - and _ interchangeable, then partial-word matching
+zstyle ':completion:*' matcher-list 'm:{[:lower:][:upper:]-_}={[:upper:][:lower:]_-}' 'r:|=*' 'l:|=* r:|=*'
+zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+zstyle ':completion:*' use-cache on
+zstyle ':completion:*' cache-path ${XDG_CACHE_HOME:-$HOME/.cache}/zsh/compcache
+zstyle ':completion:*:descriptions' format '[%d]'
 
-
-# Uncomment the following line to change how often to auto-update (in days).
-# zstyle ':omz:update' frequency 13
-
-# Uncomment the following line if pasting URLs and other text is messed up.
-# DISABLE_MAGIC_FUNCTIONS="true"
-
-# Uncomment the following line to disable colors in ls.
-# DISABLE_LS_COLORS="true"
-
-# Uncomment the following line to disable auto-setting terminal title.
-# DISABLE_AUTO_TITLE="true"
-#
-
-# Uncomment the following line to use hyphen-insensitive completion.
-# Case-sensitive completion must be off. _ and - will be interchangeable.
-HYPHEN_INSENSITIVE="true"
-# Uncomment the following line to enable command auto-correction.
-ENABLE_CORRECTION="true"
-
-# Enable completion
-autoload -Uz compinit && compinit -d ~/.config/zsh/.zcompdump
-
-
-
-[ -f /usr/share/fzf/key-bindings.zsh ] && source /usr/share/fzf/key-bindings.zsh
-[ -f /usr/share/fzf/completion.zsh ] && source /usr/share/fzf/completion.zsh
-
-
-export HISTSIZE=12000
-export SAVEHIST=10000
-export HISTFILE=~/.zshhist
-export HISTDUP=erase
-
-setopt INC_APPEND_HISTORY
-setopt SHARE_HISTORY
-setopt HIST_IGNORE_SPACE
-setopt HIST_IGNORE_ALL_DUPS
-setopt HIST_SAVE_NO_DUPS
-setopt HIST_IGNORE_DUPS
-setopt HIST_FIND_NO_DUPS
-
-# Uncomment the following line to display red dots whilst waiting for completion.
-# You can also set it to another string to have that shown instead of the default red dots.
-# e.g. COMPLETION_WAITING_DOTS="%F{yellow}waiting...%f"
-# Caution: this setting can cause issues with multiline prompts in zsh < 5.7.1 (see #5765)
-# COMPLETION_WAITING_DOTS="true"
-
-# Uncomment the following line if you want to disable marking untracked files
-# under VCS as dirty. This makes repository status check for large repositories
-# much, much faster.
-# DISABLE_UNTRACKED_FILES_DIRTY="true"
-
-# Uncomment the following line if you want to change the command execution time
-# stamp shown in the history command output.
-# You can set one of the optional three formats:
-# "mm/dd/yyyy"|"dd.mm.yyyy"|"yyyy-mm-dd"
-# or set a custom format using the strftime function format specifications,
-# see 'man strftime' for details.
-# HIST_STAMPS="mm/dd/yyyy"
-
-# Would you like to use another custom folder than $ZSH/custom?
-# ZSH_CUSTOM=/path/to/new-custom-folder
-
-# Which plugins would you like to load?
-# Standard plugins can be found in $ZSH/plugins/
-# Custom plugins may be added to $ZSH_CUSTOM/plugins/
-# Example format: plugins=(rails git textmate ruby lighthouse)
-# Add wisely, as too many plugins slow down shell startup.
-plugins=(git)
-
-
-# User configuration
-
-# export MANPATH="/usr/local/man:$MANPATH"
-
-# You may need to manually set your language environment
-# export LANG=en_US.UTF-8
-
-# Preferred editor for local and remote sessions
-# if [[ -n $SSH_CONNECTION ]]; then
-#   export EDITOR='vim'
-# else
-#   export EDITOR='mvim'
-# fi
-
-# Compilation flags
-# export ARCHFLAGS="-arch x86_64"
-
-
-# Machine specific .,m
+# ── Machine-specific ─────────────────────────────────────────────────
 case "$HOST" in
-    arch* || KSAT*)
-        alias update="sudo pacman -Syyu && paru && hyprpm update"
+    arch*|KSAT*)
+        alias update="paru -Syu && hyprpm update"
         alias refreshmirrors="rate-mirrors arch | sudo tee /etc/pacman.d/mirrorlist"
         alias pkgfnd="pacman -Q | grep"
-        alias hyprconf="cd ~/.config/hypr && nvim ~/.config/hypr/hyprland.conf"
+        alias hyprconf="cd ~/.config/hypr && nvim hyprland.lua"
 
-        # Defer the other plugins for better startup time
         source /usr/share/zsh/plugins/zsh-defer/zsh-defer.plugin.zsh
+
+        # fzf-tab: Tab completion as a fuzzy-searchable list with previews.
+        # Must load before plugins that wrap widgets (autosuggestions,
+        # syntax highlighting); deferred sources run in the order queued.
+        local_fzf_tab=(/usr/share/zsh/plugins/fzf-tab{,-git}/fzf-tab.plugin.zsh(N))
+        if (( $#local_fzf_tab )); then
+            zstyle ':completion:*' menu no
+            zstyle ':fzf-tab:*' switch-group '<' '>'
+            zstyle ':fzf-tab:complete:(cd|z|__zoxide_z):*' fzf-preview 'eza -1 --color=always --icons $realpath'
+            zsh-defer source $local_fzf_tab[1]
+        else
+            zstyle ':completion:*' menu select
+        fi
+        unset local_fzf_tab
 
         zsh-defer source /usr/share/zsh/plugins/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
         zsh-defer source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
         zsh-defer source /usr/share/zsh/plugins/zsh-autopair/autopair.zsh
         zsh-defer source /usr/share/zsh/plugins/zsh-you-should-use/you-should-use.plugin.zsh
-
         zsh-defer source /usr/share/zsh/plugins/zsh-history-substring-search/zsh-history-substring-search.zsh
+        zsh-defer source /usr/share/fzf/key-bindings.zsh  # Ctrl-R history, Ctrl-T files, Alt-C cd
 
-        # Disabled plugins
-        #
-        #zsh-defer source /usr/share/zsh/plugins/zsh-vi-mode/zsh-vi-mode.plugin.zsh
-
-        function _accept_or_complete() {
+        # Tab: accept the grey autosuggestion if there is one, otherwise complete.
+        _accept_or_complete() {
             if [[ -n "$POSTDISPLAY" ]]; then
                 zle autosuggest-accept
+            elif (( $+widgets[fzf-tab-complete] )); then
+                zle fzf-tab-complete
             else
                 zle expand-or-complete
             fi
         }
         zle -N _accept_or_complete
-        bindkey '^I' _accept_or_complete
-
+        # Bound once the deferred plugins are in, since fzf-tab claims Tab on load
+        zsh-defer -c 'bindkey "^I" _accept_or_complete'
 
         bindkey '^[[A' history-substring-search-up   # Up arrow
         bindkey '^[[B' history-substring-search-down # Down arrow
-
         bindkey '^K' history-substring-search-up     # ctrl k
         bindkey '^J' history-substring-search-down   # ctrl j
 
-        # HOST SPECIFIC
         case "$HOST" in
-            archbased)
-                ;;
-
             archflipper)
-                [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-                source ~/.fzf-git.sh
-
+                [[ -f ~/.fzf-git.sh ]] && zsh-defer source ~/.fzf-git.sh
                 alias performance="sudo cpupower frequency-set -g performance"
                 alias powersave="sudo cpupower frequency-set -g powersave"
                 ;;
         esac
         ;;
 
-
     debian*|i5server)
         alias inst="sudo apt install"
         alias update="sudo apt update && sudo apt upgrade"
+        zstyle ':completion:*' menu select
         ;;
 
     *)
         alias update="echo 'no system-specific update command defined'"
+        zstyle ':completion:*' menu select
         ;;
 esac
 
-# Example aliases
-alias zshconf="nvim ~/.zshrc +6 && source ~/.zshrc"
-# alias ohmyzsh="nvim ~/.config/.oh-my-zsh"
+bindkey '^A' beginning-of-line
+bindkey '^E' end-of-line
 
-bindkey '^A' beginning-of-line   # Ctrl-A: Move to beginning
-bindkey '^E' end-of-line         # Ctrl-E: Move to end
+# ── Prompt ───────────────────────────────────────────────────────────
+# To customize it, run `p10k configure` or edit ~/.p10k.zsh.
+[[ -f /usr/share/zsh-theme-powerlevel10k/powerlevel10k.zsh-theme ]] &&
+  source /usr/share/zsh-theme-powerlevel10k/powerlevel10k.zsh-theme
+[[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
 
-# To customize prompt, run `p10k configure` or edit ~/.config/zsh/.p10k.zsh.
-[[ ! -f ~/.config/zsh/.p10k.zsh ]] || source ~/.config/zsh/.p10k.zsh
-source /usr/share/zsh-theme-powerlevel10k/powerlevel10k.zsh-theme
-
+# ── Aliases ──────────────────────────────────────────────────────────
+alias zshconf="nvim ~/.zshrc && source ~/.zshrc"
 alias please="sudo"
 alias fking="sudo"
+alias fk="fuck"
+alias c="clear"
 alias wifilist="nmcli device wifi list"
 alias wificonnect="nmcli device wifi connect --ask"
-# alias wifix="rfkill unblock wlan"
-alias c="clear"
-alias nfch="neofetch"
+alias bt="sudo systemctl start bluetooth"
+alias btui="bluetuith"
+alias systat="sudo systemctl status"
+alias systart="sudo systemctl restart"
+
+alias ls="eza --icons"
+alias la="eza --long --header --icons --git --all --group-directories-first --sort=type"
 alias lss="eza --tree --icons --level=2"
 alias lsss="eza --tree --icons --level=3"
 alias lssss="eza --tree --icons --level=4"
-alias ls="eza --icons"
-alias la="eza --long --header --icons --git --all --group-directories-first --sort=type"
-alias py="python"
-alias serialfix="sudo chmod +766 /dev/ttyACM0"
-alias cpufetch="cpufetch --style fancy --color 230,50,45:240,230,230:0,0,0:250,70,65:170,170,170"
+alias fnd="ls -a | grep -i"
+alias lsblk="lsblk | bat -p --style=full --theme=\"Sublime Snazzy\" -l=makefile"
+alias desktopentry="cd /usr/share/applications/"
+alias stow="stow . --dotfiles -t $HOME"
+
+alias nfch="neofetch"
 alias fetch="fastfetch"
-alias desktopentry="/usr/share/applications/"
-alias nvide='nohup neovide & disown'
+alias cpufetch="cpufetch --style fancy --color 230,50,45:240,230,230:0,0,0:250,70,65:170,170,170"
+
+alias py="python"
 alias pyvenv="chmod +x .venv/bin/activate && source .venv/bin/activate"
 alias mkvenv="py -m venv .venv && chmod +x .venv/bin/activate && source .venv/bin/activate"
-alias desktopentry="cd /usr/share/applications/"
-alias bt="sudo systemctl start bluetooth"
-alias btui="bluetuith"
-alias webpconvert="for file in *.webp; dwebp $file -o ${file/%.webp/.png} && rm $file"
-alias heicconvert="for file in *.heic; do heif-convert $file ${file/%.heic/.png}; done"
-alias systat="sudo systemctl status"
-alias systart="sudo systemctl restart"
-alias stow="stow . --dotfiles -t $HOME"
-alias fnd="ls -a | grep -i"
+alias nvide='nohup neovide & disown'
+alias serialfix="sudo chmod +766 /dev/ttyACM0"
+alias templestart="qemu-system-x86_64 -m 512M -enable-kvm -drive file=$HOME/Temple/zeal.qcow2"
+
+alias yt-480="yt-dlp -f \"bestvideo[height=480][fps=30]+bestaudio/best[height=480][fps=30]\" --cookies-from-browser firefox"
+alias yt-720="yt-dlp -f \"bestvideo[height=720][fps=60]+bestaudio/best[height=720][fps=60]\" --cookies-from-browser firefox"
+alias yt-1080="yt-dlp -f \"bestvideo[height=1080][fps=60]+bestaudio/best[height=1080][fps=60]\" --cookies-from-browser firefox"
+alias yt-mp3="yt-dlp -x --audio-format mp3 --audio-quality 0 --cookies-from-browser firefox"
+
+alias hypr-fix='export HYPRLAND_INSTANCE_SIGNATURE=$(\ls -t /run/user/1000/hypr | head -n1)'
+
+# ── Functions ────────────────────────────────────────────────────────
+# Open a file / this folder in a GUI app and close the terminal (or tmux pane)
+pdf() { setsid -f zathura "$@" >/dev/null 2>&1; exit; }
+th() { setsid -f nautilus --new-window . >/dev/null 2>&1; exit; }
+
+# Copy a file's contents, or the argument itself, to the clipboard
+cpy() {
+    if [[ -f $1 ]]; then wl-copy < "$1"; else print -rn -- "$1" | wl-copy; fi
+}
 
 # Toggle mouse side buttons MB5 -> W, MB4 -> S (keyd, for Inscryption)
 mousews() {
@@ -236,16 +193,6 @@ mousews() {
 		return 1
 	fi
 }
-alias lsblk="lsblk | bat -p --style=full --theme=\"Sublime Snazzy\" -l=makefile"
-alias templestart="qemu-system-x86_64 -m 512M -enable-kvm -drive file=$HOME/Temple/temple.qcow2"
-alias templestart="qemu-system-x86_64 -m 512M -enable-kvm -drive file=$HOME/Temple/zeal.qcow2"
-alias yt-480="yt-dlp -f \"bestvideo[height=480][fps=30]+bestaudio/best[height=480][fps=30]\" --cookies-from-browser firefox"
-alias yt-720="yt-dlp -f \"bestvideo[height=720][fps=60]+bestaudio/best[height=720][fps=60]\" --cookies-from-browser firefox"
-alias yt-1080="yt-dlp -f \"bestvideo[height=1080][fps=60]+bestaudio/best[height=1080][fps=60]\" --cookies-from-browser firefox"
-alias yt-mp3="yt-dlp -x --audio-format mp3 --audio-quality 0 --cookies-from-browser firefox"
-alias hypr-fix='export HYPRLAND_INSTANCE_SIGNATURE=$(\ls -t /run/user/1000/hypr | head -n1)'
-alias powerdraw="upower -i $(upower -e | grep BAT) | grep -i energy-rate"
-
 
 # quick commit and push
 gacp() {
@@ -261,6 +208,28 @@ search home
 nameserver 1.1.1.1
 options edns0 trust-ad
 EOF
+}
+
+# Davinci converter
+conv() {
+    if [ -z "$1" ]; then
+        echo "Usage: conv inputfile [outputfile]"
+        return 1
+    fi
+
+    input="$1"
+    if [ -n "$2" ]; then
+        output="$2"
+    else
+        base="${input%.*}"
+        output="${base}.mov"
+    fi
+
+    ffmpeg -i "$input" -c:v prores_ks -profile:v 3 -c:a pcm_s16le "$output"
+}
+
+sunshine_start() {
+    DISPLAY=${DISPLAY:-:1} sunshine
 }
 
 gh-acc-swap() {
@@ -326,78 +295,6 @@ EOF
     command zsh -i
 }
 
-#alias powersave="sudo echo "2000000" > /sys/devices/system/cpu/cpu*/cpufreq/scaling_max_freq"
-#alias performance="sudo echo "3201000" > /sys/devices/system/cpu/cpu*/cpufreq/scaling_max_freq"
-
-alias fk="fuck"
-
-
-export PATH="$HOME/.local/bin:$PATH"
-export XDG_DATA_DIRS="/var/lib/flatpak/exports/share:/usr/local/share:/usr/share"
-export EDITOR="nvim"
-
-# configure and init zoxide
-eval "$(zoxide init zsh)"
-alias cd="z"
-
-[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
-
-# Auto-activate Python virtual environments
-chpwd() {
-  if [[ -d .venv ]]; then
-    source .venv/bin/activate
-  elif [[ -d venv ]]; then
-    source venv/bin/activate
-  fi
-}
-
-# Davinci converter
-conv() {
-    if [ -z "$1" ]; then
-        echo "Usage: conv inputfile [outputfile]"
-        return 1
-    fi
-
-    input="$1"
-    if [ -n "$2" ]; then
-        output="$2"
-    else
-        base="${input%.*}"
-        output="${base}.mov"
-    fi
-
-    ffmpeg -i "$input" -c:v prores_ks -profile:v 3 -c:a pcm_s16le "$output"
-}
-
-function _accept_or_complete() {
-    if [[ -n "$POSTDISPLAY" ]]; then
-        zle autosuggest-accept
-    else
-        zle expand-or-complete
-    fi
-}
-
-cpy() {
-    if [[ -f $1 ]]; then
-        cat $1 | wl-copy
-    else
-        echo $1 | wl-copy
-    fi
-}
-
-pdf() {
-    zathura $1 & disown && pkill $TERMINAL_EMULATOR
-}
-
-th() {
-    nautilus --new-window . & disown && pkill $TERMINAL_EMULATOR
-}
-
-sunshine_start() {
-    export DISPLAY:=1
-    sunshine
-}
-
 fuck () {
     TF_PYTHONIOENCODING=$PYTHONIOENCODING;
     export TF_SHELL=zsh;
@@ -415,9 +312,20 @@ fuck () {
         test -n "$TF_CMD" && print -s $TF_CMD
     }
 
+# ── Navigation ───────────────────────────────────────────────────────
+eval "$(zoxide init zsh)"
+alias cd="z"
 
+# Auto-activate Python virtual environments
+chpwd() {
+  if [[ -d .venv ]]; then
+    source .venv/bin/activate
+  elif [[ -d venv ]]; then
+    source venv/bin/activate
+  fi
+}
 
-# TMUX session handler
+# ── tmux session picker ──────────────────────────────────────────────
 [[ $- == *i* ]] || return
 
 # Define default sessions
@@ -441,8 +349,8 @@ if command -v tmux &>/dev/null \
   )
 
   if [[ "$selection" == "RESET" ]]; then
+    # Saved tmux-resurrect snapshots are kept, so prefix + Ctrl-r still works
     tmux kill-server
-    rm -f ~/.tmux/resurrect/*
 
     for s in "${sessions[@]}"; do
       tmux new-session -d -s "$s"
@@ -457,7 +365,6 @@ if command -v tmux &>/dev/null \
     exec tmux attach -t home
   fi
 fi
-export GPG_TTY=$(tty)
 # >>> Photon CLI >>>
 case ":$PATH:" in
   *:'/home/filip/.photon/bin':*) ;;
