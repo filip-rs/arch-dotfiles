@@ -1,0 +1,70 @@
+# AUR packages (paru). Curated from `pacman -Qqem` on archflipper.
+# Restore: see README.md (comment lines are skipped).
+
+# Desktop and shell
+bemoji-git
+fzf-tab-git
+hyprcaffeine
+hyprwatch
+librepods
+mullvad-vpn-bin
+nautilus-code
+neofetch
+qimgv
+waywall-working-git
+wl-color-picker
+wofi-calc
+wvkbd
+zsh-autopair-git
+zsh-completions-git
+zsh-defer-git
+zsh-fast-syntax-highlighting
+zsh-theme-powerlevel10k
+zsh-you-should-use
+
+# Laptop hardware (archflipper)
+asus-stylus-driver
+bbswitch-dkms
+detect-tablet-mode-git
+libfprint-elanpress-git
+
+# Apps
+bluetuith
+discord-canary
+discordo-git
+dissent-bin
+effectcraft-latest-bin
+filmcraft-latest-bin
+iloader-bin
+jdownloader2
+limusic-bin
+localsend-bin
+lowfi-bin
+nono-ai-bin
+notion-app-electron
+slack-cli
+spotifast-bin
+sunshine-bin
+vimv
+yapfast
+zapfast-bin
+
+# Development and embedded
+aml1
+arduino-ide-bin
+gns3-gui
+gns3-server
+gnu-netcat
+lsfg-vk-bin
+matlab-mpm
+minify
+nrfutil
+omdrop-owl
+pi-coding-agent
+python-west
+zephyr-sdk
+
+# Gaming
+badlion-client
+hytale-launcher-bin
+mcrcon
