@@ -205,7 +205,7 @@ EOF
 # ═══════════════════════════════════════════════════════════════════
 # 4. GTK theme "Palette": adw-gtk3 recoloured with the current palette
 #
-# GTK_THEME=Palette (hypr/lua/env.lua, niri/config.kdl) points every GTK3
+# GTK_THEME=Palette (hypr/lua/env.lua) points every GTK3
 # and GTK4 app here. Needs the adw-gtk-theme package. adw-gtk3 derives all
 # of its colours from the named colours below, for GTK3 and GTK4 alike.
 # GTK apps read their theme at startup, so running apps need a restart.
@@ -554,7 +554,7 @@ if [ "$skip_reload" != "--no-reload" ]; then
         disown
     fi
 
-    # Hyprland reloads config including colors.lua; niri reloads by itself
+    # Hyprland reloads config including colors.lua
     reload_compositor
 
     # CAVA (rebuild config from base + generated colors)

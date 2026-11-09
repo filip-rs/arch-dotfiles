@@ -4,9 +4,8 @@
 # Usage: monitor_apply.sh "NAME,WxH@RATE,XxY,SCALE" [ ... ]
 #
 # Called by the quickshell monitor panel. Layouts are persisted per machine in
-# an untracked file: ~/.config/hypr/host.lua on Hyprland, ~/.config/niri/host.kdl
-# on niri (included optionally from config.kdl). Everything above the marker
-# line is preserved; the monitor block below it is regenerated.
+# the untracked ~/.config/hypr/host.lua. Everything above the marker line is
+# preserved; the monitor block below it is regenerated.
 
 set -euo pipefail
 
@@ -14,17 +13,9 @@ source "$HOME/.config/scripts/lib/compositor.sh"
 
 [ "$#" -gt 0 ] || { echo "usage: $0 \"NAME,WxH@RATE,XxY,SCALE\" ..." >&2; exit 1; }
 
-case "$(compositor)" in
-    hyprland)
-        HOST_FILE="$HOME/.config/hypr/host.lua"
-        MARKER='-- >>> monitors (rewritten by scripts/desktop/monitor_apply.sh — edit above this line)'
-        ;;
-    niri)
-        HOST_FILE="$HOME/.config/niri/host.kdl"
-        MARKER='// >>> outputs (rewritten by scripts/desktop/monitor_apply.sh — edit above this line)'
-        ;;
-    *) echo "No supported compositor running" >&2; exit 1 ;;
-esac
+[ "$(compositor)" = hyprland ] || { echo "Hyprland is not running" >&2; exit 1; }
+HOST_FILE="$HOME/.config/hypr/host.lua"
+MARKER='-- >>> monitors (rewritten by scripts/desktop/monitor_apply.sh — edit above this line)'
 
 host_lines=()
 
@@ -35,14 +26,7 @@ for spec in "$@"; do
     y="${pos##*x}"
     set_output "$name" "$mode" "$x" "$y" "$scale"
 
-    case "$(compositor)" in
-        hyprland)
-            host_lines+=("hl.monitor({ output = \"$name\", mode = \"$mode\", position = \"$pos\", scale = $scale })")
-            ;;
-        niri)
-            host_lines+=("output \"$name\" {" "    mode \"$(niri_exact_mode "$name" "$mode")\"" "    scale $scale" "    position x=$x y=$y" "}")
-            ;;
-    esac
+    host_lines+=("hl.monitor({ output = \"$name\", mode = \"$mode\", position = \"$pos\", scale = $scale })")
 done
 
 # Rebuild the host file: preamble (up to and excluding the marker) + marker + monitors.

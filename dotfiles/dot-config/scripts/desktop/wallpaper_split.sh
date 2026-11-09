@@ -26,7 +26,7 @@ src="${src/#\~/$HOME}"
 src=$(readlink -f "$src")
 [ -f "$src" ] || { echo "File not found: $src"; exit 1; }
 
-# ── Detect connected outputs (Hyprland or niri) ──
+# ── Detect connected outputs ──
 source "$HOME/.config/scripts/lib/compositor.sh"
 mapfile -t OUTPUTS < <(list_outputs)
 if [ "${#OUTPUTS[@]}" -eq 0 ]; then

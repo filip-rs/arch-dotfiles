@@ -1,8 +1,6 @@
 latest.log
 dotfiles/dot-config/nvim/lazy-lock.json
-dotfiles/dot-config/hypr/local.conf
 dotfiles/dot-config/hypr/host.lua
-dotfiles/dot-config/niri/host.kdl
 dotfiles/dot-config/quickshell/guide/previews/
 
 .env
@@ -10,7 +8,6 @@ dotfiles/dot-config/quickshell/guide/previews/
 # Generated theme files (written by theme_apply.sh at runtime)
 dotfiles/dot-config/quickshell/qs_colors.json
 dotfiles/dot-config/nvim/lua/filip/theme_colors.lua
-dotfiles/dot-config/hypr/colors.conf
 dotfiles/dot-config/hypr/colors.lua
 dotfiles/dot-config/hypr/hyprlock-colors.conf
 dotfiles/dot-config/alacritty/themes/current.toml

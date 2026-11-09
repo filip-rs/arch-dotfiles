@@ -38,8 +38,8 @@ hl.config({
 		allow_session_lock_restore = true,
 	},
 
-	-- Niri-style scrolling tape; values mirror the layout{} block in
-	-- niri/config.kdl. Super H/L step columns, A/D page a screen, W/S workspaces.
+	-- Niri-style scrolling tape. Super H/L step columns, A/D page a screen,
+	-- W/S workspaces.
 	scrolling = {
 		column_width = 0.5,
 		explicit_column_widths = "0.333, 0.5, 0.667", -- Super + Z cycles these

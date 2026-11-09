@@ -201,12 +201,6 @@
             "steam": "$HOME/.local/share/icons/hicolor/16x16/apps/steam-waybar.png"
         }
     },
-    "temperature": {
-        "thermal-zone": 1,
-        "format": "{temperatureC}°C ",
-        "critical-threshold": 80,
-        "format-critical": "{temperatureC}°C "
-    },
     "custom/weather": {
         "tooltip": true,
         "format": "{}",
@@ -225,13 +219,6 @@
         "signal": 9,
         "on-click": "~/.local/bin/afk toggle; pkill -RTMIN+9 waybar",
         "tooltip": true
-    },
-    "custom/power_profile": {
-        "exec": "asusctl profile -p | sed s:'Active profile is'::",
-        "interval": 30,
-        "format": "󰈐{}",
-        "on-click": "asusctl profile -n; pkill -SIGRTMIN+8 waybar",
-        "signal": 8
     },
     // Left cap of the app dock; the taskbar is its right half.
     "custom/os_button": {

@@ -146,11 +146,6 @@ def get_active_window():
             data = json.loads(output)
             app_cls = data.get('initialClass') or data.get('class') or ''
             raw_title = data.get('initialTitle') or data.get('title') or ''
-        elif os.environ.get("NIRI_SOCKET"):
-            data = json.loads(subprocess.check_output(['niri', 'msg', '-j', 'focused-window'], text=True))
-            if not data: return "Desktop", "Desktop"
-            app_cls = data.get('app_id') or ''
-            raw_title = data.get('title') or ''
         else:
             return "Unknown", "Unknown"
 
@@ -179,25 +174,6 @@ def update_active_window():
         current_app_class, current_app_title = "Locked", "Locked"
     else:
         current_app_class, current_app_title = cls, clean_title
-
-# niri events that can change which window is focused or its title
-NIRI_FOCUS_EVENTS = ("WindowsChanged", "WindowFocusChanged", "WindowOpenedOrChanged", "WindowClosed")
-
-def listen_niri_ipc():
-    while True:
-        try:
-            proc = subprocess.Popen(['niri', 'msg', '-j', 'event-stream'],
-                                    stdout=subprocess.PIPE, text=True)
-            for line in proc.stdout:
-                try:
-                    event = json.loads(line)
-                except ValueError:
-                    continue
-                if any(k in event for k in NIRI_FOCUS_EVENTS):
-                    update_active_window()
-        except Exception:
-            pass
-        time.sleep(2)
 
 def listen_hyprland_ipc():
     hypr_sig = os.environ.get("HYPRLAND_INSTANCE_SIGNATURE")
@@ -470,8 +446,7 @@ def main():
 
     current_app_class, current_app_title = get_active_window()
 
-    listener = listen_niri_ipc if os.environ.get("NIRI_SOCKET") and not os.environ.get("HYPRLAND_INSTANCE_SIGNATURE") else listen_hyprland_ipc
-    ipc_thread = threading.Thread(target=listener, daemon=True)
+    ipc_thread = threading.Thread(target=listen_hyprland_ipc, daemon=True)
     ipc_thread.start()
 
     while True:

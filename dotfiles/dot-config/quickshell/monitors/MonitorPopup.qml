@@ -201,7 +201,7 @@ Item {
     // -------------------------------------------------------------------------
     Process {
         id: displayPoller
-        // Hyprland- or niri-backed, always in `hyprctl monitors -j` shape
+        // `hyprctl monitors -j` via scripts/lib/compositor.sh
         command: ["bash", Quickshell.env("HOME") + "/.config/scripts/lib/compositor.sh", "monitors-json"]
         running: true
         stdout: StdioCollector {
@@ -1083,7 +1083,7 @@ Item {
                             let monitorStr = mon.name + "," + mon.resW + "x" + mon.resH + "@" + mon.rate + ",0x0," + mon.sysScale;
 
                             // monitor_apply.sh applies the layout live and persists it
-                            // (hypr/host.lua or niri/host.kdl).
+                            // (hypr/host.lua).
                             Quickshell.execDetached(["notify-send", "Display Update", "Applied & Saved: " + mon.resW + "x" + mon.resH + " @ " + mon.rate + "Hz"]);
                             Quickshell.execDetached(["sh", "-c", "~/.config/scripts/desktop/monitor_apply.sh '" + monitorStr + "'"]);
                         } else {
@@ -1165,7 +1165,7 @@ Item {
                             }
                             
                             // monitor_apply.sh applies every layout live and persists it
-                            // (hypr/host.lua or niri/host.kdl).
+                            // (hypr/host.lua).
                             let fullCommand = "~/.config/scripts/desktop/monitor_apply.sh" + specArgs;
                             let postReloadCmd = "sleep 0.5 ; awww restore";
                             
