@@ -2,6 +2,10 @@
 -- Ported from the exec-once block in hyprland.conf.
 
 hl.on("hyprland.start", function()
+	-- D-Bus-started apps (Nautilus from wofi/the dock, portals) do not inherit
+	-- Hyprland's env; without GTK_THEME they fall back to stock Adwaita.
+	hl.exec_cmd("dbus-update-activation-environment --systemd GTK_THEME")
+
 	hl.exec_cmd("systemctl --user start hyprpolkitagent")
 
 	-- Tray applets

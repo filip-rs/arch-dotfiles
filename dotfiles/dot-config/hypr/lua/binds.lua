@@ -87,7 +87,7 @@ end
 
 hl.bind(mod .. " + Q", hl.dsp.exec_cmd("alacritty"))
 hl.bind(mod .. " + X", hl.dsp.window.close())
-hl.bind(mod .. " + E", hl.dsp.exec_cmd("thunar"))
+hl.bind(mod .. " + E", hl.dsp.exec_cmd("nautilus --new-window"))
 hl.bind(mod .. " + V", hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mod .. " + F", hl.dsp.window.fullscreen())
 hl.bind(mod .. " + P", hl.dsp.window.pseudo())
@@ -213,7 +213,7 @@ end
 
 hl.bind(mod5 .. " + Q", hl.dsp.exec_cmd("alacritty"))
 hl.bind(mod5 .. " + O", hl.dsp.exec_cmd("~/.config/quickshell/lock/lock.sh"))
-hl.bind(mod5 .. " + E", hl.dsp.exec_cmd("thunar"))
+hl.bind(mod5 .. " + E", hl.dsp.exec_cmd("nautilus --new-window"))
 hl.bind(mod5 .. " + V", hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mod5 .. " + F", hl.dsp.window.fullscreen())
 hl.bind(mod5 .. " + SPACE", hl.dsp.exec_cmd("wofi"))

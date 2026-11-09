@@ -5,6 +5,7 @@ abseil-cpp 20250512.1-1
 acl 2.3.2-1
 acpi 1.8-2
 adobe-source-code-pro-fonts 2.042u+1.062i+1.026vf-2
+adw-gtk-theme 6.5-1
 adwaita-cursors 48.1-1
 adwaita-fonts 49.0-2
 adwaita-icon-theme 48.1-1

@@ -223,6 +223,19 @@ alias systat="sudo systemctl status"
 alias systart="sudo systemctl restart"
 alias stow="stow . --dotfiles -t $HOME"
 alias fnd="ls -a | grep -i"
+
+# Toggle mouse side buttons MB5 -> W, MB4 -> S (keyd, for Inscryption)
+mousews() {
+	local f=/etc/keyd/mouse-ws.conf
+	if [[ -e $f ]]; then
+		sudo mv $f $f.off && sudo keyd reload && echo "mouse W/S: off"
+	elif [[ -e $f.off ]]; then
+		sudo mv $f.off $f && sudo keyd reload && echo "mouse W/S: on"
+	else
+		echo "mousews: neither $f nor $f.off exists" >&2
+		return 1
+	fi
+}
 alias lsblk="lsblk | bat -p --style=full --theme=\"Sublime Snazzy\" -l=makefile"
 alias templestart="qemu-system-x86_64 -m 512M -enable-kvm -drive file=$HOME/Temple/temple.qcow2"
 alias templestart="qemu-system-x86_64 -m 512M -enable-kvm -drive file=$HOME/Temple/zeal.qcow2"
@@ -377,7 +390,7 @@ pdf() {
 }
 
 th() {
-    thunar . & disown && pkill $TERMINAL_EMULATOR
+    nautilus --new-window . & disown && pkill $TERMINAL_EMULATOR
 }
 
 sunshine_start() {

@@ -1,7 +1,7 @@
 // niri config
 
 environment {
-    GTK_THEME "Orchis-Dark-Compact"
+    GTK_THEME "Palette"
     WALLPAPER_DIR "~/Pictures/Wallpapers"
     SCRIPT_DIR "~/.config/scripts/desktop"
     GDK_SCALE "1"
@@ -100,6 +100,8 @@ hotkey-overlay {
 
 screenshot-path "~/Pictures/Screenshots/Screenshot_%Y-%m-%d_%H-%M-%S.png"
 
+// D-Bus-started apps (Nautilus) need GTK_THEME too, or they fall back to stock Adwaita
+spawn-at-startup "dbus-update-activation-environment" "--systemd" "GTK_THEME"
 spawn-sh-at-startup "systemctl --user start hyprpolkitagent"
 spawn-at-startup "swaync"
 spawn-at-startup "awww-daemon"
@@ -137,6 +139,7 @@ window-rule {
 
 window-rule {
     match app-id="(?i)^thunar$"
+    match app-id="^org\.gnome\.Nautilus$"
     match app-id="BadlionClient"
     match title="^Untitled - Brave$"
     open-floating true
@@ -172,7 +175,7 @@ binds {
 
     Mod+Q { spawn "alacritty"; }
     Mod+X repeat=false { close-window; }
-    Mod+E { spawn "thunar"; }
+    Mod+E { spawn "nautilus" "--new-window"; }
     Mod+V { toggle-window-floating; }
     Mod+F { fullscreen-window; }
     Mod+Shift+F { maximize-column; }
@@ -296,7 +299,7 @@ binds {
 
     ISO_Level3_Shift+Q { spawn "alacritty"; }
     ISO_Level3_Shift+O { spawn "hyprlock"; }
-    ISO_Level3_Shift+E { spawn "thunar"; }
+    ISO_Level3_Shift+E { spawn "nautilus" "--new-window"; }
     ISO_Level3_Shift+V { toggle-window-floating; }
     ISO_Level3_Shift+F { fullscreen-window; }
     ISO_Level3_Shift+Space { spawn "wofi"; }

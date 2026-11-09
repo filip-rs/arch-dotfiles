@@ -42,8 +42,8 @@ hl.window_rule({
 })
 
 hl.window_rule({
-    name   = "thunar",
-    match  = { class = "thunar" },
+    name   = "file-manager",
+    match  = { class = "^(thunar|org\\.gnome\\.Nautilus)$" },
     float  = true,
     center = true,
     size   = { "monitor_w*0.5", "monitor_h*0.5" },

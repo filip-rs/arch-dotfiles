@@ -1,7 +1,7 @@
 -- Environment variables and XWayland.
 -- Ported from hyprland.conf (env = ... / xwayland { ... }).
 
-hl.env("GTK_THEME", "Orchis-Dark-Compact")
+hl.env("GTK_THEME", "Palette") -- adw-gtk3 recoloured by scripts/desktop/theme_apply.sh
 hl.env("WALLPAPER_DIR", "~/Pictures/Wallpapers")
 hl.env("SCRIPT_DIR", "~/.config/scripts/desktop")
 

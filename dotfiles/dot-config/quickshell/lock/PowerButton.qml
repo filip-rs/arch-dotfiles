@@ -1,9 +1,10 @@
 import QtQuick
 import Quickshell
 
-// Round icon button for the lockscreen's power row. Destructive actions arm on
-// the first click (the pill widens to "Reboot?") and run on the second; they
-// disarm by themselves after a few seconds.
+// Bare icon button for the lockscreen's power row: no box at rest, a faint
+// wash of the text colour on hover, the label underneath. Destructive actions
+// arm on the first click (the button widens to a red "Reboot?") and run on the
+// second; they disarm by themselves after a few seconds.
 Item {
     id: root
 
@@ -14,7 +15,7 @@ Item {
     property bool needsConfirm: true
     property real u: 1
     property string iconFont: "Symbols Nerd Font"
-    property string textFont: "Noto Sans"
+    property string textFont: "Adwaita Sans"
 
     property bool armed: false
 
@@ -22,23 +23,19 @@ Item {
         return Qt.rgba(c.r, c.g, c.b, a);
     }
 
-    implicitHeight: 54 * u
-    implicitWidth: armed ? content.implicitWidth + 40 * u : implicitHeight
+    implicitHeight: 44 * u
+    implicitWidth: armed ? content.implicitWidth + 32 * u : implicitHeight
     width: implicitWidth
     height: implicitHeight
     Behavior on implicitWidth { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
 
     Rectangle {
         anchors.fill: parent
-        radius: root.theme.radiusLarge * root.u
-        // Outline in the clock's colour like the password field; hover and
-        // press only add a faint wash of the same colour. Red = armed.
-        color: root.armed ? root.tint(root.theme.red, 0.9)
+        radius: Math.min(height / 2, root.theme.radiusLarge * root.u)
+        color: root.armed ? root.theme.red
              : mouse.pressed ? root.tint(root.theme.text, 0.22)
              : mouse.containsMouse ? root.tint(root.theme.text, 0.12)
              : "transparent"
-        border.width: Math.max(1, 1.5 * root.u)
-        border.color: root.armed ? root.theme.red : root.theme.text
         Behavior on color { ColorAnimation { duration: 120 } }
     }
 
@@ -52,7 +49,7 @@ Item {
             text: root.glyph
             color: root.armed ? root.theme.crust : root.theme.text
             font.family: root.iconFont
-            font.pixelSize: 22 * root.u
+            font.pixelSize: 21 * root.u
         }
         Text {
             anchors.verticalCenter: parent.verticalCenter
@@ -61,18 +58,18 @@ Item {
             color: root.theme.crust
             font.family: root.textFont
             font.weight: Font.DemiBold
-            font.pixelSize: 16 * root.u
+            font.pixelSize: 15 * root.u
         }
     }
 
     // Name under the button on hover.
     Text {
-        anchors { top: parent.bottom; topMargin: 8 * root.u; horizontalCenter: parent.horizontalCenter }
+        anchors { top: parent.bottom; topMargin: 4 * root.u; horizontalCenter: parent.horizontalCenter }
         text: root.label
         opacity: mouse.containsMouse && !root.armed ? 1 : 0
         color: root.theme.text
         font.family: root.textFont
-        font.pixelSize: 13 * root.u
+        font.pixelSize: 12 * root.u
         Behavior on opacity { NumberAnimation { duration: 120 } }
     }
 

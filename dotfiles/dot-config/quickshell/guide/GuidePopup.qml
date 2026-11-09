@@ -327,7 +327,7 @@ Item {
         let binds = [
             { k1: "SUPER", k2: "Q", action: "Open Terminal (Alacritty)", cmd: "alacritty" },
             { k1: "SUPER", k2: "SPACE", action: "App Launcher (wofi)", cmd: "wofi" },
-            { k1: "SUPER", k2: "E", action: "Open File Manager", cmd: "thunar" },
+            { k1: "SUPER", k2: "E", action: "Open File Manager", cmd: "nautilus --new-window" },
             { k1: "SUPER", k2: "R", action: "Open Obsidian", cmd: "obsidian --ozone-platform-hint=auto" },
             { k1: "SUPER", k2: "X", action: "Close Window", cmd: "hyprctl dispatch 'hl.dsp.window.close()'" },
             { k1: "SUPER", k2: "V", action: "Toggle Floating", cmd: "hyprctl dispatch 'hl.dsp.window.float({ action = \"toggle\" })'" },

@@ -88,10 +88,15 @@ wait_state() {
 # QS_DISABLE_CRASH_HANDLER: Quickshell's own crash handler relaunches the shell
 # without its --path, leaving an orphan that loads nothing and never exits.
 # This script does the restarting instead.
+#
+# setsid: the client gets its own process group (setsid execs in place, so $!
+# is still the client). Its PAM conversations run in forked children that
+# survive the client dying, and the fingerprint one would keep the reader
+# claimed forever (no timeout), so reap_client kills the whole group.
 start_client() {
     rm -f -- "$STATE_FILE"
     QSLOCK_STATE_FILE=$STATE_FILE QS_DISABLE_CRASH_HANDLER=1 \
-        quickshell --no-duplicate --path "$LOCK_DIR" >>"$LOG_FILE" 2>&1 9>&- &
+        setsid quickshell --no-duplicate --path "$LOCK_DIR" >>"$LOG_FILE" 2>&1 9>&- &
     child=$!
     log "started lock client $child"
     local rc
@@ -112,11 +117,18 @@ start_client() {
     log "lock confirmed"
 }
 
+# Kill whatever is left of a client's process group (its PAM children).
+reap_client() {
+    [[ -n ${1-} ]] && kill -KILL -- "-$1" 2>/dev/null
+    return 0
+}
+
 fallback() {
     log "switching to hyprlock: $*"
     if [[ -n $child ]]; then
         kill -KILL "$child" 2>/dev/null
         wait "$child" 2>/dev/null
+        reap_client "$child"
         child=
     fi
     local try rc
@@ -145,6 +157,7 @@ while :; do
     status=$?
     ((want_fallback)) && fallback "requested with --fallback"
     kill -0 "$child" 2>/dev/null && continue # wait was interrupted, client still running
+    reap_client "$child"
 
     if [[ $(state) == unlocked ]]; then
         log "unlocked"
