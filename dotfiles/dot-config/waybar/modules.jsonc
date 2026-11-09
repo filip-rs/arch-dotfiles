@@ -210,8 +210,9 @@
     "custom/weather": {
         "tooltip": true,
         "format": "{}",
-        "interval": 30,
-        "exec": "python ~/.config/waybar/scripts/waybar-wttr.py",
+        // Reads the calendar panel's cached Open-Meteo forecast (no request of its own)
+        "interval": 600,
+        "exec": "~/.config/waybar/scripts/weather.sh",
         "return-type": "json"
     },
     // Absolute-ish paths: waybar inherits Hyprland's PATH, which greetd starts
@@ -219,8 +220,10 @@
     "custom/afk": {
         "exec": "~/.local/bin/afk status --json",
         "return-type": "json",
-        "interval": 1,
-        "on-click": "~/.local/bin/afk toggle",
+        // Polled slowly; toggling (here or Super+Shift+R) refreshes it at once via signal 9
+        "interval": 10,
+        "signal": 9,
+        "on-click": "~/.local/bin/afk toggle; pkill -RTMIN+9 waybar",
         "tooltip": true
     },
     "custom/power_profile": {

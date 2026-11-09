@@ -114,7 +114,7 @@ hl.bind(mod .. " + CTRL + SHIFT + 0", hl.dsp.exec_cmd(scr .. "/screen_manager.sh
 
 hl.bind(
 	mod .. " + SHIFT + R",
-	hl.dsp.exec_cmd("~/.local/bin/afk toggle"),
+	hl.dsp.exec_cmd("~/.local/bin/afk toggle; pkill -RTMIN+9 waybar"),
 	{ description = "Toggle AFK lecture capture" }
 )
 hl.bind(

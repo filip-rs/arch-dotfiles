@@ -23,7 +23,7 @@ hl.config({
 		blur = {
 			enabled = true,
 			size = 3,
-			passes = 4,
+			passes = 2, -- 4 cost noticeably more on the iGPU for little visible difference
 			new_optimizations = true,
 		},
 	},

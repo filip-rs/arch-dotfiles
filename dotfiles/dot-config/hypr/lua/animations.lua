@@ -13,6 +13,5 @@ hl.animation({ leaf = "windowsIn",   enabled = true, speed = 4,   bezier = "winI
 hl.animation({ leaf = "windowsOut",  enabled = true, speed = 4,   bezier = "winOut", style = "slide" })
 hl.animation({ leaf = "windowsMove", enabled = true, speed = 4,   bezier = "wind",   style = "slide" })
 hl.animation({ leaf = "border",      enabled = true, speed = 1,   bezier = "liner" })
-hl.animation({ leaf = "borderangle", enabled = true, speed = 100, bezier = "liner",  style = "loop" })
 hl.animation({ leaf = "fade",        enabled = true, speed = 7,   bezier = "default" })
 hl.animation({ leaf = "workspaces",  enabled = true, speed = 4,   bezier = "wind",   style = "slidevert" }) -- workspaces stack vertically, like niri
