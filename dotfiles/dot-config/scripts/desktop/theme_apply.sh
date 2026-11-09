@@ -534,6 +534,16 @@ EOF
 # 10. Reload applications
 # ═══════════════════════════════════════════════════════════════════
 if [ "$skip_reload" != "--no-reload" ]; then
+    # Start desktop components through Hyprland so they don't belong to whatever
+    # ran this script: started from a terminal, they would die when it closes.
+    spawn() {
+        if [ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]; then
+            hyprctl dispatch "hl.dsp.exec_cmd(\"$1\")" > /dev/null
+        else
+            setsid -f $1 > /dev/null 2>&1
+        fi
+    }
+
     # Ghostty (reload via DBus)
     busctl --user call com.mitchellh.ghostty /com/mitchellh/ghostty org.gtk.Actions Activate "sava{sv}" "reload-config" 0 0 2>/dev/null || true
 
@@ -541,8 +551,7 @@ if [ "$skip_reload" != "--no-reload" ]; then
     if pgrep -x waybar >/dev/null; then
         killall -SIGUSR2 waybar 2>/dev/null || true
     else
-        waybar > /dev/null 2>&1 &
-        disown
+        spawn waybar
     fi
 
     # SwayNC: reload CSS in place (a restart would drop notification history
@@ -550,8 +559,7 @@ if [ "$skip_reload" != "--no-reload" ]; then
     if pgrep -x swaync >/dev/null; then
         swaync-client --reload-css > /dev/null 2>&1 || true
     else
-        swaync > /dev/null 2>&1 &
-        disown
+        spawn swaync
     fi
 
     # Hyprland reloads config including colors.lua
@@ -563,12 +571,11 @@ if [ "$skip_reload" != "--no-reload" ]; then
         pgrep -x cava >/dev/null && killall -USR1 cava 2>/dev/null || true
     fi
 
-    # SwayOSD only reads its stylesheet at startup
-    if pgrep -x swayosd-server >/dev/null 2>&1; then
-        killall swayosd-server 2>/dev/null || true
-        swayosd-server > /dev/null 2>&1 &
-        disown
-    fi
+    # SwayOSD only reads its stylesheet at startup, so restart it (this also
+    # brings it back if it isn't running). Wait for the old one to exit first:
+    # a copy started while it still holds its D-Bus name just hands over and quits.
+    timeout 3 killall -w swayosd-server 2>/dev/null || true
+    spawn swayosd-server
 
     # Running GTK apps (Nautilus, Lutris, ...) only re-read the Palette theme and
     # folder icons from disk when these settings change, so flip them away and

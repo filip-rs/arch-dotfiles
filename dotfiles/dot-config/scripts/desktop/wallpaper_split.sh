@@ -93,8 +93,8 @@ fi
 
 # ── Ensure awww daemon ──
 if ! pgrep -x awww-daemon >/dev/null; then
-    awww-daemon >/dev/null 2>&1 &
-    disown
+    # Own session (setsid): when run from a terminal, closing it must not kill the daemon
+    setsid -f awww-daemon >/dev/null 2>&1
     for _ in 1 2 3 4 5 6 7 8 9 10; do
         awww query >/dev/null 2>&1 && break
         sleep 0.1

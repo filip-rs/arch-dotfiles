@@ -171,8 +171,8 @@ handle_network_prep() {
 # -----------------------------------------------------------------------------
 start_quickshell() {
     # Without qt6ct, like autostart.lua: the panels are styled by hand
-    QT_QPA_PLATFORMTHEME= quickshell -p "$MAIN_QML_PATH" >/dev/null 2>&1 &
-    disown
+    # setsid: a terminal that ran this script must not take Quickshell down with it
+    QT_QPA_PLATFORMTHEME= setsid -f quickshell -p "$MAIN_QML_PATH" >/dev/null 2>&1
 }
 
 # -----------------------------------------------------------------------------
