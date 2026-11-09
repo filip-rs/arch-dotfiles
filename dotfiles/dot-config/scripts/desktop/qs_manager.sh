@@ -112,15 +112,8 @@ handle_wallpaper_prep() {
         filename=$(basename "$img")
         extension="${filename##*.}"
 
-        if [[ "${extension,,}" == "webp" ]]; then
-            new_img="${img%.*}.jpg"
-            magick "$img" "$new_img"
-            rm -f "$img"
-            img="$new_img"
-            filename=$(basename "$img")
-            extension="jpg"
-        fi
-
+        # webp is thumbnailed like any other image (magick, awww and matugen
+        # all read it); the original is never touched.
         if [[ "${extension,,}" =~ ^(mp4|mkv|mov|webm)$ ]]; then
             thumb="$THUMB_DIR/000_$filename"
             [ -f "$THUMB_DIR/$filename" ] && rm -f "$THUMB_DIR/$filename"

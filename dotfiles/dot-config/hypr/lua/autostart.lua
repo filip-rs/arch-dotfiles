@@ -27,11 +27,11 @@ hl.on("hyprland.start", function()
 
 	hl.exec_cmd("gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'")
 
+	-- Focus Time panel data (Super + Shift + T). flock keeps it to one copy.
+	hl.exec_cmd("flock -n $XDG_RUNTIME_DIR/focus_daemon.lock python3 ~/.config/quickshell/focustime/focus_daemon.py")
+
 	-- 10-band EQ PipeWire filter-chain (this is what replaces easyeffects).
 	hl.exec_cmd("~/.config/quickshell/music/equalizer.sh apply")
-
-	-- restore wallpaper + theme on login.
-	-- hl.exec_cmd("~/.config/scripts/desktop/init.sh")
 
 	hl.dispatch(hl.dsp.focus({ workspace = 3 }))
 end)

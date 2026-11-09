@@ -117,51 +117,21 @@ for o in "${OUTPUTS[@]}"; do
     awww img --outputs "$o" --resize crop "${TRANSITION_ARGS[@]}" "$img"
 done
 
-# ── Lock screen background ──
-cp "$cache_path/center.png" /tmp/lock_bg.png
+# ── Remember which wallpaper is applied ──
+# Read by the theme menu (re-derive colours) and the wallpaper picker
+# (highlight the current one). Lives in ~/.cache so it survives reboots.
+mkdir -p "$HOME/.cache/wallpaper"
+printf '%s\n' "$src" > "$HOME/.cache/wallpaper/current"
 
 # ── Theme: always regenerate from the new wallpaper ──
-STATE_FILE="$HOME/.cache/current_theme"
-current_theme=""
-[ -f "$STATE_FILE" ] && current_theme=$(cat "$STATE_FILE")
-
-MATUGEN_MODE_FLAG=()
-APPLY_MODE="wallpaper"
+current_theme=$(cat "$HOME/.cache/current_theme" 2>/dev/null || true)
 if [ "$current_theme" = "wallpaper-light" ]; then
-    MATUGEN_MODE_FLAG=(-m light --contrast -0.5)
-    APPLY_MODE="wallpaper-light"
+    MATUGEN_MODE="light"; APPLY_MODE="wallpaper-light"
+else
+    MATUGEN_MODE="dark";  APPLY_MODE="wallpaper"
 fi
 
-MATUGEN_CONFIG="$HOME/.config/matugen/config.toml"
-if [ ! -f "$MATUGEN_CONFIG" ]; then
-    echo "warning: ~/.config/matugen/config.toml missing — theme will not update. Run: cd ~/Services/arch-dotfiles/dotfiles && stow . --dotfiles -t \$HOME" >&2
-else
-    # matugen 4.1.0 iterates templates in non-deterministic hashmap order and
-    # aborts the whole run if ANY template's input_path is missing — even
-    # templates that already succeeded leave the output file half-written.
-    # Strip any [templates.X] blocks whose input_path doesn't exist so the
-    # quickshell template is guaranteed to run.
-    MATUGEN_RUNTIME_CONFIG=$(mktemp --suffix=.toml)
-    trap 'rm -f "$MATUGEN_RUNTIME_CONFIG"' EXIT
-    python3 - "$MATUGEN_CONFIG" "$MATUGEN_RUNTIME_CONFIG" << 'PYEOF'
-import os, re, sys
-src, dst = sys.argv[1], sys.argv[2]
-text = open(src).read()
-# Split into blocks separated by [section] headers, keep headers attached.
-parts = re.split(r'(?m)^(?=\[)', text)
-out = []
-for p in parts:
-    m = re.match(r'\[templates\.[^\]]+\]', p)
-    if m:
-        ip = re.search(r'input_path\s*=\s*"([^"]+)"', p)
-        if ip and not os.path.isfile(os.path.expanduser(ip.group(1))):
-            continue
-    out.append(p)
-open(dst, 'w').write(''.join(out))
-PYEOF
-    matugen -c "$MATUGEN_RUNTIME_CONFIG" image "$src" --type scheme-content --prefer saturation "${MATUGEN_MODE_FLAG[@]}" >/dev/null 2>&1 || \
-        echo "warning: matugen failed on $src" >&2
-fi
+bash "$HOME/.config/scripts/desktop/matugen_apply.sh" "$src" "$MATUGEN_MODE" || true
 bash "$THEME_APPLY" "$APPLY_MODE" 2>/dev/null || true
 
 echo "Done: $basename_raw applied ($mode_tag)"

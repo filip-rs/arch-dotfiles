@@ -164,12 +164,13 @@ def get_active_window():
     except Exception:
         return "Unknown", "Unknown"
 
+# quickshell/lock/lock.sh supervises every lock (its Quickshell lockscreen and
+# the hyprlock fallback) and keeps this file for exactly as long as the session
+# is locked.
+QSLOCK_PID_FILE = os.path.join(XDG_RUNTIME, "qslock", "supervisor.pid")
+
 def is_locked():
-    try:
-        subprocess.check_output(['pgrep', '-x', 'hyprlock'])
-        return True
-    except subprocess.CalledProcessError:
-        return False
+    return os.path.exists(QSLOCK_PID_FILE)
 
 def update_active_window():
     global current_app_class, current_app_title
@@ -475,6 +476,10 @@ def main():
 
     while True:
         time.sleep(1)
+        # Locking fires no activewindow event, so check every tick: locked time
+        # must not count towards whatever app had focus.
+        if is_locked():
+            continue
         if current_app_class and current_app_class not in [""]:
             tracker.fast_tick(current_app_class, current_app_title)
 
