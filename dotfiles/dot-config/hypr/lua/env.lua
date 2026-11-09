@@ -9,8 +9,10 @@ hl.env("GDK_SCALE", "1")
 hl.env("GDK_DPI_SCALE", "1")
 hl.env("XCURSOR_SIZE", "21")
 
--- env = QT_QPA_PLATFORMTHEME,qt6ct   -- for Qt apps
--- env = QT_STYLE_OVERRIDE,Breeze
+-- Qt apps: Fusion + the "Palette" colour scheme written by theme_apply.sh.
+-- Quickshell is started without it (autostart.lua, qs_manager.sh, lock.sh) so
+-- its hand-styled panels and lockscreen are unaffected.
+hl.env("QT_QPA_PLATFORMTHEME", "qt6ct")
 
 -- unscale XWayland
 hl.config({

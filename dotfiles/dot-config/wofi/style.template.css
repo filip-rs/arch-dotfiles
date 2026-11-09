@@ -1,3 +1,5 @@
+/* Template: theme_apply.sh writes style.css from this file, filling in the
+   theme-colors block below. Edit this file, not style.css. */
 /* @theme-colors-start */
 @define-color bg_base #130c15;
 @define-color bg_crust #18111a;

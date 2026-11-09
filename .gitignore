@@ -17,7 +17,8 @@ dotfiles/dot-config/alacritty/themes/current.toml
 dotfiles/dot-config/waybar/colors.css
 dotfiles/dot-config/swaync/colors.css
 dotfiles/dot-config/wlogout/colors.css
-dotfiles/dot-config/nwg-dock-hyprland/colors.css
+dotfiles/dot-config/wofi/style.css
+dotfiles/dot-config/swayosd/colors.css
 dotfiles/dot-config/ghostty/colors
 
 # Generated wallpaper splits (written by wallpaper_split.sh at runtime)

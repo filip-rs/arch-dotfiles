@@ -57,45 +57,49 @@ fi
 # ═══════════════════════════════════════════════════════════════════
 # 2. Read all color values from the JSON
 # ═══════════════════════════════════════════════════════════════════
-g() { jq -r ".$1 // empty" "$QS_JSON"; }
+# One jq call loads the whole palette; ${P[key]} is empty for missing keys.
+declare -A P
+while IFS=$'\t' read -r key value; do P[$key]=$value; done < <(
+    jq -r 'to_entries[] | select(.value | type == "string" or type == "number")
+           | "\(.key)\t\(.value)"' "$QS_JSON")
 
-BASE=$(g base)         MANTLE=$(g mantle)       CRUST=$(g crust)
-TEXT=$(g text)          SUBTEXT0=$(g subtext0)   SUBTEXT1=$(g subtext1)
-SURFACE0=$(g surface0) SURFACE1=$(g surface1)   SURFACE2=$(g surface2)
-OVERLAY0=$(g overlay0) OVERLAY1=$(g overlay1)   OVERLAY2=$(g overlay2)
+BASE=${P[base]:-}         MANTLE=${P[mantle]:-}       CRUST=${P[crust]:-}
+TEXT=${P[text]:-}          SUBTEXT0=${P[subtext0]:-}   SUBTEXT1=${P[subtext1]:-}
+SURFACE0=${P[surface0]:-} SURFACE1=${P[surface1]:-}   SURFACE2=${P[surface2]:-}
+OVERLAY0=${P[overlay0]:-} OVERLAY1=${P[overlay1]:-}   OVERLAY2=${P[overlay2]:-}
 
-BLUE=$(g blue)       SAPPHIRE=$(g sapphire)   PEACH=$(g peach)
-GREEN=$(g green)     RED=$(g red)             MAUVE=$(g mauve)
-PINK=$(g pink)       YELLOW=$(g yellow)       MAROON=$(g maroon)
-TEAL=$(g teal)
+BLUE=${P[blue]:-}       SAPPHIRE=${P[sapphire]:-}   PEACH=${P[peach]:-}
+GREEN=${P[green]:-}     RED=${P[red]:-}             MAUVE=${P[mauve]:-}
+PINK=${P[pink]:-}       YELLOW=${P[yellow]:-}       MAROON=${P[maroon]:-}
+TEAL=${P[teal]:-}
 
-ACCENT=$(g accent);          ACCENT=${ACCENT:-$BLUE}
-ACCENT_DIM=$(g accent_dim);  ACCENT_DIM=${ACCENT_DIM:-$SAPPHIRE}
-ACCENT_BRIGHT=$(g accent_bright); ACCENT_BRIGHT=${ACCENT_BRIGHT:-$TEAL}
-SELECTION=$(g selection);    SELECTION=${SELECTION:-$SURFACE1}
-BORDER=$(g border);          BORDER=${BORDER:-$SURFACE2}
+ACCENT=${P[accent]:-};          ACCENT=${ACCENT:-$BLUE}
+ACCENT_DIM=${P[accent_dim]:-};  ACCENT_DIM=${ACCENT_DIM:-$SAPPHIRE}
+ACCENT_BRIGHT=${P[accent_bright]:-}; ACCENT_BRIGHT=${ACCENT_BRIGHT:-$TEAL}
+SELECTION=${P[selection]:-};    SELECTION=${SELECTION:-$SURFACE1}
+BORDER=${P[border]:-};          BORDER=${BORDER:-$SURFACE2}
 
 # Terminal 16 colors (fallback to main palette)
-TB=$(g term_black);    TB=${TB:-$CRUST}
-TR=$(g term_red);      TR=${TR:-$RED}
-TG=$(g term_green);    TG=${TG:-$GREEN}
-TY=$(g term_yellow);   TY=${TY:-$YELLOW}
-TBL=$(g term_blue);    TBL=${TBL:-$BLUE}
-TMA=$(g term_magenta); TMA=${TMA:-$MAUVE}
-TC=$(g term_cyan);     TC=${TC:-$TEAL}
-TW=$(g term_white);    TW=${TW:-$TEXT}
-TBB=$(g term_bright_black);    TBB=${TBB:-$OVERLAY0}
-TBR=$(g term_bright_red);      TBR=${TBR:-$PINK}
-TBG=$(g term_bright_green);    TBG=${TBG:-$GREEN}
-TBY=$(g term_bright_yellow);   TBY=${TBY:-$YELLOW}
-TBBL=$(g term_bright_blue);    TBBL=${TBBL:-$SAPPHIRE}
-TBM=$(g term_bright_magenta);  TBM=${TBM:-$MAROON}
-TBC=$(g term_bright_cyan);     TBC=${TBC:-$TEAL}
-TBW=$(g term_bright_white);    TBW=${TBW:-$TEXT}
+TB=${P[term_black]:-};    TB=${TB:-$CRUST}
+TR=${P[term_red]:-};      TR=${TR:-$RED}
+TG=${P[term_green]:-};    TG=${TG:-$GREEN}
+TY=${P[term_yellow]:-};   TY=${TY:-$YELLOW}
+TBL=${P[term_blue]:-};    TBL=${TBL:-$BLUE}
+TMA=${P[term_magenta]:-}; TMA=${TMA:-$MAUVE}
+TC=${P[term_cyan]:-};     TC=${TC:-$TEAL}
+TW=${P[term_white]:-};    TW=${TW:-$TEXT}
+TBB=${P[term_bright_black]:-};    TBB=${TBB:-$OVERLAY0}
+TBR=${P[term_bright_red]:-};      TBR=${TBR:-$PINK}
+TBG=${P[term_bright_green]:-};    TBG=${TBG:-$GREEN}
+TBY=${P[term_bright_yellow]:-};   TBY=${TBY:-$YELLOW}
+TBBL=${P[term_bright_blue]:-};    TBBL=${TBBL:-$SAPPHIRE}
+TBM=${P[term_bright_magenta]:-};  TBM=${TBM:-$MAROON}
+TBC=${P[term_bright_cyan]:-};     TBC=${TBC:-$TEAL}
+TBW=${P[term_bright_white]:-};    TBW=${TBW:-$TEXT}
 
-RAD_S=$(g radius_small);  RAD_S=${RAD_S:-4}
-RAD_M=$(g radius_medium); RAD_M=${RAD_M:-10}
-RAD_L=$(g radius_large);  RAD_L=${RAD_L:-16}
+RAD_S=${P[radius_small]:-};  RAD_S=${RAD_S:-4}
+RAD_M=${P[radius_medium]:-}; RAD_M=${RAD_M:-10}
+RAD_L=${P[radius_large]:-};  RAD_L=${RAD_L:-16}
 
 # Helper: strip leading # from hex color
 s() { echo "${1#\#}"; }
@@ -146,9 +150,12 @@ cat > "$HOME/.config/waybar/colors.css" << EOF
 @define-color border_subtle rgba($(hex2rgb "$BORDER"), 0.6);
 EOF
 
-# 3b. Wofi: marker-based replacement (load_from_data quirk, see above)
+# 3b. Wofi: loads its CSS from memory (load_from_data), so @import has no base
+#     path and colours are inlined instead: style.css is generated from the
+#     tracked style.template.css by filling in the marked block. Edit the template.
+WOFI_TEMPLATE="$HOME/.config/wofi/style.template.css"
 WOFI_STYLE="$HOME/.config/wofi/style.css"
-if [ -f "$WOFI_STYLE" ]; then
+if [ -f "$WOFI_TEMPLATE" ]; then
     awk -v c="@define-color bg_base ${BASE};
 @define-color bg_crust ${CRUST};
 @define-color text_primary ${TEXT};
@@ -158,7 +165,7 @@ if [ -f "$WOFI_STYLE" ]; then
     /theme-colors-start/ { print; print c; skip = 1; next }
     /theme-colors-end/   { skip = 0 }
     !skip { print }
-    ' "$WOFI_STYLE" > "${WOFI_STYLE}.tmp" && mv "${WOFI_STYLE}.tmp" "$WOFI_STYLE"
+    ' "$WOFI_TEMPLATE" > "${WOFI_STYLE}.tmp" && mv "${WOFI_STYLE}.tmp" "$WOFI_STYLE"
 fi
 
 cat > "$HOME/.config/swaync/colors.css" << EOF
@@ -187,16 +194,6 @@ cat > "$HOME/.config/wlogout/colors.css" << EOF
 @define-color border_color ${BORDER};
 EOF
 
-cat > "$HOME/.config/nwg-dock-hyprland/colors.css" << EOF
-@define-color bg_base ${BASE};
-@define-color border_subtle rgba($(hex2rgb "$BORDER"), 0.6);
-@define-color text_primary ${TEXT};
-@define-color text_dim ${SUBTEXT0};
-@define-color text_muted ${SUBTEXT1};
-@define-color hover_bg rgba($(hex2rgb "$SURFACE0"), 0.8);
-@define-color active_border rgba($(hex2rgb "$BORDER"), 0.5);
-EOF
-
 # ═══════════════════════════════════════════════════════════════════
 # 4. GTK theme "Palette": adw-gtk3 recoloured with the current palette
 #
@@ -221,6 +218,12 @@ else
 fi
 # Readable text colour on top of the given background colour
 on() { if [ "$(brightness "$1")" -gt 140 ]; then echo "$INK_DARK"; else echo "$INK_LIGHT"; fi; }
+
+# libadwaita/GNOME apps (and LibreWolf's light/dark) follow this setting
+if [ "$ADW" = "adw-gtk3" ]; then COLOR_SCHEME="prefer-light"; else COLOR_SCHEME="prefer-dark"; fi
+if [ "$(gsettings get org.gnome.desktop.interface color-scheme 2>/dev/null)" != "'$COLOR_SCHEME'" ]; then
+    gsettings set org.gnome.desktop.interface color-scheme "$COLOR_SCHEME" 2>/dev/null || true
+fi
 
 GTK_PALETTE="$HOME/.local/share/themes/Palette"
 if [ -d "/usr/share/themes/$ADW" ]; then
@@ -302,13 +305,105 @@ fi
 
 # ═══════════════════════════════════════════════════════════════════
 # 4b. Icon theme "Palette": Adwaita with folders in the accent colour
-#     (like the GTK theme, apps only load it at startup)
+#     (running GTK apps pick it up through the settings flip in section 10)
 # ═══════════════════════════════════════════════════════════════════
 if [ -d /usr/share/icons/Adwaita/scalable/places ]; then
     python3 "$HOME/.config/scripts/desktop/folder_icons.py" "$ACCENT" "$HOME/.local/share/icons/Palette"
 else
     echo "theme_apply.sh: Adwaita icons not found, skipping folder icons" >&2
 fi
+
+# ═══════════════════════════════════════════════════════════════════
+# 4c. Qt apps: qt6ct colour scheme "Palette" on the Fusion style, plus a KDE
+#     colour scheme for KDE apps (Kdenlive: Settings → Colour Theme → Palette).
+#     QT_QPA_PLATFORMTHEME=qt6ct comes from hypr/lua/env.lua. Qt apps read
+#     colours at startup only, so running ones need a restart.
+# ═══════════════════════════════════════════════════════════════════
+QT6CT_DIR="$HOME/.config/qt6ct"
+mkdir -p "$QT6CT_DIR/colors"
+
+# Dark palettes put entries/lists (Base) a step darker than the window; light
+# ones a step lighter, as GTK does.
+if [ "$ADW" = "adw-gtk3" ]; then QT_WINDOW="$MANTLE"; QT_BASE="$BASE"; else QT_WINDOW="$BASE"; QT_BASE="$MANTLE"; fi
+qt_roles() { # $1 text colour, $2 highlight, $3 highlighted text
+    # QPalette role order: WindowText Button Light Midlight Dark Mid Text
+    # BrightText ButtonText Base Window Shadow Highlight HighlightedText Link
+    # LinkVisited AlternateBase NoRole ToolTipBase ToolTipText PlaceholderText Accent
+    local c=("$1" "$SURFACE0" "$SURFACE2" "$SURFACE1" "$CRUST" "$MANTLE" "$1"
+             "$QT_WINDOW" "$1" "$QT_BASE" "$QT_WINDOW" "$CRUST" "$2" "$3" "$ACCENT"
+             "$MAUVE" "$QT_WINDOW" "$QT_WINDOW" "$SURFACE1" "$TEXT" "$SUBTEXT1" "$ACCENT")
+    local IFS=,
+    echo "${c[*]/#\#/#ff}" | sed 's/,/, /g'
+}
+cat > "$QT6CT_DIR/colors/Palette.conf" << EOF
+[ColorScheme]
+active_colors=$(qt_roles "$TEXT" "$ACCENT" "$(on "$ACCENT")")
+inactive_colors=$(qt_roles "$TEXT" "$ACCENT" "$(on "$ACCENT")")
+disabled_colors=$(qt_roles "$SUBTEXT1" "$SURFACE2" "$SUBTEXT1")
+EOF
+
+# Point qt6ct at it and use the GTK fonts, keeping any other settings made in
+# the qt6ct app
+GTK_FONT=$(gsettings get org.gnome.desktop.interface font-name 2>/dev/null | tr -d "'")
+GTK_MONO=$(gsettings get org.gnome.desktop.interface monospace-font-name 2>/dev/null | tr -d "'")
+python3 - "$QT6CT_DIR/qt6ct.conf" "$QT6CT_DIR/colors/Palette.conf" "${GTK_FONT:-Cantarell 11}" "${GTK_MONO:-Monospace 10}" << 'PYEOF'
+import configparser, sys
+path, scheme, font, mono = sys.argv[1:5]
+def qfont(spec):  # "Family Name 11" -> QFont::toString() as qt6ct stores it
+    family, _, size = spec.rpartition(" ")
+    return f'"{family},{size},-1,5,400,0,0,0,0,0,0,0,0,0,0,1"'
+c = configparser.ConfigParser(interpolation=None)
+c.optionxform = str
+c.read(path)
+for section in ("Appearance", "Fonts"):
+    if not c.has_section(section):
+        c.add_section(section)
+c["Appearance"].update({"color_scheme_path": scheme, "custom_palette": "true",
+                        "icon_theme": "Palette", "style": "Fusion",
+                        "standard_dialogs": "xdgdesktopportal"})
+c["Fonts"].update({"general": qfont(font), "fixed": qfont(mono)})
+with open(path, "w") as f:
+    c.write(f, space_around_delimiters=False)
+PYEOF
+
+kde() { local h="${1#\#}"; printf '%d,%d,%d' "0x${h:0:2}" "0x${h:2:2}" "0x${h:4:2}"; }
+kde_set() { # $1 section, $2 background, $3 alternate background, $4 text
+    cat << EOF
+[Colors:$1]
+BackgroundAlternate=$(kde "$3")
+BackgroundNormal=$(kde "$2")
+DecorationFocus=$(kde "$ACCENT")
+DecorationHover=$(kde "$ACCENT")
+ForegroundActive=$(kde "$ACCENT")
+ForegroundInactive=$(kde "$SUBTEXT0")
+ForegroundLink=$(kde "$ACCENT")
+ForegroundNegative=$(kde "$RED")
+ForegroundNeutral=$(kde "$YELLOW")
+ForegroundNormal=$(kde "$4")
+ForegroundPositive=$(kde "$GREEN")
+ForegroundVisited=$(kde "$MAUVE")
+
+EOF
+}
+mkdir -p "$HOME/.local/share/color-schemes"
+{
+    echo "[General]"
+    echo "ColorScheme=Palette"
+    echo "Name=Palette"
+    echo
+    kde_set Window "$QT_WINDOW" "$SURFACE0" "$TEXT"
+    kde_set View "$QT_BASE" "$QT_WINDOW" "$TEXT"
+    kde_set Button "$SURFACE0" "$SURFACE1" "$TEXT"
+    kde_set Selection "$ACCENT" "$ACCENT" "$(on "$ACCENT")"
+    kde_set Tooltip "$SURFACE1" "$SURFACE0" "$TEXT"
+    kde_set Complementary "$MANTLE" "$CRUST" "$TEXT"
+    kde_set Header "$MANTLE" "$CRUST" "$TEXT"
+    echo "[WM]"
+    echo "activeBackground=$(kde "$MANTLE")"
+    echo "activeForeground=$(kde "$TEXT")"
+    echo "inactiveBackground=$(kde "$CRUST")"
+    echo "inactiveForeground=$(kde "$SUBTEXT0")"
+} > "$HOME/.local/share/color-schemes/Palette.colors"
 
 # ═══════════════════════════════════════════════════════════════════
 # 5. Hyprland colors.lua (require()d by lua/theme.lua)
@@ -428,52 +523,28 @@ return {
 EOF
 
 # ═══════════════════════════════════════════════════════════════════
-# 10. Kitty colors (if kitty config dir exists)
-# ═══════════════════════════════════════════════════════════════════
-if [ -d "$HOME/.config/kitty" ]; then
-    cat > "$HOME/.config/kitty/theme-colors.conf" << EOF
-# Auto-generated by theme_apply.sh
-background ${BASE}
-foreground ${TEXT}
-cursor ${SAPPHIRE}
-color0  ${TB}
-color1  ${TR}
-color2  ${TG}
-color3  ${TY}
-color4  ${TBL}
-color5  ${TMA}
-color6  ${TC}
-color7  ${TW}
-color8  ${TBB}
-color9  ${TBR}
-color10 ${TBG}
-color11 ${TBY}
-color12 ${TBBL}
-color13 ${TBM}
-color14 ${TBC}
-color15 ${TBW}
-EOF
-fi
-
-# ═══════════════════════════════════════════════════════════════════
-# 11. Reload applications
+# 10. Reload applications
 # ═══════════════════════════════════════════════════════════════════
 if [ "$skip_reload" != "--no-reload" ]; then
-    # Kitty
-    killall -USR1 kitty 2>/dev/null || true
-
     # Ghostty (reload via DBus)
     busctl --user call com.mitchellh.ghostty /com/mitchellh/ghostty org.gtk.Actions Activate "sava{sv}" "reload-config" 0 0 2>/dev/null || true
 
-    # Waybar (full restart to pick up new colors)
-    killall waybar 2>/dev/null || true
-    waybar > /dev/null 2>&1 &
-    disown
+    # Waybar: reload config and CSS in place
+    if pgrep -x waybar >/dev/null; then
+        killall -SIGUSR2 waybar 2>/dev/null || true
+    else
+        waybar > /dev/null 2>&1 &
+        disown
+    fi
 
-    # SwayNC (full restart for CSS changes)
-    killall swaync 2>/dev/null || true
-    swaync > /dev/null 2>&1 &
-    disown
+    # SwayNC: reload CSS in place (a restart would drop notification history
+    # and do-not-disturb)
+    if pgrep -x swaync >/dev/null; then
+        swaync-client --reload-css > /dev/null 2>&1 || true
+    else
+        swaync > /dev/null 2>&1 &
+        disown
+    fi
 
     # Hyprland reloads config including colors.lua; niri reloads by itself
     reload_compositor
@@ -484,10 +555,11 @@ if [ "$skip_reload" != "--no-reload" ]; then
         pgrep -x cava >/dev/null && killall -USR1 cava 2>/dev/null || true
     fi
 
-    # Swayosd
+    # SwayOSD only reads its stylesheet at startup
     if pgrep -x swayosd-server >/dev/null 2>&1; then
         killall swayosd-server 2>/dev/null || true
-        swayosd-server --top-margin 0.9 --style "$HOME/.config/swayosd/style.css" > /dev/null 2>&1 &
+        swayosd-server > /dev/null 2>&1 &
+        disown
     fi
 
     # Running GTK apps (Nautilus, Lutris, ...) only re-read the Palette theme and

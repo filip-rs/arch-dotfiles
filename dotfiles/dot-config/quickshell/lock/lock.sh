@@ -95,7 +95,9 @@ wait_state() {
 # claimed forever (no timeout), so reap_client kills the whole group.
 start_client() {
     rm -f -- "$STATE_FILE"
-    QSLOCK_STATE_FILE=$STATE_FILE QS_DISABLE_CRASH_HANDLER=1 \
+    # QT_QPA_PLATFORMTHEME emptied: the lockscreen keeps its own look rather
+    # than the qt6ct palette Hyprland sets for regular Qt apps.
+    QSLOCK_STATE_FILE=$STATE_FILE QS_DISABLE_CRASH_HANDLER=1 QT_QPA_PLATFORMTHEME= \
         setsid quickshell --no-duplicate --path "$LOCK_DIR" >>"$LOG_FILE" 2>&1 9>&- &
     child=$!
     log "started lock client $child"

@@ -203,7 +203,8 @@ handle_network_prep() {
 # ZOMBIE WATCHDOG
 # -----------------------------------------------------------------------------
 if ! pgrep -f "quickshell.*Main\.qml" >/dev/null; then
-    quickshell -p "$MAIN_QML_PATH" >/dev/null 2>&1 &
+    # Without qt6ct, like autostart.lua: the panels are styled by hand
+    QT_QPA_PLATFORMTHEME= quickshell -p "$MAIN_QML_PATH" >/dev/null 2>&1 &
     disown
 fi
 
