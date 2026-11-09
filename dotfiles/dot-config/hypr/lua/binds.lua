@@ -6,7 +6,7 @@ local mod5 = "MOD5" -- caps-as-level3 (kb_options = lv3:caps_switch)
 local scr = "~/.config/scripts/desktop"
 local qs = scr .. "/qs_manager.sh"
 
-local browser = "brave-beta"
+local browser = "librewolf"
 
 -- Page the scrolling tape one screen sideways (Super + A/D).
 --
@@ -94,7 +94,7 @@ hl.bind(mod .. " + P", hl.dsp.window.pseudo())
 hl.bind(mod .. " + SPACE", hl.dsp.exec_cmd("wofi"))
 hl.bind(mod .. " + O", hl.dsp.exec_cmd("~/.config/quickshell/lock/lock.sh"))
 hl.bind(mod .. " + U", hl.dsp.exec_cmd("wlogout --protocol layer-shell"))
-hl.bind(mod .. " + SHIFT + M", hl.dsp.exit())
+hl.bind(mod .. " + CTRL + SHIFT + M", hl.dsp.exit(), { description = "Session: Quit Hyprland (instantly)" })
 
 -- Phone-shaped side window: fullscreen off, float, fixed size, centred.
 hl.bind(mod .. " + F5", function()
@@ -188,7 +188,7 @@ hl.bind(mod .. " + SHIFT + N", hl.dsp.exec_cmd("swaync-client -t -sw"))
 hl.bind(mod .. " + SHIFT + C", hl.dsp.exec_cmd("wl-color-picker clipboard --no-notify"))
 hl.bind(mod .. " + SHIFT + E", hl.dsp.exec_cmd("bemoji -t"))
 
-hl.bind("CTRL + SHIFT + B", hl.dsp.exec_cmd(browser .. " --new-window https://www.bible.com/bible/111/MAT.1.NIV"))
+hl.bind("CTRL + SHIFT + ALT + B", hl.dsp.exec_cmd(browser .. " --new-window https://www.bible.com/bible/111/MAT.1.NIV"))
 hl.bind("CTRL + SHIFT + ALT + E", hl.dsp.exec_cmd(browser .. " --new-window https://chat.openai.com/"))
 hl.bind("CTRL + SHIFT + ALT + A", hl.dsp.exec_cmd(browser .. " --new-window https://claude.ai/"))
 hl.bind("CTRL + SHIFT + ALT + L", hl.dsp.exec_cmd(browser .. " --new-window https://linkedin.com/"))
@@ -228,25 +228,38 @@ hl.bind("code:156", hl.dsp.exec_cmd("rog-control-center")) -- Armoury Crate key
 hl.bind("code:211", hl.dsp.exec_cmd("asusctl profile -n; pkill -SIGRTMIN+8 waybar")) -- fan profile, FN+F5
 hl.bind("code:210", hl.dsp.exec_cmd("asusctl led-mode -n")) -- keyboard RGB profile, FN+F4
 
-hl.bind("code:121", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"), { locked = true })
-hl.bind(
-	"code:122",
-	hl.dsp.exec_cmd("wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 5%-"),
-	{ locked = true, repeating = true }
-)
-hl.bind(
-	"code:123",
-	hl.dsp.exec_cmd("wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 5%+"),
-	{ locked = true, repeating = true }
-)
+-- ───────────── volume, brightness and media (SwayOSD popups) ─────────────
+-- Hardware keys are bound by keycode, which both keyboards share. The laptop
+-- has no media keys, so Super + Alt does the same from the home row.
 
-hl.bind("code:232", hl.dsp.exec_cmd("brightnessctl set 1%-"), { locked = true, repeating = true })
-hl.bind("code:233", hl.dsp.exec_cmd("brightnessctl set 1%+"), { locked = true, repeating = true })
-hl.bind(mod .. " + code:232", hl.dsp.exec_cmd("brightnessctl set 100%-"), { locked = true })
-hl.bind(mod .. " + code:233", hl.dsp.exec_cmd("brightnessctl set 50%+"), { locked = true })
+local osd = "swayosd-client "
+local bri = scr .. "/brightness.sh " -- fine steps at the bottom, coarse at the top
 
-hl.bind("code:237", hl.dsp.exec_cmd("brightnessctl -d asus::kbd_backlight set 33%-"), { repeating = true })
-hl.bind("code:238", hl.dsp.exec_cmd("brightnessctl -d asus::kbd_backlight set 33%+"), { repeating = true })
+local media = {
+	{ "code:121", "--output-volume mute-toggle", "Mute", false },
+	{ "code:122", "--output-volume -5", "Volume down", true },
+	{ "code:123", "--output-volume +5", "Volume up", true },
+	{ "XF86AudioMicMute", "--input-volume mute-toggle", "Microphone mute", false },
+	{ "XF86AudioPlay", "--playerctl play-pause", "Play / pause", false },
+	{ "XF86AudioNext", "--playerctl next", "Next track", false },
+	{ "XF86AudioPrev", "--playerctl prev", "Previous track", false },
+	{ mod .. " + ALT + SPACE", "--playerctl play-pause", "Play / pause", false },
+	{ mod .. " + ALT + L", "--playerctl next", "Next track", false },
+	{ mod .. " + ALT + H", "--playerctl prev", "Previous track", false },
+	{ mod .. " + ALT + K", "--output-volume +5", "Volume up", true },
+	{ mod .. " + ALT + J", "--output-volume -5", "Volume down", true },
+	{ mod .. " + ALT + M", "--input-volume mute-toggle", "Microphone mute", false },
+}
+for _, m in ipairs(media) do
+	hl.bind(m[1], hl.dsp.exec_cmd(osd .. m[2]), { locked = true, repeating = m[4], description = "Media: " .. m[3] })
+end
+
+hl.bind("code:232", hl.dsp.exec_cmd(bri .. "down"), { locked = true, repeating = true, description = "System: Brightness down" })
+hl.bind("code:233", hl.dsp.exec_cmd(bri .. "up"), { locked = true, repeating = true, description = "System: Brightness up" })
+hl.bind(mod .. " + code:232", hl.dsp.exec_cmd(bri .. "min"), { locked = true, description = "System: Brightness to minimum" })
+hl.bind(mod .. " + code:233", hl.dsp.exec_cmd(bri .. "max"), { locked = true, description = "System: Brightness to maximum" })
+hl.bind("code:237", hl.dsp.exec_cmd(bri .. "kbd-down"), { repeating = true, description = "System: Keyboard backlight down" })
+hl.bind("code:238", hl.dsp.exec_cmd(bri .. "kbd-up"), { repeating = true, description = "System: Keyboard backlight up" })
 
 -- ───────────────────── workspaces & focus ────────────────────────
 -- Laid out like niri: the column tape scrolls sideways, workspaces stack

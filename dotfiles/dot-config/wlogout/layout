@@ -11,7 +11,7 @@
     "keybind" : "e"
 }
 {
-    "label" : "hibernate",
+    "label" : "suspend",
     "action" : "systemctl suspend",
     "text" : "        ",
     "keybind" : "h"

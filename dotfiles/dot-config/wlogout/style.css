@@ -40,11 +40,7 @@ button:hover {
 }
 
 #suspend {
-  background-image: none;
-}
-
-#hibernate {
-  background-image: image(url("Icons/hibernate.png"));
+  background-image: image(url("Icons/suspend.png"));
 }
 
 #shutdown {

@@ -1,0 +1,9 @@
+# SwayOSD server (started in hypr/lua/autostart.lua). Volume, mic, brightness,
+# keyboard backlight and media keys all show their OSD through swayosd-client.
+[server]
+top_margin = 0.85
+max_volume = 100
+# Brightness steps are chosen by scripts/desktop/brightness.sh; let it reach 1%
+min_brightness = 1
+show_percentage = true
+keyboard_backlight = true

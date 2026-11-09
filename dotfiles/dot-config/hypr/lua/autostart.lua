@@ -20,6 +20,7 @@ hl.on("hyprland.start", function()
 	hl.exec_cmd("waybar")
 	hl.exec_cmd("env -u QT_QPA_PLATFORMTHEME quickshell -p ~/.config/quickshell/Main.qml")
 	hl.exec_cmd("hypridle")
+	hl.exec_cmd("swayosd-server") -- volume/brightness/media popups (~/.config/swayosd)
 
 	-- AirPods control daemon. librepods-ctl and the me.kavishdevar.* D-Bus
 	-- interfaces only work while this is running.

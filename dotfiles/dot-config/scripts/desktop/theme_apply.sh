@@ -187,6 +187,14 @@ cat > "$HOME/.config/swaync/colors.css" << EOF
 @define-color blue-base ${ACCENT};
 EOF
 
+mkdir -p "$HOME/.config/swayosd"
+cat > "$HOME/.config/swayosd/colors.css" << EOF
+@define-color osd_bg ${BASE};
+@define-color osd_fg ${TEXT};
+@define-color osd_border rgba($(hex2rgb "$BORDER"), 0.6);
+@define-color osd_accent ${ACCENT};
+EOF
+
 cat > "$HOME/.config/wlogout/colors.css" << EOF
 @define-color bg_base ${BASE};
 @define-color selection ${SELECTION};

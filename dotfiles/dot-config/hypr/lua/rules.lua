@@ -36,12 +36,6 @@ hl.window_rule({
 })
 
 hl.window_rule({
-    name  = "brave-tiled",
-    match = { class = "Brave-browser" },
-    tile  = true,
-})
-
-hl.window_rule({
     name   = "file-manager",
     match  = { class = "^(thunar|org\\.gnome\\.Nautilus)$" },
     float  = true,
@@ -64,15 +58,6 @@ hl.window_rule({
     center  = true,
     size    = { "monitor_w*0.5", "monitor_h*0.5" },
     monitor = "DP-2",
-})
-
--- Brave's Google login popup.
-hl.window_rule({
-    name   = "brave-login-popup",
-    match  = { initial_title = "Untitled - Brave" },
-    float  = true,
-    center = true,
-    size   = { "monitor_w*0.5", "monitor_h*0.5" },
 })
 
 -- librepods autostarts with --hide, but if its window does show up it should
