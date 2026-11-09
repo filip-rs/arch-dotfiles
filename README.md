@@ -130,9 +130,13 @@ wlogout, the terminals, Neovim, hyprlock, plus
 - a GTK theme `Palette` (adw-gtk3 recoloured) for GTK3/GTK4/libadwaita apps,
 - an icon theme `Palette` (Adwaita with folders in the accent colour),
 - a qt6ct colour scheme and a KDE colour scheme `Palette` for Qt apps,
+- an OBS theme `Palette` (a Yami variant; OBS styles itself),
 - the light/dark preference, from the palette's brightness.
 
 Running GTK apps and waybar/swaync update in place; Qt apps on restart.
+Apps with their own theme setting need it pointed at the palette once per
+machine: Prism Launcher → Settings → Theme "System", OBS → Settings →
+Appearance → "Palette", Kdenlive → Settings → Colour Theme → "Palette".
 Generated files are gitignored. Applying a wallpaper (picker, Super + Ctrl + W)
 re-derives the palette from it through `matugen_apply.sh`.
 
