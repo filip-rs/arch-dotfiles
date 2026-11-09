@@ -301,6 +301,16 @@ else
 fi
 
 # ═══════════════════════════════════════════════════════════════════
+# 4b. Icon theme "Palette": Adwaita with folders in the accent colour
+#     (like the GTK theme, apps only load it at startup)
+# ═══════════════════════════════════════════════════════════════════
+if [ -d /usr/share/icons/Adwaita/scalable/places ]; then
+    python3 "$HOME/.config/scripts/desktop/folder_icons.py" "$ACCENT" "$HOME/.local/share/icons/Palette"
+else
+    echo "theme_apply.sh: Adwaita icons not found, skipping folder icons" >&2
+fi
+
+# ═══════════════════════════════════════════════════════════════════
 # 5. Hyprland colors.lua (require()d by lua/theme.lua)
 # ═══════════════════════════════════════════════════════════════════
 cat > "$HOME/.config/hypr/colors.lua" << EOF
@@ -479,6 +489,15 @@ if [ "$skip_reload" != "--no-reload" ]; then
         killall swayosd-server 2>/dev/null || true
         swayosd-server --top-margin 0.9 --style "$HOME/.config/swayosd/style.css" > /dev/null 2>&1 &
     fi
+
+    # Running GTK apps (Nautilus, Lutris, ...) only re-read the Palette theme and
+    # folder icons from disk when these settings change, so flip them away and
+    # back. Apps started with GTK_THEME=Palette stay on Palette throughout.
+    gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita' 2>/dev/null || true
+    gsettings set org.gnome.desktop.interface icon-theme 'Adwaita' 2>/dev/null || true
+    sleep 0.3
+    gsettings set org.gnome.desktop.interface gtk-theme 'Palette' 2>/dev/null || true
+    gsettings set org.gnome.desktop.interface icon-theme 'Palette' 2>/dev/null || true
 
     notify-send -a "Theme" "Theme Applied" "$(cat "$STATE_FILE" 2>/dev/null || echo "$mode")" 2>/dev/null || true
 fi
