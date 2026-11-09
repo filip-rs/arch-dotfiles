@@ -320,66 +320,72 @@ Item {
         ListElement { title: "Monitors"; target: "monitors"; icon: "󰍹"; desc: "Quick display management."; preview: "previews/preview_monitors.png" }
     }
                 
-    function buildKeybinds() {
+    // Keybinds come straight from Hyprland: every bind in hypr/lua/binds.lua
+    // (and the host/plugin files) carries a "Section: what it does"
+    // description. Binds sharing a description become one row; binds without
+    // one (the Caps duplicates) are left out.
+    Process {
+        id: bindsProc
+        command: ["hyprctl", "binds", "-j"]
+        stdout: StdioCollector {
+            onStreamFinished: root.buildKeybinds(this.text)
+        }
+    }
+
+    function bindKeyName(b) {
+        const mods = [[64, "SUPER"], [4, "CTRL"], [8, "ALT"], [1, "SHIFT"], [128, "CAPS"]];
+        let parts = [];
+        for (const [bit, name] of mods) if (b.modmask & bit) parts.push(name);
+        const keys = {
+            "SPACE": "Space", "TAB": "Tab", "minus": "-", "equal": "=", "comma": ",",
+            "period": ".", "bracketleft": "[", "semicolon": ";", "apostrophe": "'",
+            "mouse_down": "Wheel", "mouse_up": "Wheel", "mouse:272": "Left drag",
+            "mouse:273": "Right drag", "XF86AudioPlay": "Play", "XF86AudioNext": "Next",
+            "XF86AudioPrev": "Prev", "XF86AudioMicMute": "Mic key"
+        };
+        const codes = {
+            121: "Mute key", 122: "Vol- key", 123: "Vol+ key", 232: "Bright- key",
+            233: "Bright+ key", 237: "Kbd- key", 238: "Kbd+ key", 156: "Armoury key",
+            210: "Fn+F4", 211: "Fn+F5"
+        };
+        let key = b.keycode > 0 ? (codes[b.keycode] || ("code " + b.keycode)) : (keys[b.key] || b.key);
+        return { mods: parts.join("+"), key: key };
+    }
+
+    function buildKeybinds(json) {
         dynamicKeybindsModel.clear();
-        // Mirrors lua/binds.lua. Entries with an empty cmd are
-        // reference-only (they need a real key press to make sense).
-        let binds = [
-            { k1: "SUPER", k2: "Q", action: "Open Terminal (Alacritty)", cmd: "alacritty" },
-            { k1: "SUPER", k2: "SPACE", action: "App Launcher (wofi)", cmd: "wofi" },
-            { k1: "SUPER", k2: "E", action: "Open File Manager", cmd: "nautilus --new-window" },
-            { k1: "SUPER", k2: "R", action: "Open Obsidian", cmd: "obsidian --ozone-platform-hint=auto" },
-            { k1: "SUPER", k2: "X", action: "Close Window", cmd: "hyprctl dispatch 'hl.dsp.window.close()'" },
-            { k1: "SUPER", k2: "V", action: "Toggle Floating", cmd: "hyprctl dispatch 'hl.dsp.window.float({ action = \"toggle\" })'" },
-            { k1: "SUPER", k2: "F", action: "Toggle Fullscreen", cmd: "hyprctl dispatch 'hl.dsp.window.fullscreen()'" },
-            { k1: "SUPER", k2: "F5", action: "Phone-shaped Window", cmd: "" },
-            { k1: "SUPER", k2: "H J K L", action: "Move Focus", cmd: "hyprctl dispatch 'hl.dsp.focus({ direction = \"l\" })'" },
-            { k1: "SUPER+SHIFT", k2: "H J K L", action: "Move Window", cmd: "hyprctl dispatch 'hl.dsp.window.move({ direction = \"l\" })'" },
-            { k1: "ALT", k2: "TAB", action: "Cycle Windows", cmd: "hyprctl dispatch 'hl.dsp.window.cycle_next()'" },
-            { k1: "SUPER", k2: "1 - 0", action: "Switch Workspace", cmd: "" },
-            { k1: "SUPER+SHIFT", k2: "1 - 0 (not 5)", action: "Move to Workspace", cmd: "" },
-            { k1: "SUPER", k2: "TAB", action: "Overview", cmd: "hyprctl dispatch 'hl.plugin.scrolloverview.overview(\"toggle all\")'" },
-            { k1: "SUPER+SHIFT", k2: "TAB", action: "Zoomed-out Overview", cmd: "" },
-            { k1: "SUPER", k2: "W / S", action: "Workspace Up / Down", cmd: "hyprctl dispatch 'hl.dsp.focus({ workspace = \"r+1\" })'" },
-            { k1: "SUPER+SHIFT", k2: "W / S", action: "Move Window Up / Down a Workspace", cmd: "" },
-            { k1: "SUPER", k2: "A / D", action: "Page Left / Right (one screen)", cmd: "" },
-            { k1: "SUPER+SHIFT", k2: "A / D", action: "Move Column Left / Right", cmd: "" },
-            { k1: "SUPER", k2: "- / =", action: "Narrow / Widen Column", cmd: "" },
-            { k1: "SUPER", k2: "Z", action: "Cycle Column Width", cmd: "hyprctl dispatch 'hl.dsp.layout(\"colresize +conf\")'" },
-            { k1: "SUPER+SHIFT", k2: "F", action: "Maximize Column", cmd: "hyprctl dispatch 'hl.dsp.layout(\"colresize 1.0\")'" },
-            { k1: "SUPER", k2: "C", action: "Center Column", cmd: "hyprctl dispatch 'hl.dsp.layout(\"center\")'" },
-            { k1: "SUPER", k2: ", / .", action: "Pull Into / Push Out of Column", cmd: "" },
-            { k1: "SUPER+CTRL", k2: "SPACE", action: "Quickshell Module Menu", cmd: "bash ~/.config/scripts/desktop/qs_menu.sh" },
-            { k1: "SUPER+CTRL", k2: "S", action: "Calendar", cmd: "bash ~/.config/scripts/desktop/qs_manager.sh toggle calendar --anchor=center" },
-            { k1: "SUPER+CTRL", k2: "N", action: "Network (Wi-Fi / Bluetooth)", cmd: "bash ~/.config/scripts/desktop/qs_manager.sh toggle network --anchor=center" },
-            { k1: "SUPER+CTRL", k2: "V", action: "Volume", cmd: "bash ~/.config/scripts/desktop/qs_manager.sh toggle volume --anchor=center" },
-            { k1: "SUPER+CTRL", k2: "B", action: "Battery", cmd: "bash ~/.config/scripts/desktop/qs_manager.sh toggle battery --anchor=center" },
-            { k1: "SUPER+CTRL", k2: "Q", action: "Music", cmd: "bash ~/.config/scripts/desktop/qs_manager.sh toggle music --anchor=center" },
-            { k1: "SUPER+CTRL", k2: "M", action: "Monitors", cmd: "bash ~/.config/scripts/desktop/qs_manager.sh toggle monitors --anchor=center" },
-            { k1: "SUPER+CTRL", k2: "W", action: "Wallpaper Picker", cmd: "bash ~/.config/scripts/desktop/qs_manager.sh toggle wallpaper --anchor=center" },
-            { k1: "SUPER+SHIFT", k2: "T", action: "Focus Time", cmd: "bash ~/.config/scripts/desktop/qs_manager.sh toggle focustime --anchor=center" },
-            { k1: "SUPER+CTRL+SHIFT", k2: "G", action: "This Guide", cmd: "bash ~/.config/scripts/desktop/qs_manager.sh toggle guide --anchor=center" },
-            { k1: "SUPER", k2: "O", action: "Lock Screen", cmd: "hyprlock" },
-            { k1: "SUPER", k2: "U", action: "Logout Menu", cmd: "wlogout --protocol layer-shell" },
-            { k1: "SUPER+SHIFT", k2: "5", action: "Screenshot to Clipboard", cmd: "bash ~/.config/scripts/desktop/screenshot_copy.sh" },
-            { k1: "SUPER+SHIFT+CTRL", k2: "S", action: "Screenshot to File", cmd: "bash ~/.config/scripts/desktop/screenshot_save.sh" },
-            { k1: "SUPER+SHIFT", k2: "N", action: "Notification Panel", cmd: "swaync-client -t -sw" },
-            { k1: "SUPER+SHIFT", k2: "C", action: "Colour Picker", cmd: "wl-color-picker clipboard --no-notify" },
-            { k1: "SUPER+SHIFT", k2: "E", action: "Emoji Picker", cmd: "bemoji -t" },
-            { k1: "SUPER+SHIFT", k2: "B", action: "Restart Waybar", cmd: "killall waybar && waybar" },
-            { k1: "SUPER", k2: "Y / T", action: "Keyboard Mouse (wl-kbptr)", cmd: "wl-kbptr" },
-            { k1: "SUPER+CTRL+SHIFT", k2: "6", action: "Toggle 60 / 120 Hz", cmd: "bash ~/.config/scripts/desktop/switch_refreshrate.sh" },
-            { k1: "SUPER+CTRL+SHIFT", k2: "7", action: "Speakers / Headphones", cmd: "bash ~/.config/scripts/desktop/speaker_toggle.sh" },
-            { k1: "SUPER+CTRL+SHIFT", k2: "0", action: "Focus Mode (blank side screens)", cmd: "bash ~/.config/scripts/desktop/screen_manager.sh" },
-            { k1: "SUPER+SHIFT", k2: "R", action: "Toggle AFK Capture", cmd: "~/.local/bin/afk toggle" },
-            { k1: "SUPER", k2: "[ ; '", action: "Type å ø æ", cmd: "" }
-        ];
-        for (let item of binds) { dynamicKeybindsModel.append(item); }
+        let binds = [];
+        try { binds = JSON.parse(json); } catch (e) { return; }
+
+        let sections = [];   // section names in first-seen order
+        let rows = {};       // section -> [{ desc, mods, keys[] }], merged per desc + mods
+        for (const b of binds) {
+            if (!b.description) continue;
+            const i = b.description.indexOf(": ");
+            const section = i > 0 ? b.description.slice(0, i) : "Other";
+            const desc = i > 0 ? b.description.slice(i + 2) : b.description;
+            const k = bindKeyName(b);
+            if (!rows[section]) { rows[section] = []; sections.push(section); }
+            let row = rows[section].find(r => r.desc === desc && r.mods === k.mods);
+            if (!row) { row = { desc: desc, mods: k.mods, keys: [] }; rows[section].push(row); }
+            if (!row.keys.includes(k.key)) row.keys.push(k.key);
+        }
+
+        for (const section of sections) {
+            dynamicKeybindsModel.append({ isHeader: true, k1: "", k2: "", action: section });
+            for (const r of rows[section]) {
+                let keys = r.keys.length > 7 ? r.keys[0] + " … " + r.keys[r.keys.length - 1]
+                                             : r.keys.join(" ");
+                dynamicKeybindsModel.append({
+                    isHeader: false, k1: r.mods, k2: keys, action: r.desc
+                });
+            }
+        }
     }
 
     Component.onCompleted: {
         startupSequence.start();
-        buildKeybinds();
+        bindsProc.running = true;
     }
 
     ParallelAnimation {
@@ -1502,16 +1508,26 @@ Item {
                             Repeater {
                                 model: dynamicKeybindsModel
                                 Rectangle {
-                                    Layout.fillWidth: true; Layout.preferredHeight: root.s(46); radius: root.s(8)
-                                    color: bindMa.containsMouse ? root.surface1 : Qt.alpha(root.surface0, 0.4)
-                                    border.color: bindMa.containsMouse ? root.peach : "transparent"
+                                    Layout.fillWidth: true; Layout.preferredHeight: model.isHeader ? root.s(34) : root.s(46); radius: root.s(8)
+                                    color: model.isHeader ? "transparent" : (bindMa.containsMouse ? root.surface1 : Qt.alpha(root.surface0, 0.4))
+                                    border.color: !model.isHeader && bindMa.containsMouse ? root.peach : "transparent"
                                     border.width: 1
                                     scale: bindMa.pressed ? 0.98 : 1.0
                                     Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutQuart } }
                                     Behavior on color { ColorAnimation { duration: 150 } }
                                     Behavior on border.color { ColorAnimation { duration: 150 } }
 
+                                    Text {
+                                        visible: model.isHeader
+                                        anchors.left: parent.left; anchors.bottom: parent.bottom
+                                        anchors.leftMargin: root.s(4); anchors.bottomMargin: root.s(4)
+                                        text: model.action
+                                        font.family: "JetBrains Mono"; font.weight: Font.Bold; font.pixelSize: root.s(13)
+                                        color: root.peach
+                                    }
+
                                     RowLayout {
+                                        visible: !model.isHeader
                                         anchors.fill: parent; anchors.margins: root.s(10); spacing: root.s(15)
                                         
                                         Item {
@@ -1522,10 +1538,10 @@ Item {
                                             Row {
                                                 anchors.verticalCenter: parent.verticalCenter; spacing: root.s(8)
                                                 Rectangle { 
-                                                    width: k1Text.implicitWidth + root.s(16); height: root.s(26); radius: root.s(4); color: root.surface0; border.color: root.surface2; border.width: 1
+                                                    width: k1Text.implicitWidth + root.s(16); height: root.s(26); radius: root.s(4); color: root.surface0; border.color: root.surface2; border.width: 1; visible: model.k1 !== ""
                                                     Text { id: k1Text; anchors.centerIn: parent; text: model.k1; font.family: "JetBrains Mono"; font.weight: Font.Bold; font.pixelSize: root.s(11); color: root.peach }
                                                 }
-                                                Text { text: "+"; font.family: "JetBrains Mono"; font.pixelSize: root.s(12); color: root.overlay0; visible: model.k2 !== ""; anchors.verticalCenter: parent.verticalCenter }
+                                                Text { text: "+"; font.family: "JetBrains Mono"; font.pixelSize: root.s(12); color: root.overlay0; visible: model.k1 !== "" && model.k2 !== ""; anchors.verticalCenter: parent.verticalCenter }
                                                 Rectangle { 
                                                     width: k2Text.implicitWidth + root.s(16); height: root.s(26); radius: root.s(4); color: root.surface0; border.color: root.surface2; border.width: 1; visible: model.k2 !== ""
                                                     Text { id: k2Text; anchors.centerIn: parent; text: model.k2; font.family: "JetBrains Mono"; font.weight: Font.Bold; font.pixelSize: root.s(11); color: root.peach }
@@ -1546,8 +1562,7 @@ Item {
                                         }
                                     }
                                     MouseArea {
-                                        id: bindMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
-                                        onClicked: Quickshell.execDetached(["bash", "-c", model.cmd])
+                                        id: bindMa; anchors.fill: parent; hoverEnabled: !model.isHeader
                                     }
                                 }
                             }

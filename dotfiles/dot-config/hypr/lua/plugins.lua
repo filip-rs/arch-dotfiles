@@ -62,7 +62,7 @@ if has("scrolloverview") then
 
 	hl.bind("SUPER + TAB", function()
 		overview.overview("toggle all")
-	end, { description = "Toggle overview" })
+	end, { description = "Workspaces: Overview" })
 
 	-- The plugin reads `scale` once, as an overview opens, so the wide view
 	-- swaps it in for that one call and puts it straight back for Super + Tab
@@ -71,7 +71,7 @@ if has("scrolloverview") then
 		overview.configure({ scale = SCALE_WIDE })
 		overview.overview("toggle all")
 		overview.configure({ scale = SCALE })
-	end, { description = "Toggle zoomed-out overview" })
+	end, { description = "Workspaces: Zoomed-out overview" })
 
 	overview.gesture({ fingers = 4, direction = "vertical" })
 end

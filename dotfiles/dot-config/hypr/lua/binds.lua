@@ -6,6 +6,13 @@ local mod5 = "MOD5" -- caps-as-level3 (kb_options = lv3:caps_switch)
 local scr = "~/.config/scripts/desktop"
 local qs = scr .. "/qs_manager.sh"
 
+-- Descriptions are "Section: what it does". The Guide panel (Super + Ctrl +
+-- Shift + G) reads them back from `hyprctl binds -j`, groups them by section
+-- and merges binds that share one. Binds without a description are left out.
+local function d(text)
+	return { description = text }
+end
+
 local browser = "librewolf"
 
 -- Page the scrolling tape one screen sideways (Super + A/D).
@@ -85,15 +92,15 @@ end
 
 -- ───────────────────────────── core ─────────────────────────────
 
-hl.bind(mod .. " + Q", hl.dsp.exec_cmd("$TERMINAL"))
-hl.bind(mod .. " + X", hl.dsp.window.close())
-hl.bind(mod .. " + E", hl.dsp.exec_cmd("nautilus --new-window"))
-hl.bind(mod .. " + V", hl.dsp.window.float({ action = "toggle" }))
-hl.bind(mod .. " + F", hl.dsp.window.fullscreen())
-hl.bind(mod .. " + P", hl.dsp.window.pseudo())
-hl.bind(mod .. " + SPACE", hl.dsp.exec_cmd("wofi"))
-hl.bind(mod .. " + O", hl.dsp.exec_cmd("~/.config/quickshell/lock/lock.sh"))
-hl.bind(mod .. " + U", hl.dsp.exec_cmd("wlogout --protocol layer-shell"))
+hl.bind(mod .. " + Q", hl.dsp.exec_cmd("$TERMINAL"), d("Apps: Terminal"))
+hl.bind(mod .. " + X", hl.dsp.window.close(), d("Windows: Close"))
+hl.bind(mod .. " + E", hl.dsp.exec_cmd("nautilus --new-window"), d("Apps: File manager"))
+hl.bind(mod .. " + V", hl.dsp.window.float({ action = "toggle" }), d("Windows: Toggle floating"))
+hl.bind(mod .. " + F", hl.dsp.window.fullscreen(), d("Windows: Fullscreen"))
+hl.bind(mod .. " + P", hl.dsp.window.pseudo(), d("Windows: Pseudo-tile"))
+hl.bind(mod .. " + SPACE", hl.dsp.exec_cmd("wofi"), d("Apps: App launcher"))
+hl.bind(mod .. " + O", hl.dsp.exec_cmd("~/.config/quickshell/lock/lock.sh"), d("Session: Lock"))
+hl.bind(mod .. " + U", hl.dsp.exec_cmd("wlogout --protocol layer-shell"), d("Session: Power menu"))
 hl.bind(mod .. " + CTRL + SHIFT + M", hl.dsp.exit(), { description = "Session: Quit Hyprland (instantly)" })
 
 -- Phone-shaped side window: fullscreen off, float, fixed size, centred.
@@ -102,30 +109,30 @@ hl.bind(mod .. " + F5", function()
 	hl.dispatch(hl.dsp.window.float({ action = "toggle" }))
 	hl.dispatch(hl.dsp.window.resize({ x = 480, y = 1080 }))
 	hl.dispatch(hl.dsp.window.center())
-end, { description = "Phone-shaped floating window" })
+end, d("Windows: Phone-shaped floating window"))
 
 -- ──────────────────────────── scripts ────────────────────────────
 
-hl.bind(mod .. " + SHIFT + 5", hl.dsp.exec_cmd(scr .. "/screenshot_copy.sh"))
-hl.bind(mod .. " + SHIFT + CTRL + S", hl.dsp.exec_cmd(scr .. "/screenshot_save.sh"))
-hl.bind(mod .. " + CTRL + SHIFT + 6", hl.dsp.exec_cmd(scr .. "/switch_refreshrate.sh"))
-hl.bind(mod .. " + CTRL + SHIFT + 7", hl.dsp.exec_cmd(scr .. "/speaker_toggle.sh"))
-hl.bind(mod .. " + CTRL + SHIFT + 0", hl.dsp.exec_cmd(scr .. "/screen_manager.sh"))
+hl.bind(mod .. " + SHIFT + 5", hl.dsp.exec_cmd(scr .. "/screenshot_copy.sh"), d("Tools: Screenshot to clipboard"))
+hl.bind(mod .. " + SHIFT + CTRL + S", hl.dsp.exec_cmd(scr .. "/screenshot_save.sh"), d("Tools: Screenshot to file"))
+hl.bind(mod .. " + CTRL + SHIFT + 6", hl.dsp.exec_cmd(scr .. "/switch_refreshrate.sh"), d("System: Toggle 60 / 120 Hz"))
+hl.bind(mod .. " + CTRL + SHIFT + 7", hl.dsp.exec_cmd(scr .. "/speaker_toggle.sh"), d("System: Speakers / headphones"))
+hl.bind(mod .. " + CTRL + SHIFT + 0", hl.dsp.exec_cmd(scr .. "/screen_manager.sh"), d("System: Focus mode (blank side screens)"))
 
 hl.bind(
 	mod .. " + SHIFT + R",
 	hl.dsp.exec_cmd("~/.local/bin/afk toggle; pkill -RTMIN+9 waybar"),
-	{ description = "Toggle AFK lecture capture" }
+	d("Tools: AFK lecture capture")
 )
 hl.bind(
 	mod .. " + CTRL + L",
 	hl.dsp.exec_cmd("~/.local/bin/login-bind type school"),
-	{ description = "Type school login" }
+	d("Tools: Type school login")
 )
 hl.bind(
 	mod .. " + CTRL + SHIFT + I",
 	hl.dsp.exec_cmd("/home/filip/Programming/Bash/mullvad-location-switcher/mullvad-switch.sh next"),
-	{ description = "Next Mullvad location" }
+	d("System: Next Mullvad location")
 )
 
 -- Idle inhibition (hyprcaffeine). The panel is on SUPER + CTRL + C with the
@@ -134,16 +141,16 @@ hl.bind(
 -- install` writes, because that file binds its menu over SUPER + CTRL + SHIFT
 -- + I -- the Mullvad relay switcher directly above -- and is require()d after
 -- this one, so it silently won.
-hl.bind(mod .. " + CTRL + I", hl.dsp.exec_cmd("hyprcaffeine toggle"), { description = "Caffeine: block suspend" })
+hl.bind(mod .. " + CTRL + I", hl.dsp.exec_cmd("hyprcaffeine toggle"), d("System: Caffeine, block suspend"))
 hl.bind(
 	mod .. " + CTRL + D",
 	hl.dsp.exec_cmd("hyprcaffeine monitor toggle"),
-	{ description = "Caffeine: keep display on" }
+	d("System: Caffeine, keep display on")
 )
 hl.bind(
 	mod .. " + CTRL + SHIFT + D",
 	hl.dsp.exec_cmd("hyprcaffeine lid toggle"),
-	{ description = "Caffeine: block lid close" }
+	d("System: Caffeine, block lid close")
 )
 
 -- ───────────────────────── quickshell panels ─────────────────────
@@ -164,49 +171,50 @@ for _, p in ipairs(panels) do
 	hl.bind(
 		mod .. " + CTRL + " .. p.key,
 		hl.dsp.exec_cmd(qs .. " toggle " .. p.target .. " --anchor=center"),
-		{ description = "Quickshell: " .. p.desc }
+		d("Panels: " .. p.desc)
 	)
 end
 
 hl.bind(
 	mod .. " + SHIFT + T",
 	hl.dsp.exec_cmd(qs .. " toggle focustime --anchor=center"),
-	{ description = "Quickshell: Focus time" }
+	d("Panels: Focus time")
 )
 hl.bind(
 	mod .. " + CTRL + SHIFT + G",
 	hl.dsp.exec_cmd(qs .. " toggle guide --anchor=center"),
-	{ description = "Quickshell: Guide" }
+	d("Panels: This guide")
 )
-hl.bind(mod .. " + CTRL + SPACE", hl.dsp.exec_cmd(scr .. "/qs_menu.sh"), { description = "Quickshell module menu" })
+hl.bind(mod .. " + CTRL + SPACE", hl.dsp.exec_cmd(scr .. "/qs_menu.sh"), d("Panels: Panel and theme menu"))
 
 -- ─────────────────────────── apps & URLs ─────────────────────────
 
-hl.bind(mod .. " + R", hl.dsp.exec_cmd("obsidian --ozone-platform-hint=auto"))
-hl.bind(mod .. " + SHIFT + B", hl.dsp.exec_cmd("killall waybar && waybar"))
-hl.bind(mod .. " + SHIFT + N", hl.dsp.exec_cmd("swaync-client -t -sw"))
-hl.bind(mod .. " + SHIFT + C", hl.dsp.exec_cmd("wl-color-picker clipboard --no-notify"))
-hl.bind(mod .. " + SHIFT + E", hl.dsp.exec_cmd("bemoji -t"))
+hl.bind(mod .. " + R", hl.dsp.exec_cmd("obsidian --ozone-platform-hint=auto"), d("Apps: Obsidian"))
+hl.bind(mod .. " + SHIFT + B", hl.dsp.exec_cmd("killall waybar && waybar"), d("System: Restart Waybar"))
+hl.bind(mod .. " + SHIFT + N", hl.dsp.exec_cmd("swaync-client -t -sw"), d("Panels: Notifications"))
+hl.bind(mod .. " + SHIFT + C", hl.dsp.exec_cmd("wl-color-picker clipboard --no-notify"), d("Tools: Colour picker"))
+hl.bind(mod .. " + SHIFT + E", hl.dsp.exec_cmd("bemoji -t"), d("Tools: Emoji picker"))
 
-hl.bind("CTRL + SHIFT + ALT + B", hl.dsp.exec_cmd(browser .. " --new-window https://www.bible.com/bible/111/MAT.1.NIV"))
-hl.bind("CTRL + SHIFT + ALT + E", hl.dsp.exec_cmd(browser .. " --new-window https://chat.openai.com/"))
-hl.bind("CTRL + SHIFT + ALT + A", hl.dsp.exec_cmd(browser .. " --new-window https://claude.ai/"))
-hl.bind("CTRL + SHIFT + ALT + L", hl.dsp.exec_cmd(browser .. " --new-window https://linkedin.com/"))
+hl.bind("CTRL + SHIFT + ALT + B", hl.dsp.exec_cmd(browser .. " --new-window https://www.bible.com/bible/111/MAT.1.NIV"), d("Links: Bible"))
+hl.bind("CTRL + SHIFT + ALT + E", hl.dsp.exec_cmd(browser .. " --new-window https://chat.openai.com/"), d("Links: ChatGPT"))
+hl.bind("CTRL + SHIFT + ALT + A", hl.dsp.exec_cmd(browser .. " --new-window https://claude.ai/"), d("Links: Claude"))
+hl.bind("CTRL + SHIFT + ALT + L", hl.dsp.exec_cmd(browser .. " --new-window https://linkedin.com/"), d("Links: LinkedIn"))
 
 -- ────────────────────── keyboard-driven pointer ──────────────────
 
-hl.bind(mod .. " + Y", hl.dsp.exec_cmd("wl-kbptr -o modes=floating,bisect -o mode_floating.source=detect"))
-hl.bind(mod .. " + T", hl.dsp.exec_cmd("wl-kbptr"))
+hl.bind(mod .. " + Y", hl.dsp.exec_cmd("wl-kbptr -o modes=floating,bisect -o mode_floating.source=detect"), d("Tools: Keyboard pointer (floating)"))
+hl.bind(mod .. " + T", hl.dsp.exec_cmd("wl-kbptr"), d("Tools: Keyboard pointer"))
 
 -- ─────────────────────── æøå + symbol helpers ────────────────────
 
-hl.bind(mod .. " + bracketleft", hl.dsp.exec_cmd("wtype 'å'"))
-hl.bind(mod .. " + semicolon", hl.dsp.exec_cmd("wtype 'ø'"))
-hl.bind(mod .. " + apostrophe", hl.dsp.exec_cmd("wtype 'æ'"))
+hl.bind(mod .. " + bracketleft", hl.dsp.exec_cmd("wtype 'å'"), d("Typing: å ø æ"))
+hl.bind(mod .. " + semicolon", hl.dsp.exec_cmd("wtype 'ø'"), d("Typing: å ø æ"))
+hl.bind(mod .. " + apostrophe", hl.dsp.exec_cmd("wtype 'æ'"), d("Typing: å ø æ"))
 
-local symbols = { ["2"] = "@", ["3"] = "£", ["4"] = "$", ["7"] = "{", ["8"] = "[", ["9"] = "]", ["0"] = "}" }
-for key, sym in pairs(symbols) do
-	hl.bind("CTRL + ALT + " .. key, hl.dsp.exec_cmd("wtype '" .. sym .. "'"))
+-- A list rather than a map so the Guide shows the keys in this order
+local symbols = { { "2", "@" }, { "3", "£" }, { "4", "$" }, { "7", "{" }, { "8", "[" }, { "9", "]" }, { "0", "}" } }
+for _, s in ipairs(symbols) do
+	hl.bind("CTRL + ALT + " .. s[1], hl.dsp.exec_cmd("wtype '" .. s[2] .. "'"), d("Typing: @ £ $ { [ ] }"))
 end
 
 -- ──────────────── MOD5 (caps) duplicates of the core binds ───────
@@ -261,50 +269,50 @@ hl.bind("code:238", hl.dsp.exec_cmd(bri .. "kbd-up"), { repeating = true, descri
 
 for i = 1, 10 do
 	local key = i % 10 -- 10 maps to key 0
-	hl.bind(mod .. " + " .. key, hl.dsp.focus({ workspace = i }))
+	hl.bind(mod .. " + " .. key, hl.dsp.focus({ workspace = i }), d("Workspaces: Switch to workspace"))
 	if i ~= 5 then -- SUPER + SHIFT + 5 is the screenshot
-		hl.bind(mod .. " + SHIFT + " .. key, hl.dsp.window.move({ workspace = i }))
+		hl.bind(mod .. " + SHIFT + " .. key, hl.dsp.window.move({ workspace = i }), d("Workspaces: Move window to workspace"))
 	end
 end
 
-hl.bind(mod .. " + W", hl.dsp.focus({ workspace = "r-1" }))
-hl.bind(mod .. " + S", hl.dsp.focus({ workspace = "r+1" }))
-hl.bind(mod .. " + SHIFT + W", hl.dsp.window.move({ workspace = "r-1" }))
-hl.bind(mod .. " + SHIFT + S", hl.dsp.window.move({ workspace = "r+1" }))
+hl.bind(mod .. " + W", hl.dsp.focus({ workspace = "r-1" }), d("Workspaces: Workspace up"))
+hl.bind(mod .. " + S", hl.dsp.focus({ workspace = "r+1" }), d("Workspaces: Workspace down"))
+hl.bind(mod .. " + SHIFT + W", hl.dsp.window.move({ workspace = "r-1" }), d("Workspaces: Move window up a workspace"))
+hl.bind(mod .. " + SHIFT + S", hl.dsp.window.move({ workspace = "r+1" }), d("Workspaces: Move window down a workspace"))
 
-hl.bind(mod .. " + A", page("l"), { description = "Page tape left" })
-hl.bind(mod .. " + D", page("r"), { description = "Page tape right" })
-hl.bind(mod .. " + SHIFT + A", hl.dsp.layout("swapcol l"))
-hl.bind(mod .. " + SHIFT + D", hl.dsp.layout("swapcol r"))
+hl.bind(mod .. " + A", page("l"), d("Columns: Page one screen left"))
+hl.bind(mod .. " + D", page("r"), d("Columns: Page one screen right"))
+hl.bind(mod .. " + SHIFT + A", hl.dsp.layout("swapcol l"), d("Columns: Move column left"))
+hl.bind(mod .. " + SHIFT + D", hl.dsp.layout("swapcol r"), d("Columns: Move column right"))
 
 -- Column sizing and shaping.
-hl.bind(mod .. " + minus", hl.dsp.layout("colresize -0.1"), { repeating = true })
-hl.bind(mod .. " + equal", hl.dsp.layout("colresize +0.1"), { repeating = true })
-hl.bind(mod .. " + Z", hl.dsp.layout("colresize +conf"))
-hl.bind(mod .. " + SHIFT + F", hl.dsp.layout("colresize 1.0")) -- maximize column; Z to go back
-hl.bind(mod .. " + C", hl.dsp.layout("center"))
-hl.bind(mod .. " + comma", hl.dsp.layout("consume_or_expel prev"))
-hl.bind(mod .. " + period", hl.dsp.layout("consume_or_expel next"))
+hl.bind(mod .. " + minus", hl.dsp.layout("colresize -0.1"), { repeating = true, description = "Columns: Narrow column" })
+hl.bind(mod .. " + equal", hl.dsp.layout("colresize +0.1"), { repeating = true, description = "Columns: Widen column" })
+hl.bind(mod .. " + Z", hl.dsp.layout("colresize +conf"), d("Columns: Cycle column width"))
+hl.bind(mod .. " + SHIFT + F", hl.dsp.layout("colresize 1.0"), d("Columns: Maximize column (Z to go back)"))
+hl.bind(mod .. " + C", hl.dsp.layout("center"), d("Columns: Centre column"))
+hl.bind(mod .. " + comma", hl.dsp.layout("consume_or_expel prev"), d("Columns: Pull window into column"))
+hl.bind(mod .. " + period", hl.dsp.layout("consume_or_expel next"), d("Columns: Push window out of column"))
 
-hl.bind(mod .. " + mouse_down", hl.dsp.focus({ workspace = "r+1" }))
-hl.bind(mod .. " + mouse_up", hl.dsp.focus({ workspace = "r-1" }))
-hl.bind(mod .. " + SHIFT + mouse_down", hl.dsp.layout("focus r"))
-hl.bind(mod .. " + SHIFT + mouse_up", hl.dsp.layout("focus l"))
+hl.bind(mod .. " + mouse_down", hl.dsp.focus({ workspace = "r+1" }), d("Workspaces: Scroll through workspaces"))
+hl.bind(mod .. " + mouse_up", hl.dsp.focus({ workspace = "r-1" }), d("Workspaces: Scroll through workspaces"))
+hl.bind(mod .. " + SHIFT + mouse_down", hl.dsp.layout("focus r"), d("Columns: Scroll through columns"))
+hl.bind(mod .. " + SHIFT + mouse_up", hl.dsp.layout("focus l"), d("Columns: Scroll through columns"))
 
-hl.bind(mod .. " + H", hl.dsp.focus({ direction = "l" }))
-hl.bind(mod .. " + L", hl.dsp.focus({ direction = "r" }))
-hl.bind(mod .. " + K", hl.dsp.focus({ direction = "u" }))
-hl.bind(mod .. " + J", hl.dsp.focus({ direction = "d" }))
+hl.bind(mod .. " + H", hl.dsp.focus({ direction = "l" }), d("Windows: Move focus"))
+hl.bind(mod .. " + L", hl.dsp.focus({ direction = "r" }), d("Windows: Move focus"))
+hl.bind(mod .. " + K", hl.dsp.focus({ direction = "u" }), d("Windows: Move focus"))
+hl.bind(mod .. " + J", hl.dsp.focus({ direction = "d" }), d("Windows: Move focus"))
 
-hl.bind(mod .. " + SHIFT + H", hl.dsp.window.move({ direction = "l" }))
-hl.bind(mod .. " + SHIFT + L", hl.dsp.window.move({ direction = "r" }))
-hl.bind(mod .. " + SHIFT + K", hl.dsp.window.move({ direction = "u" }))
-hl.bind(mod .. " + SHIFT + J", hl.dsp.window.move({ direction = "d" }))
+hl.bind(mod .. " + SHIFT + H", hl.dsp.window.move({ direction = "l" }), d("Windows: Move window"))
+hl.bind(mod .. " + SHIFT + L", hl.dsp.window.move({ direction = "r" }), d("Windows: Move window"))
+hl.bind(mod .. " + SHIFT + K", hl.dsp.window.move({ direction = "u" }), d("Windows: Move window"))
+hl.bind(mod .. " + SHIFT + J", hl.dsp.window.move({ direction = "d" }), d("Windows: Move window"))
 
-hl.bind("ALT + TAB", hl.dsp.window.cycle_next())
+hl.bind("ALT + TAB", hl.dsp.window.cycle_next(), d("Windows: Cycle windows"))
 
 -- ─────────────────────────── mouse binds ─────────────────────────
 
-hl.bind(mod .. " + mouse:272", hl.dsp.window.drag(), { mouse = true })
-hl.bind(mod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
-hl.bind(mod .. " + SHIFT + mouse:272", hl.dsp.window.resize(), { mouse = true })
+hl.bind(mod .. " + mouse:272", hl.dsp.window.drag(), { mouse = true, description = "Windows: Drag window" })
+hl.bind(mod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true, description = "Windows: Resize window" })
+hl.bind(mod .. " + SHIFT + mouse:272", hl.dsp.window.resize(), { mouse = true, description = "Windows: Resize window" })
