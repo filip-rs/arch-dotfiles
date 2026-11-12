@@ -132,6 +132,7 @@ bindkey '^E' end-of-line
 
 # ── Aliases ──────────────────────────────────────────────────────────
 alias zshconf="nvim ~/.zshrc && source ~/.zshrc"
+alias rm="trash"
 alias please="sudo"
 alias fking="sudo"
 alias fk="fuck"
