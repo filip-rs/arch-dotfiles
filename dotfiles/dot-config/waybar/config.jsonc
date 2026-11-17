@@ -3,15 +3,15 @@
 // Every module body lives in modules.jsonc and is pulled in with "include";
 // these objects only decide layout. Options set here win over the include.
 //
-//   primary       eDP-1 (laptop) + DP-1 (desktop centre) — identical config
-//   complementary DP-2 / DP-3 / HDMI-A-1 — per-output context only, no
+//   primary       eDP-1 (laptop) + DP-1 (desktop centre) + DP-2 (Lenovo, desktop solo) — identical config
+//   complementary DP-3 / HDMI-A-1 — per-output context only, no
 //                 duplicated global controls
 [
     {
         // ── PRIMARY: laptop panel and desktop centre monitor ──
         "name": "primary",
         "include": ["modules.jsonc"],
-        "output": ["eDP-1", "DP-1"],
+        "output": ["eDP-1", "DP-1", "DP-2"],
         "layer": "top",
         "position": "bottom",
         "mod": "dock",
@@ -60,7 +60,7 @@
         // primary bar only.
         "name": "complementary",
         "include": ["modules.jsonc"],
-        "output": ["DP-2", "DP-3", "HDMI-A-1"],
+        "output": ["DP-3", "HDMI-A-1"],
         "layer": "top",
         "position": "bottom",
         "mod": "dock",
