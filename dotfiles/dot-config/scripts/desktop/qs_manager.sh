@@ -141,9 +141,10 @@ update_wallpaper_thumbs() {
     done
 }
 
-# The scan runs in its own process group with a hard time limit: the panel can
-# also be closed from QML (Escape, click-away) without going through here, and
-# an unbounded scan would keep the adapter discovering forever.
+# The scan runs in its own process group so it can be stopped as one unit.
+# Main.qml calls "scan-stop" when the network panel goes away, so the scan ends
+# with the panel. The time limit is only a backstop (e.g. Quickshell crashed),
+# since an unbounded scan would keep the adapter discovering forever.
 stop_bt_scan() {
     local pgid
     pgid=$(cat "$BT_PID_FILE" 2>/dev/null)
@@ -181,6 +182,13 @@ start_quickshell() {
 if [[ "$ACTION" == "close" ]]; then
     # Nothing to close if Quickshell is not running, so no waiting here
     qs_ipc command close >/dev/null
+    stop_bt_scan
+    exit 0
+fi
+
+# Sent by Main.qml when the network panel closes from inside Quickshell
+# (Escape, click-away), which never goes through this script
+if [[ "$ACTION" == "scan-stop" ]]; then
     stop_bt_scan
     exit 0
 fi

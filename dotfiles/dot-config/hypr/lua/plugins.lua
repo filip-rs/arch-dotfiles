@@ -39,7 +39,7 @@ end
 
 if has("scrolloverview") then
 	local SCALE = 0.35 -- Super + Tab and the gesture
-	local SCALE_WIDE = 0.1 -- Super + Shift + Tab; the plugin's minimum
+	local SCALE_WIDE = 0.125 -- Super + Shift + Tab; the plugin's minimum
 
 	hl.config({
 		plugin = {

@@ -79,6 +79,17 @@ PanelWindow {
     }
 
     property string currentActive: "hidden"
+
+    // qs_manager.sh starts a Bluetooth scan when it opens the network panel.
+    // Escape and click-away close panels here without going through the
+    // script, so end the scan as soon as the network panel is gone, however
+    // it went (closed, or replaced by another panel).
+    readonly property bool networkOpen: currentActive === "network"
+    onNetworkOpenChanged: {
+        if (!networkOpen)
+            Quickshell.execDetached(["bash", Quickshell.env("HOME") + "/.config/scripts/desktop/qs_manager.sh", "scan-stop"]);
+    }
+
     property bool isVisible: false
     property string activeArg: ""
     property string activeAnchor: ""

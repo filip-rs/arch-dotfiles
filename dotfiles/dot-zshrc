@@ -210,6 +210,29 @@ options edns0 trust-ad
 EOF
 }
 
+# Keep a wifi network connected while the laptop sleeps (wake-on-WLAN),
+# so there is no slow login after opening the lid.
+#   wifimagic            add the wifi you are on now
+#   wifimagic <name>     add a saved wifi by name
+#   wifimagic -r [name]  remove it again
+#   wifimagic -l         list the networks that have it
+wifimagic() {
+    local value=magic name
+    case "$1" in
+        -l) local c
+            nmcli -g NAME,TYPE connection show | grep ':802-11-wireless$' | sed 's/:802-11-wireless$//; s/\\:/:/g' |
+                while IFS= read -r c; do
+                    [[ "$(nmcli -g 802-11-wireless.wake-on-wlan connection show "$c")" == 0x8 ]] && echo "$c"
+                done
+            return ;;
+        -r) value=default; shift ;;
+    esac
+    name="${*:-$(nmcli -g GENERAL.CONNECTION device show wlan0)}"
+    [[ -z "$name" ]] && { echo "wifimagic: not on wifi, give a network name"; return 1; }
+    nmcli connection modify "$name" 802-11-wireless.wake-on-wlan "$value" || return 1
+    echo "$name: wake-on-wlan $value (applies from the next time it connects)"
+}
+
 # Davinci converter
 conv() {
     if [ -z "$1" ]; then
