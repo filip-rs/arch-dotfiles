@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=YouTube (yt-x)
+GenericName=YouTube Browser
+Comment=Your YouTube home feed as a thumbnail grid (rofi); plays in mpv
+Exec=yt-x --feed
+Icon=/home/filip/Services/arch-dotfiles/desktopentries/yt-x.png
+Terminal=false
+Categories=AudioVideo;Video;
+Keywords=youtube;yt;video;mpv;terminal;
