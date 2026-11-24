@@ -98,7 +98,10 @@ hl.bind(mod .. " + E", hl.dsp.exec_cmd("nautilus --new-window"), d("Apps: File m
 hl.bind(mod .. " + V", hl.dsp.window.float({ action = "toggle" }), d("Windows: Toggle floating"))
 hl.bind(mod .. " + F", hl.dsp.window.fullscreen(), d("Windows: Fullscreen"))
 hl.bind(mod .. " + P", hl.dsp.window.pseudo(), d("Windows: Pseudo-tile"))
-hl.bind(mod .. " + SPACE", hl.dsp.exec_cmd("wofi"), d("Apps: App launcher"))
+-- Quickshell's launcher (quickshell/launcher) via its global shortcut, so the
+-- keypress goes straight to the running shell instead of starting a process.
+local launcher = hl.dsp.global("quickshell:launcher")
+hl.bind(mod .. " + SPACE", launcher, d("Apps: App launcher"))
 hl.bind(mod .. " + O", hl.dsp.exec_cmd("~/.config/quickshell/lock/lock.sh"), d("Session: Lock"))
 hl.bind(mod .. " + U", hl.dsp.exec_cmd("wlogout --protocol layer-shell"), d("Session: Power menu"))
 hl.bind(mod .. " + CTRL + SHIFT + M", hl.dsp.exit(), { description = "Session: Quit Hyprland (instantly)" })
@@ -224,7 +227,7 @@ hl.bind(mod5 .. " + O", hl.dsp.exec_cmd("~/.config/quickshell/lock/lock.sh"))
 hl.bind(mod5 .. " + E", hl.dsp.exec_cmd("nautilus --new-window"))
 hl.bind(mod5 .. " + V", hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mod5 .. " + F", hl.dsp.window.fullscreen())
-hl.bind(mod5 .. " + SPACE", hl.dsp.exec_cmd("wofi"))
+hl.bind(mod5 .. " + SPACE", launcher)
 -- No caps + W: that is how å gets typed on altgr-intl.
 hl.bind(mod5 .. " + A", page("l"))
 hl.bind(mod5 .. " + D", page("r"))

@@ -62,6 +62,14 @@ hl.window_rule({
     no_initial_focus = true,
 })
 
+-- The Quickshell app launcher animates itself in ~0.1 s; the stock layer fade
+-- (speed 7, so 0.7 s) on top would make it feel slow.
+hl.layer_rule({
+    name    = "launcher-no-anim",
+    match   = { namespace = "qs-launcher" },
+    no_anim = true,
+})
+
 hl.layer_rule({
     name  = "blur-logout",
     match = { namespace = "logout_dialog" },

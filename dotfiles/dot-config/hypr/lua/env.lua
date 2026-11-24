@@ -20,6 +20,10 @@ hl.env("XCURSOR_SIZE", "21")
 -- Quickshell is started without it (autostart.lua, qs_manager.sh, lock.sh) so
 -- its hand-styled panels and lockscreen are unaffected.
 hl.env("QT_QPA_PLATFORMTHEME", "qt6ct")
+-- ...which also means Quickshell doesn't get qt6ct's icon theme. Without this
+-- it only searches hicolor, and launcher entries with generic Adwaita icons
+-- (ranger, Qt6 Settings, Monitor Settings) fall back to letters.
+hl.env("QS_ICON_THEME", "Palette")
 
 -- unscale XWayland
 hl.config({

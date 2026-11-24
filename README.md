@@ -1,8 +1,8 @@
 # Arch dotfiles
 
-My (most important) Arch Linux dotfiles — configs and settings I use daily on my
-Hyprland machines: `archflipper` (laptop) and `archbased` (desktop) run the same
-repo at the same time. Some of it is fully custom, some is sourced from various
+My (most important) Arch Linux dotfiles. Configs and settings I use daily on my
+Hyprland machines, `archflipper` (laptop) and `archbased` (desktop), which run
+the same repo at the same time. Some of it is fully custom, some is sourced from various
 places (see [Credits](#credits)).
 
 ## Layout
@@ -53,8 +53,8 @@ with `--dotfiles`: `dot-zshrc` -> `~/.zshrc`, `dot-config/` -> `~/.config/`.
    stow . --dotfiles -t $HOME
    ```
 
-   That installs all my dotfiles to your system, if you rather just want a single part
-   it's easier to just symlink or copy a folder individually.
+   That installs all my dotfiles to your system. If you only want a single part,
+   it's easier to just symlink or copy that folder individually.
 
 3. Desktop entries installs to `~/.local/share/applications`,
    see `desktopentries.md`:
@@ -104,21 +104,22 @@ To refresh them, compare against `pacman -Qqen` / `pacman -Qqem`.
 
 ## Hyprland notes
 
-- Config is written in **Hyprland's Lua format (0.55+)**, entry point
+- Config is written in **Hyprland's Lua format (0.55+)**, main folder
   `~/.config/hypr/hyprland.lua`, split into modules under `lua/`
   (`env`, `theme`, `monitors`, `looknfeel`, `animations`, `input`, `rules`,
   `binds`, `plugins`, `hosts`, `autostart`). `hyprctl dispatch` takes Lua too:
   `hyprctl dispatch 'hl.dsp.dpms({ action = "off" })'`.
 - The terminal for Super + Q is `TERMINAL` in `lua/env.lua`.
-- Every bind has a `"Section: what it does"` description; the Guide panel
-  (Super + Ctrl + Shift + G) reads them from `hyprctl binds -j`, so it never
-  needs updating by hand.
+- Every bind has a `"Section: what it does"` description.
 - Everything that talks to the compositor from scripts goes through
   `~/.config/scripts/lib/compositor.sh`. Source it from bash, or run it
   directly (`compositor.sh monitors-json`) from QML/Python.
 - Panels are opened over Quickshell IPC: `qs_manager.sh` runs
   `qs -p ~/.config/quickshell/Main.qml ipc call panel command <panel>`
   (`... panel command close`, `... panel active` to see what is open).
+- The app launcher (Super + Space) is `quickshell/launcher`, bound through the
+  `quickshell:launcher` global shortcut. The default is autolaunch when only
+  one result is matching.
 
 ## Theming
 
@@ -152,17 +153,16 @@ re-derives the palette from it through `matugen_apply.sh`.
 
 ## Optional extras that aren't in this repo
 
-Nothing breaks without these; the binds or bar modules that use them just do
-nothing (or hide).
+Nothing breaks without these, the binds or bar modules that use them just wont do anything.
 
-| What | Used by | Without it |
-| --- | --- | --- |
-| `~/.local/bin/afk` (lecture capture) | Super + Shift + R, bar module | bind does nothing, module hidden |
-| `~/.local/bin/login-bind` | Super + Ctrl + L | bind does nothing |
-| `~/Programming/Bash/mullvad-location-switcher` | Super + Ctrl + Shift + I | bind does nothing |
-| `/etc/keyd/*.conf` (keyd layers) | Caps "nordic" layer, `mousews` | Caps still types å/ø/æ via altgr-intl |
-| Millennium Steam skin | matugen template | template skipped automatically |
-| `scrolloverview` (hyprpm) | Super + Tab overview | bind not registered |
+| What                                           | Used by                        | Without it                            |
+| ---------------------------------------------- | ------------------------------ | ------------------------------------- |
+| `~/.local/bin/afk` (lecture capture)           | Super + Shift + R, bar module  | bind does nothing, module hidden      |
+| `~/.local/bin/login-bind`                      | Super + Ctrl + L               | bind does nothing                     |
+| `~/Programming/Bash/mullvad-location-switcher` | Super + Ctrl + Shift + I       | bind does nothing                     |
+| `/etc/keyd/*.conf` (keyd layers)               | Caps "nordic" layer, `mousews` | Caps still types å/ø/æ via altgr-intl |
+| Millennium Steam skin                          | matugen template               | template skipped automatically        |
+| `scrolloverview` (hyprpm)                      | Super + Tab overview           | bind not registered                   |
 
 ## CI
 

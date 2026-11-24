@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import "WindowRegistry.js" as Registry
+import "launcher"
 
 PanelWindow {
     id: masterWindow
@@ -76,6 +77,12 @@ PanelWindow {
         function active(): string {
             return masterWindow.currentActive;
         }
+    }
+
+    // App launcher (Super + Space). Its own layer-shell window; it lives in
+    // this process so opening it starts nothing. See launcher/Launcher.qml.
+    Launcher {
+        onOpened: masterWindow.switchWidget("hidden", "")
     }
 
     property string currentActive: "hidden"

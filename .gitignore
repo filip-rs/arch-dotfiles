@@ -22,3 +22,7 @@ dotfiles/dot-config/ghostty/colors
 dotfiles/dot-config/scripts/desktop/WallpaperSplitter/center.png
 dotfiles/dot-config/scripts/desktop/WallpaperSplitter/left.png
 dotfiles/dot-config/scripts/desktop/WallpaperSplitter/right.png
+
+# yt-x runtime data (history, saved videos/playlists, extensions); only config is tracked
+dotfiles/dot-config/yt-x/my/
+dotfiles/dot-config/yt-x/extensions/
