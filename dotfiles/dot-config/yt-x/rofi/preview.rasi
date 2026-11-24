@@ -1,0 +1,118 @@
+/**
+ * yt-x video grid (rofi). Based on the official yt-x "Tokyo Night Horizontal
+ * Strip" theme by @benexl, retuned for density on the laptop's 1920x1200 panel:
+ * 9 columns x 5 rows = 45 tiles = one page of 41 videos (CONFIG_PER_PAGE in
+ * ../config) plus the Next/Previous/Back/Exit tiles, all visible at once.
+ *
+ * rofi scales an icon to fit a size x size square, so 16:9 thumbnails always
+ * leave some empty space above and below them. (squared: false only changes
+ * the box, not the image scaling, and negative margins don't parse.) The icon
+ * size is therefore just what still fits 5 rows: 170px at 9 columns.
+ *
+ * Titles get two lines (eh: 2). rofi doesn't wrap, so the grid launcher in
+ * ../config puts the line break into each title itself.
+ */
+
+/*****----- Configuration -----*****/
+configuration {
+    font:           "JetBrains Mono Nerd Font 10";
+    show-icons:     true;
+    eh:             2;
+
+    /* The tile under the pointer is the selected one; one click plays it. */
+    hover-select:    true;
+    me-select-entry: "";
+    me-accept-entry: "MousePrimary";
+    /* Details + yt-x's full action menu for the selected video (grid.sh). */
+    kb-custom-1:     "Alt+Return,MouseSecondary";
+}
+
+/*****----- Global Properties -----*****/
+* {
+    base:     #1a1b26;
+    surface:  #24283b;
+    text:     #c0caf5;
+    subtext:  #a9b1d6;
+    blue:     #7aa2f7;
+    cyan:     #7dcfff;
+
+    background-color: transparent;
+    text-color:       @text;
+}
+
+/*****----- Main Window -----*****/
+window {
+    transparency:     "real";
+    fullscreen:       true;
+    padding:          12px;
+    background-color: @base;
+}
+
+/*****----- Main Box -----*****/
+mainbox {
+    children:         [ inputbar, listview ];
+    spacing:          10px;
+}
+
+/*****----- Inputbar -----*****/
+inputbar {
+    children:         [ prompt, entry ];
+    border:           1px;
+    border-radius:    8px;
+    spacing:          8px;
+    border-color:     @blue;
+    background-color: @surface;
+}
+
+prompt {
+    padding:          6px 8px;
+    background-color: @blue;
+    text-color:       @base;
+}
+
+entry {
+    padding:           6px 8px;
+    placeholder:       "Search...     (right click / Alt+Enter on a video: details and more options)";
+    placeholder-color: @subtext;
+}
+
+/*****----- List of items -----*****/
+listview {
+    flow:             horizontal;
+    columns:          9;
+    lines:            5;
+    spacing:          10px;
+    fixed-columns:    true;
+    fixed-height:     true;
+    scrollbar:        false;
+}
+
+/*****----- Elements -----*****/
+element {
+    orientation:      vertical;
+    cursor:           pointer;
+    padding:          4px;
+    spacing:          4px;
+    border-radius:    8px;
+    background-color: @surface;
+}
+
+element-icon {
+    size:             170px;
+    horizontal-align: 0.5;
+}
+
+element-text {
+    horizontal-align: 0.5;
+    text-color:       inherit;
+}
+
+element normal.normal {
+    background-color: @surface;
+    text-color:       @text;
+}
+
+element selected.normal {
+    background-color: @blue;
+    text-color:       @base;
+}

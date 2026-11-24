@@ -1,0 +1,201 @@
+# ===================================================================================
+# 大きな力には大きな責任が伴う
+# ===================================================================================
+#
+#     ██╗░░░██╗████████╗░░░░░░██╗░░██╗  ░█████╗░░█████╗░███╗░░██╗███████╗██╗░██████╗░
+#     ╚██╗░██╔╝╚══██╔══╝░░░░░░╚██╗██╔╝  ██╔══██╗██╔══██╗████╗░██║██╔════╝██║██╔════╝░
+#     ░╚████╔╝░░░░██║░░░█████╗░╚███╔╝░  ██║░░╚═╝██║░░██║██╔██╗██║█████╗░░██║██║░░██╗░
+#     ░░╚██╔╝░░░░░██║░░░╚════╝░██╔██╗░  ██║░░██╗██║░░██╗██║╚████║██╔══╝░░██║██║░░╚██╗
+#     ░░░██║░░░░░░██║░░░░░░░░░██╔╝╚██╗  ╚█████╔╝╚█████╔╝██║░╚███║██║░░░░░██║╚██████╔╝
+#     ░░░╚═╝░░░░░░╚═╝░░░░░░░░░╚═╝░░╚═╝  ░╚════╝░░╚════╝░╚═╝░░╚══╝╚═╝░░░░░╚═╝░╚═════╝░
+#
+# ===================================================================================
+#
+# !! BE CAREFUL WHAT YOU INCLUDE HERE SINCE THE CONFIG FILE IS SOURCED AS A SCRIPT  !!
+# !! ITS RECOMMENDED TO ONLY DO VARIABLE ASSIGNMENTS AND CONDITIONAL ASSIGNMENTS    !!
+# !! AND DO MORE COMPLEX STUFF USING EXTENSIONS BY CONVENTION                       !!
+# !! Environment variables (export YT_X_VAR=...) override these settings.           !!
+#
+# ===================================================================================
+
+# List of extensions to load automatically on startup
+CONFIG_AUTOLOADED_EXTENSIONS=""
+
+# Enable or disable colored/formatted output
+# Options: true, false (Default: true)
+CONFIG_ENABLE_COLORS="true"
+
+# The menu launcher tool used for the ui
+# Options: fzf, rofi, gum (Default: fzf)
+CONFIG_LAUNCHER="rofi"
+
+# Enable image/video previews within the selector
+# Options: true, false (Default: false)
+# With the rofi launcher, video lists become a YouTube-like thumbnail grid
+# (rofi/preview.rasi); previews must be on for the thumbnails to load.
+CONFIG_ENABLE_PREVIEW="true"
+CONFIG_ENABLE_PREVIEW_IMAGES="true"
+
+# The tool used to render previews in the terminal
+# Options: chafa, icat, imgcat (Default: chafa)
+CONFIG_IMAGE_RENDERER="chafa"
+
+# Extra arguments for specific image renderers
+CONFIG_CHAFA_ARGS=""
+CONFIG_ICAT_ARGS=""
+CONFIG_IMGCAT_ARGS=""
+
+# custom opts for yt-dlp
+CONFIG_YT_DLP_OPTS=""
+
+# The media player used for playback
+# Options: mpv, vlc, tplay (Default: mpv)
+CONFIG_PLAYER="mpv"
+
+# Extra arguments for specific media players
+# (CONFIG_MPV_ARGS is set further down, next to the cookie file)
+CONFIG_MPV_ARGS=""
+CONFIG_VLC_ARGS=""
+CONFIG_TPLAY_ARGS=""
+
+# Name of the activity to launch on Android. Useful if you are using a fork with a different activity name
+CONFIG_PLAYER_MPV_ANDROID_ACTIVITY_NAME=""
+CONFIG_PLAYER_VLC_ANDROID_ACTIVITY_NAME=""
+
+# Whether to disown the player, process to prevent blocking the UI
+# options: true, false (Default: false)
+# false: yt-x waits for mpv, so the fullscreen rofi overlay is gone while a
+# video plays (mpv is a normal window you can fullscreen). Quitting mpv brings
+# the video's menu back; Escape there returns to the grid. With true, the next
+# rofi menu opened straight away on top of mpv and kept the keyboard.
+CONFIG_DISOWN_PLAYER="false"
+
+# Maximum number of search results to fetch per page
+# Options: Integer (Default: 30)
+# 41 videos + the 4 Next/Previous/Back/Exit tiles fill the 9x5 grid in rofi/preview.rasi
+CONFIG_PER_PAGE="41"
+
+# Browser for yt-dlp to get cookies from
+# passed to --cookies-from-browser yt-dlp option
+# Currently supported browsers are: brave, chrome, chromium, edge, firefox, opera, safari, vivaldi, whale
+# NOTE: this option is entirely dependent on what yt-dlp supports
+#
+# Not used: reading the live LibreWolf profile goes stale. yt-dlp copies only
+# cookies.sqlite, not the -wal file where LibreWolf keeps the cookies YouTube
+# rotated since, so after ~30 min YouTube rejects them ("cookies are no longer
+# valid") and every feed comes back empty. The login comes from the file below.
+CONFIG_BROWSER=""
+#
+# YouTube login (Skole account): a session exported once from a throwaway
+# browser profile that was then closed for good, as the yt-dlp wiki advises.
+# yt-dlp writes rotated cookies back into this file, so it stays valid.
+# Kept out of the dotfiles (it is a login); without it yt-x runs signed out.
+_ytx_cookies="$HOME/.local/share/yt-x/youtube-cookies.txt"
+if [ -s "$_ytx_cookies" ]; then
+  CONFIG_YT_DLP_OPTS="--cookies $_ytx_cookies"
+  # yt-x does not hand cookies to mpv, so videos opened from yt-x get them
+  # here (members-only, age-restricted). Plain mpv stays signed out.
+  CONFIG_MPV_ARGS="--ytdl-raw-options=cookies=$_ytx_cookies"
+fi
+
+# Text editor for manual configuration/metadata editing
+# Options: vim, nano, code ... (Default: $EDITOR or vi)
+CONFIG_EDITOR="nvim"
+
+# The terminal to use to execute commands that require a terminal
+# yt-x runs from the launcher without a terminal; without this it would pick kitty
+CONFIG_TERMINAL_EXEC="ghostty -e"
+
+# Duration in seconds for desktop notifications
+CONFIG_NOTIFICATION_DURATION="5"
+
+# Directory where downloads are saved
+# Default: $HOME/Videos/yt-x
+CONFIG_DOWNLOAD_DIR="$HOME/Videos/yt-x"
+CONFIG_DOWNLOADS_ENUMERATE="false"
+
+# Automatically check for script updates on startup
+# Options: true, false (Default: true)
+# Off: updates come from the AUR package, not the script
+CONFIG_CHECK_FOR_UPDATES="false"
+
+# Number of items to keep in the recent history
+CONFIG_NO_OF_RECENT="10"
+
+# Enable or disable saving search queries to history
+# Options: true, false (Default: true)
+CONFIG_ENABLE_SEARCH_HISTORY="true"
+
+# Custom options passed directly to gum
+CONFIG_GUM_OPTS="--prompt.foreground #2ac3de --indicator.foreground #2ac3de --selected-indicator.foreground #2ac3de --unselected-prefix.foreground #585858 --header.foreground #2ac3de --text.foreground #c0caf5 --cursor-text.foreground #c0caf5 --match.foreground #2ac3de --placeholder.foreground #585858  --prompt  > --indicator ◆ --selected-prefix  ◉  --unselected-prefix  ○  --placeholder こんにちは..."
+CONFIG_GUM_INPUT_OPTS="--prompt.foreground #2ac3de --cursor.foreground #c0caf5 --placeholder こんにちは... --cursor.mode blink"
+CONFIG_GUM_PAGER_OPTS="--foreground #c0caf5 --line-number.foreground #585858 --match.foreground #2ac3de --match-highlight.foreground #1a1b26 --match-highlight.background #2ac3de --help.foreground #585858 --show-line-numbers --soft-wrap --border-foreground #2ac3de"
+CONFIG_GUM_SPIN_OPTS="--spinner dot --spinner.foreground #2ac3de --title.foreground #585858  --align left"
+CONFIG_GUM_CONFIRM_OPTS="--prompt.foreground #2ac3de --selected.foreground #1a1b26 --selected.background #2ac3de --unselected.foreground #585858"
+
+# Custom options passed directly to fzf
+CONFIG_FZF_HEADER="\
+"
+CONFIG_FZF_OPTS="
+  --ansi
+  --border
+  --scheme=history
+  --style=full
+  --color=bg+:#283457
+  --color=bg:#16161e
+  --color=border:#27a1b9
+  --color=fg:#c0caf5
+  --color=gutter:#16161e
+  --color=header:#2ac3de
+  --color=hl+:#2ac3de
+  --color=hl:#2ac3de
+  --color=info:#545c7e
+  --color=marker:#ff007c
+  --color=pointer:#ff007c
+  --color=prompt:#2ac3de
+  --color=query:#c0caf5:regular
+  --color=scrollbar:#27a1b9
+  --color=separator:#ff9e64
+  --color=spinner:#ff007c
+  --border=rounded
+  --border-label=''
+  --prompt=' >'
+  --marker=' >'
+  --pointer='◆'
+  --layout=reverse
+  --cycle
+  --ghost='Search...'
+  --height=100%
+  --bind=ctrl-/:toggle-preview,ctrl-space:toggle-wrap+toggle-preview-wrap
+  --no-margin
+  +m
+  -i
+  --exact
+  --tabstop=1
+  --preview-window=border-rounded,left,35%,wrap-word
+  --wrap-sign=''
+  --wrap-word"
+
+# Grid behaviour: left click plays, right click / Alt+Enter opens the details
+# (description) and yt-x's full action menu, two-line titles. See grid.sh.
+[ -s "$HOME/.config/yt-x/grid.sh" ] && . "$HOME/.config/yt-x/grid.sh"
+
+# Rofi config all are required to run rofi as a launcher
+# get the official ones from https://github.com/Benexl/yt-x
+# (the official yt-x themes, kept in the dotfiles next to this config)
+CONFIG_ROFI_THEME_MAIN="$HOME/.config/yt-x/rofi/main.rasi"
+CONFIG_ROFI_THEME_PREVIEW="$HOME/.config/yt-x/rofi/preview.rasi"
+CONFIG_ROFI_THEME_PROMPT="$HOME/.config/yt-x/rofi/prompt.rasi"
+CONFIG_ROFI_THEME_CONFIRM="$HOME/.config/yt-x/rofi/confirm.rasi"
+CONFIG_ROFI_THEME_PAGER="$HOME/.config/yt-x/rofi/pager.rasi"
+
+# Number of days to keep cached preview images, playlists, and logs
+# Default: 3
+CONFIG_CACHE_RETENTION_DAYS="3"
+
+# ==============================================================================
+# Join the community at https://discord.gg/6Y3STzYpSx
+# and don't forget to star the repo https://github.com/Benexl/yt-x :)
+# ==============================================================================
+# 楽しんでね
+# ==============================================================================
