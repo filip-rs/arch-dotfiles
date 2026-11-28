@@ -37,8 +37,14 @@ for n = 0, 7 do
 end
 hl.env("__EGL_VENDOR_LIBRARY_FILENAMES", "/usr/share/glvnd/egl_vendor.d/50_mesa.json")
 hl.env("VK_ICD_FILENAMES", "/usr/share/vulkan/icd.d/radeon_icd.json")
+-- Qt Multimedia's FFmpeg backend (the quickshell wallpaper picker's video
+-- previews) otherwise probes CUDA/VDPAU, loads libcuda and keeps /dev/nvidia0
+-- open until quickshell exits. VA-API runs on the 680M. Both are needed: the
+-- encoder list is probed on first playback too.
+hl.env("QT_FFMPEG_DECODING_HW_DEVICE_TYPES", "vaapi")
+hl.env("QT_FFMPEG_ENCODING_HW_DEVICE_TYPES", "vaapi")
 hl.on("hyprland.start", function()
 	-- systemd/D-Bus-started services (hyprpolkitagent) need them too; the
 	-- restart covers the race with autostart.lua starting it.
-	hl.exec_cmd("dbus-update-activation-environment --systemd __EGL_VENDOR_LIBRARY_FILENAMES VK_ICD_FILENAMES && systemctl --user restart hyprpolkitagent")
+	hl.exec_cmd("dbus-update-activation-environment --systemd __EGL_VENDOR_LIBRARY_FILENAMES VK_ICD_FILENAMES QT_FFMPEG_DECODING_HW_DEVICE_TYPES QT_FFMPEG_ENCODING_HW_DEVICE_TYPES && systemctl --user restart hyprpolkitagent")
 end)
